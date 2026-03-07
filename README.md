@@ -16,4 +16,10 @@ Follow the git workflow, below is a quick refresher:
 `git pull` - make sure that you have the latest version of the code which prevents you from overwriting other people's work.
 
 ### 3. Stage Your Changes
-`git add .` adds all of the changes 
+`git add .` stages all of your current work, however it does not add it to your remote repository. To stage a specific file replace the . with its name, and to unstage a file use `git restore --staged .`.
+
+### 4. Commit Your Changes
+Once your work is staged and you are happy with it being part of your remote repository use `git commit -m "Message describing the changes you made"`. Keep in mind that this does not make your changes available to other people, just adds them to your local repository.
+
+### 5. Push Your Changes
+To make your work visible to others push your changes to the master (remote) branch with `git push`. 
