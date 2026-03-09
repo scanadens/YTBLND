@@ -2,16 +2,36 @@
 #define BLEND_H
 
 #include<string>
-#include<list>\
+#include<list>
 
+#include "User.h"
 #include "Video.h"
 
-class BLEND {
+class Blend {
     private:
-        std::string blendID, algorithmUsed;
+        std::string blendID;
+        std::string algorithmUsed;
+        std::list<User> participants;
         std::list<Video> videoList;
     public:
-        Video getVideo(int index); //returns video at a given position in videoList
-        int size(); //returns total number of videos in the blend
-};
+        Blend(const std::string& blendID,
+              const std::string& algorithmUsed,
+              const std::list<User>& participants,
+              const std::list<Video>& videoList);
+
+        // Getters
+        std::string      getBlendID()       const;
+        std::string      getAlgorithmUsed() const;
+        std::list<User>  getParticipants()  const;
+        std::list<Video> getVideoList()     const;
+
+        // Setters 
+        void setVideoList(const std::list<Video>& videoList);
+
+        // Indexed access for videos
+        Video getVideo(int index) const;
+
+        // Size of the blend
+        int size() const;
+    };
 #endif

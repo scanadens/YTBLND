@@ -12,8 +12,22 @@ class YouTubeData {
         std::list<VideoEntry> watchHistory;
         std::list<Video> likedVideos;
         std::list<Channel> subscribedChannels;
+
     public:
-        std::list<Video> getMostWatchedVideos(int n); //returns n most replayed videos
-        std::list<Channel> getTopChannels(int n); //returns n most frequently watched channels
+        YouTubeData();
+
+        // Getters
+        std::list<VideoEntry> getWatchHistory()        const;
+        std::list<Video>      getLikedVideos()          const;
+        std::list<Channel>    getSubscribedChannels()   const;
+
+        // Setters — populated in bulk by YouTubeDataParser after an API fetch
+        void setWatchHistory(const std::list<VideoEntry>& watchHistory);
+        void setLikedVideos(const std::list<Video>& likedVideos);
+        void setSubscribedChannels(const std::list<Channel>& subscribedChannels);
+
+        //Computed queries
+        std::list<Video> getMostWatchedVideos(int n)   const; //returns n most replayed videos
+        std::list<Channel> getTopChannels(int n)       const; //returns n most frequently watched channels
 };
 #endif
