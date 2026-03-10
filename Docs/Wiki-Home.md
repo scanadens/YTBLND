@@ -42,3 +42,7 @@ Links to our documentation is listed as a glossary below.
 [User Stories](User_Stories)
 
 [Project Structure](Project_Structure)
+
+# Design and UI
+
+[Mock Product Design](Product_design.md)
