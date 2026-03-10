@@ -1,8 +1,3 @@
-/**
- * \author Shamar Pennant
- * \brief Parses a string into a list<Dict<str,str>> object based on file format
- */
-
 #pragma once
 
 #include <list>
@@ -11,6 +6,10 @@
 #include <bits/stdc++.h>
 #include <vector>
 
+/**
+ * \author Shamar Pennant
+ * \brief Parses a string into a list<Dict<str,str>> object based on file format
+ */
 class Parser {
 	public:
 		virtual ~Parser() = default;
@@ -25,6 +24,9 @@ class Parser {
 
 		/**Makes a copy of the parameter to this instance. Used for parse()*/
 		virtual void setData(std::string data) = 0;
+		/** copies id to parse_id */
+		virtual void setParseId(int id) = 0;
+		virtual int getParseId() = 0;
 
 	protected:
 		Parser() = default;

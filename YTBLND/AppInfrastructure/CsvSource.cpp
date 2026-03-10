@@ -30,6 +30,7 @@ class CsvSource : public FileSource {
 				} else {num++;}
 			}
 
+			// if there was no null terminator found in string
 			if (num == 0) {
 				cerr << "error: src string is not null terminated";
 				exit(1);
@@ -51,7 +52,10 @@ class CsvSource : public FileSource {
 		}
 
 		void setSource(string src) {this->src = src;}
+		void setSourceId(int id) {this->source_id = id;}
+		int getSourceId() {return source_id;}
 
 	private:
-		string src = "";
+		string src = ""; // holds the file path
+		int source_id = -1; // holds this objects id to match with a Parser object
 };

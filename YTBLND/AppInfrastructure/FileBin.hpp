@@ -1,15 +1,13 @@
-/**
- * \author Shamar Pennant
- * \brief Places a string into the desired file and location
- */
-
-
 #pragma once
 
 #include <iostream>
 #include <fstream>
 #include <string>
 
+/**
+ * \author Shamar Pennant
+ * \brief Places a string into the desired file and location
+ */
 class FileBin {
 	public:
 		virtual ~FileBin() = default;

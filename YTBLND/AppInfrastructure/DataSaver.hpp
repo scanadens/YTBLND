@@ -1,8 +1,3 @@
-/**
- * \author Shamar Pennant
- * \brief Saves run time data as the desired file format
- */
-
 #pragma once
 
 #include "FileBin.hpp"
@@ -10,6 +5,10 @@
 #include <vector>
 #include <memory>
 
+/**
+ * \author Shamar Pennant
+ * \brief Saves run time data as the desired file format
+ */
 class DataSaver {
 	public:
 		DataSaver(FileBin b, FileFormatter ff);

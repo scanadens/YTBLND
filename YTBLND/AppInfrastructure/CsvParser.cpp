@@ -1,5 +1,5 @@
 /**
- * @author Shamar Pennant
+ * \author Shamar Pennant
  * \brief Parses csv file contents into a single string
  */
 
@@ -68,6 +68,10 @@ class CsvParser : public Parser {
 			this->raw_data = data;
 		}
 
+		void setParseId(int id) {this->parse_id = id;}
+		int getParseId() {return parse_id;}
+
 	private:
 		list<string> raw_data;
+		int parse_id = -1;
 };
