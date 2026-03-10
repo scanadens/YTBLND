@@ -1,3 +1,9 @@
+/**
+ * \author Shamar Pennant
+ * \brief formats list<Dict<str,str>> to the desired file format string
+ */
+
+#pragma once
 #include <list>
 #include <unordered_map>
 #include <string>
