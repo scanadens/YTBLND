@@ -37,6 +37,9 @@ DataExtractor::DataExtractor(unique_ptr<FileSource> src, unique_ptr<Parser> p) {
 			parsers.push_back(p);
 			parse_id_in_use = p.get()->getParseId();
 		}
+
+		free(temp_parse);
+		free(temp_src);
 	}
 }
 
@@ -88,6 +91,9 @@ list<unordered_map<string, string>> DataExtractor::extract() {
 	list<string> raw_data = tmp_src_ptr->read();
 	// format the data with the repsective parser
 	list<unordered_map<string, string>> formatted_data = tmp_parse_ptr->parse();
+
+	free(tmp_parse_ptr);
+	free(tmp_src_ptr);
 
 	return formatted_data;
 }

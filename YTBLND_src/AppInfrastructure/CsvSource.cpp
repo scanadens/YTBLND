@@ -11,9 +11,9 @@ class CsvSource : public FileSource {
 		CsvSource(string src) {
 			this-> src = src;
 		}
-		~CsvSource();
+		~CsvSource() override = default;
 
-		list<string> read() {
+		list<string> read() override {
 			if (src.empty()) { // in the event that src is empty
 				cerr << "error: src string is empty in CsvSource";
 				exit(1);
@@ -51,9 +51,9 @@ class CsvSource : public FileSource {
 			return ret;
 		}
 
-		void setSource(string src) {this->src = src;}
-		void setSourceId(int id) {this->source_id = id;}
-		int getSourceId() {return source_id;}
+		void setSource(string src) override {this->src = src;}
+		void setSourceId(int id) override {this->source_id = id;}
+		int getSourceId() override {return source_id;}
 
 	private:
 		string src = ""; // holds the file path

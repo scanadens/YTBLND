@@ -23,7 +23,7 @@ class Parser {
 		virtual std::list<std::unordered_map <std::string, std::string>> parse() = 0;
 
 		/**Makes a copy of the parameter to this instance. Used for parse()*/
-		virtual void setData(std::string data) = 0;
+		virtual void setData(std::list<std::string> data) = 0;
 		/** copies id to parse_id */
 		virtual void setParseId(int id) = 0;
 		virtual int getParseId() = 0;

@@ -13,9 +13,9 @@ class CsvParser : public Parser {
 		CsvParser(list<string> raw_data) {
 			this->raw_data = raw_data;
 		} 
-		~CsvParser();
+		~CsvParser() override = default;
 
-		list<unordered_map<string, string>> parse() {
+		list<unordered_map<string, string>> parse() override {
 			// check if raw_data is empty
 			if (raw_data.empty()) {
 				cerr << "error: raw data string is empty in CsvParser";
@@ -64,12 +64,12 @@ class CsvParser : public Parser {
 			}
 		}
 
-		void setData(list<string> data) {
+		void setData(list<string> data) override {
 			this->raw_data = data;
 		}
 
-		void setParseId(int id) {this->parse_id = id;}
-		int getParseId() {return parse_id;}
+		void setParseId(int id) override {this->parse_id = id;}
+		int getParseId() override {return parse_id;}
 
 	private:
 		list<string> raw_data;

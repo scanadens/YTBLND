@@ -1,8 +1,7 @@
-<aside>
-<img src="https://www.notion.so/icons/pencil_orange.svg" alt="https://www.notion.so/icons/pencil_orange.svg" width="40px" /> 
+# Other Notes
 
->Contributors: Jasmine Kumar, Shamar Pennant, Yousef Selim
->
+<aside>
+<img src="https://www.notion.so/icons/pencil_orange.svg" alt="https://www.notion.so/icons/pencil_orange.svg" width="40px" /> ***Contributors:*** Jasmine Kumar, Shamar Pennant, Yousef Selim
 
 </aside>
 
@@ -53,7 +52,7 @@ To keep the system portable and buildable in a Linux environment, the recommenda
 
 - **Data parsing**:
     - CSV parsing for playlists/subscriptions exports (either a minimal custom parser or a small CSV utility).
-    - HTML parsing for Google Takeout history files (prefer simple pattern extraction where feasible; otherwise use a lightweight HTML parser).
+    - HTML parsing for Google Takeout history files (prefer simple pattern extraction where feasible; otherwise use a lightweight HTML parser such as [Gumbo](https://codeberg.org/gumbo-parser/gumbo-parser)).
 - **Libraries to consider:**
     - Eigen3 - linear algebra
     - Boost - utilities
@@ -62,6 +61,7 @@ To keep the system portable and buildable in a Linux environment, the recommenda
         - Boost.Graph - network analysis
     - nlohmann/json - JSON library
     - ONNX Runtime - if we want to use pre-trained models
+    - Gumbo - HTML parser
 
 ### Algorithm Pipeline
 
@@ -109,3 +109,5 @@ Key logistical considerations include:
 ## Testing and Validation
 
 Core system components such as the blending algorithm, similarity calculations, and permission logic will be validated through unit and integration testing. Testing will focus on correctness, consistency of recommendations, and robustness under edge cases such as users joining or leaving active blends.
+
+We will be using the [gtest](https://google.github.io/googletest/) library to conduct our C++ unit testing.
