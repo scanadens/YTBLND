@@ -10,36 +10,35 @@ DataExtractor::DataExtractor(unique_ptr<FileSource> src, unique_ptr<Parser> p) {
 	/*
 		searches both the local FileSource and Parser vectors
 		looking for matching id's to match the param passed in.
-		If they cant be found, or the vector is empty, just 
+		If they cant be found, or the vector is empty, just
 		push_back the new param
 	*/
 
 	if (src_formats.empty() || parsers.empty()) {
 		// check if either vectors are empty
-		this->src_formats.push_back(src);
-		this->parsers.push_back(p);
+		source_id_in_use = src->getSourceId();
+		parse_id_in_use = p->getParseId();
+		this->src_formats.push_back(std::move(src));
+		this->parsers.push_back(std::move(p));
 	} else { // of neither are empty
 		// check if source vector contains the given FileSource.
 		// if not, then push into vector
-		FileSource* temp_src = locate_src(src.get()->getSourceId());
+		FileSource* temp_src = locate_src(src->getSourceId());
 		if (temp_src != nullptr) {
 			source_id_in_use = temp_src->getSourceId();
 		} else {
-			src_formats.push_back(src);
-			source_id_in_use = src.get()->getSourceId();
+			source_id_in_use = src->getSourceId();
+			src_formats.push_back(std::move(src));
 		}
 		// check if parse vector contains the given Parser
 		// if not then push into vector
-		Parser* temp_parse = locate_parser(p.get()->getParseId());
+		Parser* temp_parse = locate_parser(p->getParseId());
 		if (temp_parse != nullptr) {
 			parse_id_in_use = temp_parse->getParseId();
 		} else {
-			parsers.push_back(p);
-			parse_id_in_use = p.get()->getParseId();
+			parse_id_in_use = p->getParseId();
+			parsers.push_back(std::move(p));
 		}
-
-		free(temp_parse);
-		free(temp_src);
 	}
 }
 
@@ -65,10 +64,10 @@ Parser* DataExtractor::locate_parser(int id) {
 
 list<unordered_map<string, string>> DataExtractor::extract() {
 	// check if either id's are out of bounds of their respective vectors
-	if (source_id_in_use == -1 || source_id_in_use >= src_formats.size()) {
+	if (source_id_in_use == -1 || source_id_in_use >= (int)src_formats.size()) {
 		cerr << "One of the provided Id's is out of bounds:\nsrc_id = " << source_id_in_use << "\nparse_id = " << parse_id_in_use;
 		exit(1);
-	} 
+	}
 
 	// check if id's match (how we know they match formats)
 	if (source_id_in_use != parse_id_in_use) {
@@ -89,19 +88,17 @@ list<unordered_map<string, string>> DataExtractor::extract() {
 
 	// grab the raw data from the file
 	list<string> raw_data = tmp_src_ptr->read();
-	// format the data with the repsective parser
+	// pass raw data to parser, then parse
+	tmp_parse_ptr->setData(raw_data);
 	list<unordered_map<string, string>> formatted_data = tmp_parse_ptr->parse();
-
-	free(tmp_parse_ptr);
-	free(tmp_src_ptr);
 
 	return formatted_data;
 }
 
 void DataExtractor::addParser(unique_ptr<Parser> parser) {
-	if (locate_parser(parser.get()->getParseId()) == nullptr) {parsers.push_back(parser);}
+	if (locate_parser(parser->getParseId()) == nullptr) {parsers.push_back(std::move(parser));}
 }
 
 void DataExtractor::addSource(unique_ptr<FileSource> src) {
-	if (locate_src(src.get()->getSourceId()) == nullptr) {src_formats.push_back(src);}
+	if (locate_src(src->getSourceId()) == nullptr) {src_formats.push_back(std::move(src));}
 }
