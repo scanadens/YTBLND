@@ -16,6 +16,18 @@ Wireframe of our product made in [frame0](https://frame0.app)
 
 </aside>
 
+main inspiration for our design > https://www.freepik.com/premium-vector/retro-window-pixel-90s-interface-y2k-style-pc-browser-computer-desktop-vaporwave-icon-ui-frame-website-digital-sticker-screen-warning-message-smile-symbol-vector-os-elements-set_402895649.htm
+
 [Quick view of what our application should look like](Resources/YTBLND_wireframe.pdf)
 
 Quick view of what our application should look like
+
+Sourcing our icons from here > https://thenounproject.com/
+
+- Background will be set as the following. If possible aiming to use as a svg for dynamic scalability
+    
+    [checkered_wave_background.jpg](Resources/checkered_wave_background.jpg)
+    
+    [checkered_wave_background.eps](Resources/checkered_wave_background.eps)
+    
+    [checkered_wave_background.ai](Resources/checkered_wave_background.ai)
