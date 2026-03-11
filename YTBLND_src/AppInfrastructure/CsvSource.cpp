@@ -17,30 +17,24 @@ class CsvSource : public FileSource {
 			if (src.empty()) { // in the event that src is empty
 				cerr << "error: src string is empty in CsvSource";
 				exit(1);
-			} 
-
-			// ensure the path is null terminated
-			int num = 0;
-			// sourced code for this bit here > https://www.geeksforgeeks.org/cpp/string-find-in-cpp/
-			int pos = -1;
-			while ((pos = src.find("\0", pos++)) != string::npos) {
-				if (num >= 2) {
-					cerr << "error: src string is null terminated more than once";
-					exit(1);
-				} else {num++;}
 			}
 
-			// if there was no null terminator found in string
-			if (num == 0) {
-				cerr << "error: src string is not null terminated";
+			// ensure path contains no embedded null characters
+			if (src.find('\0') != string::npos) {
+				cerr << "error: src string contains embedded null character";
 				exit(1);
 			}
 
 			// returned string
 			list<string> ret;
 
-			// creating (in) file stream with given file source path 
+			// creating (in) file stream with given file source path
 			fstream read_file_in(src, ios::in);
+
+			if (!read_file_in.is_open()) {
+				cerr << "error: could not open file: " << src;
+				exit(1);
+			}
 
 			// holds file line
 			string line = "";
