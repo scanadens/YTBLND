@@ -2,4 +2,4 @@
 
 # simple script that runs the tests
 
-./build/YTBLND_src_test.exe 
+./build/YTBLND_src/ytblnd_tests 

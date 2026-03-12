@@ -6,7 +6,3 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Build the main project + tests
 add_subdirectory(YTBLND_src)
-
-# Now that ytblnd exists, link SQLite
-find_package(SQLite3 REQUIRED)
-target_link_libraries(ytblnd PRIVATE SQLite::SQLite3)

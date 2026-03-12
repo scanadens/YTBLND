@@ -27,7 +27,7 @@ if(NOT GUMBO_FOUND)
 endif()
 
 # ── wxWidgets ─────────────────────────────────────────────────────────────────
-find_package(wxWidgets 3 REQUIRED COMPONENTS core base net)
+find_package(wxWidgets REQUIRED COMPONENTS core base net) # DO NOT CHANGE (works across all distros and OS's)
 include(${wxWidgets_USE_FILE})
 
 # ── Main executable ──────────────────────────────────────────────────────────
