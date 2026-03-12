@@ -14,6 +14,18 @@ file(GLOB_RECURSE YTBLND_UI_SOURCES
     UILayer/*.cpp
 )
 
+# ── Gumbo (optional — HTML parser used by HtmlParser.cpp) ────────────────────
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GUMBO gumbo)   # not REQUIRED — build still works without it
+
+if(NOT GUMBO_FOUND)
+    message(STATUS "Gumbo not found — HtmlParser.cpp and HtmlSource.cpp excluded")
+    list(REMOVE_ITEM YTBLND_CORE_SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/AppInfrastructure/HtmlParser.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/AppInfrastructure/HtmlSource.cpp"
+    )
+endif()
+
 # ── wxWidgets ─────────────────────────────────────────────────────────────────
 find_package(wxWidgets 3 REQUIRED COMPONENTS core base net)
 include(${wxWidgets_USE_FILE})

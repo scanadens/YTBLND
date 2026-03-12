@@ -2,6 +2,7 @@
 
 #include <thread>
 
+#include <wx/dcbuffer.h>
 #include <wx/graphics.h>
 #include <wx/url.h>
 #include <wx/sckstrm.h>
