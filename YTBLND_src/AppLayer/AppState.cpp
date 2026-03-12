@@ -75,6 +75,20 @@ ChatRoom* AppState::getChatRoom(const std::string& blendID) {
     return &it->second;
 }
 
+// ── Session Users ─────────────────────────────────────────────────────────────
+
+void AppState::addSessionUser(const User& user) {
+    sessionUsers.insert_or_assign(user.getUserID(), user);
+}
+
+std::map<std::string, User> AppState::getSessionUsers() const {
+    return sessionUsers;
+}
+
+void AppState::clearSessionUsers() {
+    sessionUsers.clear();
+}
+
 // ── Session ───────────────────────────────────────────────────────────────────
 
 void AppState::clearSession() {
@@ -82,4 +96,5 @@ void AppState::clearSession() {
     activeBlend       = nullptr;
     isBlendGenerating = false;
     chatRooms.clear();
+    sessionUsers.clear();
 }
