@@ -1,0 +1,5 @@
+# Build artifacts
+build/
+
+# Personal YouTube Takeout data — provide your own locally
+Takeout/
