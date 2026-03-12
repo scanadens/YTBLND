@@ -4,6 +4,7 @@
 #include <fstream>
 #include <list>
 #include "File_ID.hpp"
+#include <sstream>
 
 /**
  * \author Shamar Pennant

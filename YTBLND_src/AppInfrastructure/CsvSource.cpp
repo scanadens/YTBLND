@@ -25,6 +25,10 @@ class CsvSource : public FileSource {
 
 			// creating (in) file stream with given file source path 
 			fstream read_file_in(src, ios::in);
+			if (!read_file_in.is_open()) {
+				cerr << "unable to open " << src << " within CsvSource" << endl;
+				exit(1);
+			}
 
 			// holds file line
 			string line = "";
