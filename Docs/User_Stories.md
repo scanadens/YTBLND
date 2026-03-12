@@ -72,7 +72,7 @@ As a user, I can select 1-3 friends to blend with so that I can create a combine
 - Visual confirmation of selection
 - Maximum 3 friends enforced
 
-## Sign in Securely:
+## Sign In Securely:
 
 Story Points: 2
 
@@ -86,7 +86,7 @@ As a registered user, I can sign in securely so that my data remains private.
 - Incorrect credentials are rejected
 - Session times out after inactivity
 
-## Sign In:
+## Sign Out Securely:
 
 Story Points: 1
 
