@@ -26,10 +26,16 @@ target_include_directories(ytblnd PRIVATE
 
 # --- Link Gumbo (based on my fedora system, not sure if this needs to be changed later on) ---
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GUMBO REQUIRED gumbo)
+pkg_check_modules(GUMBO gumbo)  # not REQUIRED so tests still build without it
 
-target_include_directories(ytblnd PRIVATE ${GUMBO_INCLUDE_DIRS})
-target_link_libraries(ytblnd PRIVATE ${GUMBO_LIBRARIES})
+if(GUMBO_FOUND)
+    target_include_directories(ytblnd PRIVATE ${GUMBO_INCLUDE_DIRS})
+    target_link_libraries(ytblnd PRIVATE ${GUMBO_LIBRARIES})
+endif()
+
+# --- SQLite ---
+find_package(SQLite3 REQUIRED)
+target_link_libraries(ytblnd PRIVATE SQLite::SQLite3)
 
 # --- GOOGLE TEST SETUP ---
 
@@ -50,12 +56,30 @@ target_include_directories(ytblnd_tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+# Add the same include directories so tests can find all headers
+target_include_directories(ytblnd_tests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/AlgorithmLayer
+    ${CMAKE_CURRENT_SOURCE_DIR}/AppLayer
+    ${CMAKE_CURRENT_SOURCE_DIR}/AppInfrastructure
+    ${CMAKE_CURRENT_SOURCE_DIR}/ModelLayer
+    ${CMAKE_CURRENT_SOURCE_DIR}/ServiceLayer
+    ${CMAKE_CURRENT_SOURCE_DIR}/UILayer
+)
+
+# Expose the source root so tests can locate fixture files by absolute path
+target_compile_definitions(ytblnd_tests PRIVATE
+    YTBLND_SRC_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
 # Link gtest + your project code
 target_link_libraries(ytblnd_tests PRIVATE
     GTest::gtest
     GTest::gtest_main
-    ${GUMBO_LIBRARIES}
+    SQLite::SQLite3
 )
+
+# Compile project source files into the test target so tests can use them
+target_sources(ytblnd_tests PRIVATE ${YTBLND_SOURCES})
 
 # Register tests with CTest
 add_test(NAME ytblnd_tests COMMAND ytblnd_tests)
