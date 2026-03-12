@@ -4,6 +4,7 @@
 #include "FileFormatter.hpp"
 #include <vector>
 #include <memory>
+#include "File_ID.hpp"
 
 /**
  * \author Shamar Pennant

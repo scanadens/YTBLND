@@ -42,18 +42,16 @@ target_link_libraries(ytblnd PRIVATE SQLite::SQLite3)
 # Enable testing
 enable_testing()
 
-# Find gtest (Fedora installs it as gtest-devel)
-find_package(GTest REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTEST REQUIRED gtest)
 
-# Gather test sources
 file(GLOB_RECURSE TEST_SOURCES tests/*.cpp)
 
-# Create test executable
 add_executable(ytblnd_tests ${TEST_SOURCES})
 
-# Include your project headers in tests
 target_include_directories(ytblnd_tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${GTEST_INCLUDE_DIRS}
 )
 
 # Add the same include directories so tests can find all headers

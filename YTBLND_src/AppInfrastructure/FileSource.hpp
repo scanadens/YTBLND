@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <list>
+#include "File_ID.hpp"
+#include <sstream>
 
 /**
  * \author Shamar Pennant
@@ -19,9 +21,6 @@ class FileSource {
 		/** Copies the given pramater to a local version 
 		 * for read() to use later */
 		virtual void setSource(std::string src) = 0;
-
-		/** Copies given id to source_id */
-		virtual void setSourceId(int id) = 0;
 		virtual int getSourceId() = 0;
 
 	protected:
