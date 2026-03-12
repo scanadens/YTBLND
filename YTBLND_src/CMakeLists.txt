@@ -1,17 +1,32 @@
-# --- Collect all source files from your layers ---
-file(GLOB_RECURSE YTBLND_SOURCES
+# ── Source globs ─────────────────────────────────────────────────────────────
+
+# Core sources shared between the main executable and tests (no UI, no main)
+file(GLOB_RECURSE YTBLND_CORE_SOURCES
     AlgorithmLayer/*.cpp
     AppLayer/*.cpp
     AppInfrastructure/*.cpp
     ModelLayer/*.cpp
     ServiceLayer/*.cpp
+)
+
+# UI sources only compiled into the main executable
+file(GLOB_RECURSE YTBLND_UI_SOURCES
     UILayer/*.cpp
 )
 
-# --- Create the main executable ---
-add_executable(ytblnd ${YTBLND_SOURCES})
+# ── wxWidgets ─────────────────────────────────────────────────────────────────
+find_package(wxWidgets 3 REQUIRED COMPONENTS core base net)
+include(${wxWidgets_USE_FILE})
 
-# Include directories for the main executable
+# ── Main executable ──────────────────────────────────────────────────────────
+# main.cpp is at YTBLND_src root — added explicitly so it is NOT picked up by
+# the test GLOB and does not conflict with GTest's own main.
+add_executable(ytblnd
+    ${YTBLND_CORE_SOURCES}
+    ${YTBLND_UI_SOURCES}
+    main.cpp
+)
+
 target_include_directories(ytblnd PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/AlgorithmLayer
     ${CMAKE_CURRENT_SOURCE_DIR}/AppLayer
@@ -21,12 +36,15 @@ target_include_directories(ytblnd PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/UILayer
 )
 
-# --- Collect all source files from your layers ---
-enable_testing()
-
-# Prefer modern CMake GTest discovery
-find_package(GTest REQUIRED)
 find_package(SQLite3 REQUIRED)
+target_link_libraries(ytblnd PRIVATE
+    SQLite::SQLite3
+    ${wxWidgets_LIBRARIES}
+)
+
+# ── Tests ─────────────────────────────────────────────────────────────────────
+enable_testing()
+find_package(GTest REQUIRED)
 
 file(GLOB_RECURSE TEST_SOURCES tests/*.cpp)
 
@@ -42,19 +60,17 @@ target_include_directories(ytblnd_tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/UILayer
 )
 
-# Expose the source root so tests can locate fixture files
 target_compile_definitions(ytblnd_tests PRIVATE
     YTBLND_SRC_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-# Link GTest + SQLite + your project code
+# Tests use core sources only — no UI, no wxWidgets dependency
+target_sources(ytblnd_tests PRIVATE ${YTBLND_CORE_SOURCES})
+
 target_link_libraries(ytblnd_tests PRIVATE
     GTest::gtest
     GTest::gtest_main
     SQLite::SQLite3
 )
-
-# Compile project source files into the test target
-target_sources(ytblnd_tests PRIVATE ${YTBLND_SOURCES})
 
 add_test(NAME ytblnd_tests COMMAND ytblnd_tests)
