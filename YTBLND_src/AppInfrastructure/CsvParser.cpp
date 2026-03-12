@@ -35,7 +35,7 @@ class CsvParser : public Parser {
 				string line = raw_data.front();
 				raw_data.pop_front();
 
-				if (line_num == 0) {
+				if (line_num == 0) { 
 					/*
 					When on the first line (the col titles)
 					save their names within col_titles to be 
@@ -52,7 +52,7 @@ class CsvParser : public Parser {
 						col_titles.push_back(t);
 					}
 				} else { // for any other line, they're normal rows
-					vector<string> fields = parseCsvLine(line);
+					int num_col = 0;
 					unordered_map<string, string> row_contents;
 
 					/* delimit the line/row and place key value pay 
