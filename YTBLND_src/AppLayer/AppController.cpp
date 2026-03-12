@@ -1,5 +1,8 @@
 #include "AppController.h"
+#include "../AppInfrastructure/WatchLaterParser.hpp"
+#include "../AlgorithmLayer/RandomBlendAlgorithm.h"
 #include <iostream>
+#include <list>
 
 // ── Constructor / Destructor ──────────────────────────────────────────────────
 
@@ -58,22 +61,52 @@ void AppController::handleLogout(const EventPayload& payload) {
 }
 
 void AppController::handleUploadData(const EventPayload& payload) {
-    // TODO: read "filePath" from payload
-    // TODO: pass filePath to YouTubeDataParser
-    // TODO: call appState.getCurrentUser()->setYouTubeData() with parsed result
-    // TODO: notify the relevant panel to refresh
-    std::cout << "[AppController] handleUploadData called (stub)\n";
+    auto fileIt = payload.find("filePath");
+    auto userIt = payload.find("userID");
+    if (fileIt == payload.end() || userIt == payload.end()) {
+        std::cerr << "[AppController] handleUploadData: missing 'filePath' or 'userID' in payload\n";
+        return;
+    }
+
+    const std::string& filePath = fileIt->second;
+    const std::string& userID   = userIt->second;
+
+    std::list<Video> watchLater = WatchLaterParser(filePath).parse();
+
+    User user(userID, "", "");
+    YouTubeData yd;
+    yd.setWatchLaterVideos(watchLater);
+    user.setYouTubeData(yd);
+
+    appState.addSessionUser(user);
+    std::cout << "[AppController] Loaded " << watchLater.size()
+              << " watch-later videos for user '" << userID << "'\n";
 }
 
 void AppController::handleCreateBlend(const EventPayload& payload) {
-    // TODO: collect participating Users from payload userID keys
-    // TODO: set appState.setIsBlendGenerating(true) and notify BlendPanel
-    // TODO: run blendAlgorithm->generateBlend(participants)
-    // TODO: call appState.setActiveBlend() with the result
-    // TODO: call appState.createChatRoom() for the new blend
-    // TODO: persist blend via DataManager
-    // TODO: set appState.setIsBlendGenerating(false) and notify BlendPanel
-    std::cout << "[AppController] handleCreateBlend called (stub)\n";
+    std::map<std::string, User> sessionUsers = appState.getSessionUsers();
+    if (sessionUsers.empty()) {
+        std::cerr << "[AppController] handleCreateBlend: no session users loaded\n";
+        return;
+    }
+
+    std::list<User> participants;
+    for (const auto& entry : sessionUsers) {
+        participants.push_back(entry.second);
+    }
+
+    appState.setIsBlendGenerating(true);
+
+    currentBlend = std::make_unique<Blend>(
+        RandomBlendAlgorithm(5).generateBlend(participants)
+    );
+    appState.setActiveBlend(currentBlend.get());
+    appState.createChatRoom(*currentBlend);
+
+    appState.setIsBlendGenerating(false);
+
+    std::cout << "[AppController] Blend created with "
+              << currentBlend->size() << " videos\n";
 }
 
 void AppController::handlePlayVideo(const EventPayload& payload) {
