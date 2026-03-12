@@ -1,7 +1,7 @@
     #include <gtest/gtest.h>
     #include "../AppInfrastructure/CsvSource.cpp"
     #include "../AppInfrastructure/CsvParser.cpp"
-    #include "../AppInfrastructure/DataExtractor.cpp"
+    #include "../AppInfrastructure/DataExtractor.hpp"
 
     // constants to help with test consistancy.
     std::string const csv_sample_line1 = "name,email\n";

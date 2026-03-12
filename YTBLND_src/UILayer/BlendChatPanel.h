@@ -1,3 +1,39 @@
+// ============================================================================
+// BlendChatPanel.h — Blend chat screen
+//
+// Displays the chat room associated with the active blend and lets the user
+// send new messages.
+//
+// LAYOUT
+// ──────
+//   TopBar ("Blend Chat", back → HOME)
+//   [if no active blend] — "No active blend." label (full height)
+//   [if blend active]    — scrollable message list + input row
+//
+// MESSAGE LIST
+// ────────────
+// Reload() reads AppState::getActiveChatRoom()->getMessages() and rebuilds
+// all message rows from scratch.  Each row shows:
+//   "[userID]: message text"  (secondary + primary colour)
+//   HH:MM timestamp           (muted, smaller font)
+// Messages are separated by thin wxStaticLine rules.  The list auto-scrolls
+// to the bottom after each rebuild.
+//
+// SENDING
+// ───────
+// DoSend() dispatches "sendMessage" with the current user's ID and the
+// trimmed input text, then calls Reload() so the new message appears.
+// Both the Send button and pressing Enter in the input field call DoSend().
+//
+// TODO: "sendMessage" is currently a stub in AppController — messages are
+//       added to the in-memory ChatRoom but may not be persisted to SQLite.
+//       Wire up AppController::handleSendMessage to save to the database.
+// TODO: Real-time updates — currently the list only refreshes on send or
+//       manual navigation.  Add a polling timer or network event listener
+//       to pick up messages from other users.
+// TODO: Show the sender's display name instead of raw userID.
+// ============================================================================
+
 #pragma once
 
 #include <wx/wx.h>

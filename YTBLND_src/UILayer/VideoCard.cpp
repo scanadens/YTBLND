@@ -1,3 +1,7 @@
+// ============================================================================
+// VideoCard.cpp — Custom video preview card widget implementation
+// ============================================================================
+
 #include "VideoCard.h"
 
 #include <thread>

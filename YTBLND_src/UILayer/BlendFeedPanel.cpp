@@ -1,3 +1,7 @@
+// ============================================================================
+// BlendFeedPanel.cpp — 3×2 video grid for the Home page implementation
+// ============================================================================
+
 #include "BlendFeedPanel.h"
 
 #include <wx/sizer.h>

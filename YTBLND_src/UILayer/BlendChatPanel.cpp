@@ -1,3 +1,7 @@
+// ============================================================================
+// BlendChatPanel.cpp — Blend chat screen implementation
+// ============================================================================
+
 #include "BlendChatPanel.h"
 
 #include <wx/scrolwin.h>
@@ -207,6 +211,8 @@ void BlendChatPanel::DoSend()
 
     std::string userID = user ? user->getUserID() : "anonymous";
 
+    // TODO: Confirm that AppController::handleSendMessage persists the message
+    //       to SQLite (currently it may only update in-memory ChatRoom).
     m_controller.getEventRouter().dispatch("sendMessage",
         {{"userID", userID},
          {"text",   text.ToStdString()}});
