@@ -33,6 +33,10 @@ if(GUMBO_FOUND)
     target_link_libraries(ytblnd PRIVATE ${GUMBO_LIBRARIES})
 endif()
 
+# --- SQLite ---
+find_package(SQLite3 REQUIRED)
+target_link_libraries(ytblnd PRIVATE SQLite::SQLite3)
+
 # --- GOOGLE TEST SETUP ---
 
 # Enable testing
@@ -71,6 +75,7 @@ target_compile_definitions(ytblnd_tests PRIVATE
 target_link_libraries(ytblnd_tests PRIVATE
     GTest::gtest
     GTest::gtest_main
+    SQLite::SQLite3
 )
 
 # Compile project source files into the test target so tests can use them
