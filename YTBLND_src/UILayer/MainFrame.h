@@ -4,6 +4,8 @@
 #include "UIPages.h"
 
 class AppController;
+class LoginPanel;
+class DataInstructionsPanel;
 class BlendFeedPanel;
 class UserPanel;
 class BlendCreationPanel;
@@ -22,12 +24,14 @@ public:
 private:
     AppController& controller;
 
-    wxSimplebook*       book;
-    BlendFeedPanel*     feedPanel;
-    UserPanel*          userPanel;
-    wxPanel*            settingsPanel;   // stub — back button only for now
-    BlendCreationPanel* creationPanel;
-    BlendChatPanel*     chatPanel;
+    wxSimplebook*           book;
+    LoginPanel*             loginPanel;
+    DataInstructionsPanel*  dataInstrPanel;
+    BlendCreationPanel*     creationPanel;
+    BlendFeedPanel*         feedPanel;
+    UserPanel*              userPanel;
+    wxPanel*                settingsPanel;  // stub — back button only for now
+    BlendChatPanel*         chatPanel;
 
     // Builds the home page (top bar + title + feed + refresh) and returns it.
     wxPanel* BuildHomePage();

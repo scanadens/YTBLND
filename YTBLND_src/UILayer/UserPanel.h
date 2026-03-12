@@ -23,9 +23,6 @@ private:
     void RefreshUserInfo();
 
     // Event handlers
-    void OnUploadCSV   (wxCommandEvent& evt);
-    void OnSaveBlend   (wxCommandEvent& evt);
-    void OnLoadBlend   (wxCommandEvent& evt);
-    void OnLogout      (wxCommandEvent& evt);
-    void OnShow        (wxShowEvent&    evt);
+    void OnLogout (wxCommandEvent& evt);
+    void OnShow   (wxShowEvent&    evt);
 };
