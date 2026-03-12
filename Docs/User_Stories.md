@@ -220,6 +220,19 @@ As a user, I can add friends by username or email so that I can create blends wi
 - Accept/reject requests
 - View friend list
 
+## Remove a Friend:
+
+Story Points: 1
+
+### Story:
+
+As a user, I can remove friends by username.
+
+### Acceptance Tests:
+
+- Search for users by username/email
+- Remove a selected friend
+
 # Wish list
 
 ## Plugin Integration:
