@@ -8,16 +8,12 @@
 
 AppController::AppController()
     : appState(AppState::getInstance()),
-      dataManager(nullptr) // stub — replace with real instance when implemented
+      dataManager(std::make_unique<SqliteDataManager>("ytblnd.db"))
 {
     registerEvents();
 }
 
 AppController::~AppController() {
-    // Persist current user before shutdown when DataManager is implemented:
-    // if (dataManager && appState.getCurrentUser())
-    //     dataManager->persistUser(*appState.getCurrentUser());
-
     eventRouter.deregisterAll();
 }
 
@@ -26,6 +22,7 @@ AppController::~AppController() {
 void AppController::registerEvents() {
     // Binds each named event to the corresponding handler on this controller.
     // Panels dispatch events by name; EventRouter calls the handler below.
+    eventRouter.registerListener("register",    [this](const EventPayload& p){ handleRegister(p); });
     eventRouter.registerListener("login",       [this](const EventPayload& p){ handleLogin(p); });
     eventRouter.registerListener("logout",      [this](const EventPayload& p){ handleLogout(p); });
     eventRouter.registerListener("uploadData",  [this](const EventPayload& p){ handleUploadData(p); });
@@ -44,20 +41,68 @@ EventRouter& AppController::getEventRouter() {
 
 // ── Event Handlers ────────────────────────────────────────────────────────────
 
+void AppController::handleRegister(const EventPayload& payload) {
+    auto idIt   = payload.find("userID");
+    auto unIt   = payload.find("username");
+    auto emIt   = payload.find("email");
+    auto pwIt   = payload.find("password");
+
+    if (idIt == payload.end() || unIt == payload.end() ||
+        pwIt == payload.end()) {
+        std::cerr << "[AppController] handleRegister: missing required fields\n";
+        return;
+    }
+
+    User newUser(idIt->second,
+                 unIt->second,
+                 emIt != payload.end() ? emIt->second : "",
+                 pwIt->second);
+
+    if (!dataManager->createUser(newUser)) {
+        std::cerr << "[AppController] handleRegister: userID '"
+                  << idIt->second << "' already exists\n";
+        return;
+    }
+
+    // Log the new user in immediately after registration
+    appState.setCurrentUser(new User(newUser));
+    std::cout << "[AppController] Registered and logged in as '"
+              << newUser.getUsername() << "'\n";
+}
+
 void AppController::handleLogin(const EventPayload& payload) {
-    // TODO: retrieve email and password from payload
-    // TODO: call DataManager to load the matching User by email
-    // TODO: verify passwordHash
-    // TODO: call appState.setCurrentUser() on success
-    // TODO: trigger handleRefresh if YouTube data is stale
-    std::cout << "[AppController] handleLogin called (stub)\n";
+    auto idIt = payload.find("userID");
+    auto pwIt = payload.find("password");
+
+    if (idIt == payload.end() || pwIt == payload.end()) {
+        std::cerr << "[AppController] handleLogin: missing 'userID' or 'password'\n";
+        return;
+    }
+
+    if (!dataManager->validatePassword(idIt->second, pwIt->second)) {
+        std::cerr << "[AppController] handleLogin: invalid credentials for '"
+                  << idIt->second << "'\n";
+        return;
+    }
+
+    std::optional<User> user = dataManager->findUserByID(idIt->second);
+    if (!user.has_value()) {
+        std::cerr << "[AppController] handleLogin: user not found after validation\n";
+        return;
+    }
+
+    appState.setCurrentUser(new User(*user));
+    std::cout << "[AppController] Logged in as '" << user->getUsername() << "'\n";
 }
 
 void AppController::handleLogout(const EventPayload& payload) {
-    // TODO: call dataManager->persistUser() for current user
-    // TODO: call appState.clearSession()
-    // TODO: instruct MainFrame to navigate to LoginPanel
-    std::cout << "[AppController] handleLogout called (stub)\n";
+    User* u = appState.getCurrentUser();
+    if (u) {
+        std::cout << "[AppController] Logging out '" << u->getUsername() << "'\n";
+        delete u;
+    }
+    appState.setCurrentUser(nullptr);
+    appState.clearSession();
 }
 
 void AppController::handleUploadData(const EventPayload& payload) {
@@ -73,7 +118,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
 
     std::list<Video> watchLater = WatchLaterParser(filePath).parse();
 
-    User user(userID, "", "");
+    User user(userID, "", "", "");
     YouTubeData yd;
     yd.setWatchLaterVideos(watchLater);
     user.setYouTubeData(yd);

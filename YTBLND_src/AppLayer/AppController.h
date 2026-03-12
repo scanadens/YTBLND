@@ -8,12 +8,9 @@
 #include "AppState.h"
 #include "EventRouter.h"
 #include "../ModelLayer/Blend.h"
+#include "../ServiceLayer/SqliteDataManager.h"
 
-// Forward declarations — these classes are stubs and will be fully
-// implemented in later stages. AppController depends on their interfaces
-// but does not need their full definitions in the header.
-class DataManager;
-class YouTubeDataParser;
+class YouTubeDataParser;  // stub for future use
 
 // AppController is the application's central coordinator.
 // It is the only class that talks to both the UI layer and the backend.
@@ -28,7 +25,7 @@ class AppController {
     private:
         AppState&    appState;    // Singleton session state
         EventRouter  eventRouter; // Messenger between UI and controller
-        DataManager* dataManager; // Stub — handles storage and parsing coordination
+        std::unique_ptr<SqliteDataManager> dataManager;
         // IBlendAlgorithm* blendAlgorithm; // Stub — added when algorithm layer is implemented
 
         // Owns the most recently generated Blend so AppState can hold a raw pointer to it.
@@ -54,9 +51,12 @@ class AppController {
         // These are called by EventRouter when the matching event is dispatched.
         // Panels never call these directly.
 
-        // Payload: { "email": "...", "password": "..." }
+        // Payload: { "userID": "...", "username": "...", "email": "...", "password": "..." }
+        // Creates a new account and logs the user in on success.
+        void handleRegister(const EventPayload& payload);
+
+        // Payload: { "userID": "...", "password": "..." }
         // Validates credentials, loads the User, sets AppState.currentUser.
-        // Triggers a data refresh if the user's YouTube data is stale.
         void handleLogin(const EventPayload& payload);
 
         // Payload: {}
