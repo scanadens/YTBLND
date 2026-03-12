@@ -1,3 +1,7 @@
+// ============================================================================
+// UserPanel.cpp — Account info and logout screen implementation
+// ============================================================================
+
 #include "UserPanel.h"
 
 #include <wx/statline.h>

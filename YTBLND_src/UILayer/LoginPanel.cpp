@@ -1,3 +1,7 @@
+// ============================================================================
+// LoginPanel.cpp — Sign In / Register screen implementation
+// ============================================================================
+
 #include "LoginPanel.h"
 
 #include <wx/simplebook.h>

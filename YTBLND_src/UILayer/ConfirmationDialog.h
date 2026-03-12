@@ -1,3 +1,27 @@
+// ============================================================================
+// ConfirmationDialog.h — Dark-themed modal confirmation dialog
+//
+// A simple two-button (OK / Cancel) dialog that matches the YTBLND dark theme.
+// Use the static Confirm() helper for the common one-shot pattern, or
+// construct manually when you need custom button labels.
+//
+// Typical usage (static helper):
+//   if (ConfirmationDialog::Confirm(this, "Log Out", "Are you sure?")) { … }
+//
+// Custom labels:
+//   ConfirmationDialog dlg(this, "Delete Blend", "This cannot be undone.",
+//                          "Delete", "Keep");
+//   if (dlg.ShowModal() == wxID_OK) { … }
+//
+// Styling notes:
+//   - OK button uses UIColors::Accent (purple)
+//   - Cancel button uses UIColors::SurfaceRaised (grey)
+//   - Both buttons lighten slightly on hover
+//
+// TODO: Add a wxIcon / warning symbol to the left of the message for
+//       destructive-action dialogs (delete, logout, etc.).
+// ============================================================================
+
 #pragma once
 #include <wx/dialog.h>
 #include <wx/string.h>

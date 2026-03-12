@@ -1,3 +1,45 @@
+// ============================================================================
+// VideoCard.h — Custom video preview card widget
+//
+// A self-contained wxPanel that displays a single YouTube video:
+//   • Top 72% — thumbnail fetched asynchronously from img.youtube.com
+//   • Bottom 28% — video title (up to 2 lines) and channel ID
+//   • Accent-coloured rounded border appears on hover
+//   • Clicking opens the video in the user's default browser
+//
+// ASYNC THUMBNAIL LOADING
+// ───────────────────────
+// SetVideo() spawns a std::thread that downloads the JPEG thumbnail from
+//   http://img.youtube.com/vi/<videoID>/hqdefault.jpg
+// On completion the thread posts a ThumbnailEvent back to the UI thread via
+// wxQueueEvent (thread-safe).  The card shows "Loading..." until the fetch
+// completes, then either the image or a ▶ placeholder on failure.
+//
+// THREAD SAFETY NOTE
+// ──────────────────
+// The detached thread holds a raw VideoCard* pointer.  wxQueueEvent will
+// silently discard the event if the card has been destroyed, which is safe.
+// However, if SetVideo() is called again before the previous fetch finishes,
+// the stale event will still arrive — OnThumbnailLoaded() will overwrite
+// whatever the second fetch loaded.
+// TODO: Add a generation counter (or cancel flag) so stale thumbnail events
+//       from earlier fetches are ignored when the card has been reused.
+//
+// CLICK BEHAVIOUR
+// ───────────────
+// OnClick dispatches "playVideo" to AppController and opens the YouTube URL
+// in the system browser.
+// TODO: If in-app playback is ever added, dispatch to a video player panel
+//       instead of opening the browser.
+//
+// TITLE / CHANNEL DATA
+// ────────────────────
+// Video::getTitle() and getChannelID() may return empty strings if the CSV
+// only contained a video ID.  VideoCard omits those text areas gracefully.
+// TODO: Fetch richer metadata (actual channel name, view count, etc.) via the
+//       YouTube Data API v3 when an API key is available.
+// ============================================================================
+
 #pragma once
 
 #include <wx/wx.h>

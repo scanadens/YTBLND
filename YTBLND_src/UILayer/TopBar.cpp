@@ -1,3 +1,7 @@
+// ============================================================================
+// TopBar.cpp — Reusable interior-page header bar implementation
+// ============================================================================
+
 #include "TopBar.h"
 #include "UIColors.h"
 #include <wx/font.h>

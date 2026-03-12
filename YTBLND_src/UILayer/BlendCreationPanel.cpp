@@ -1,3 +1,7 @@
+// ============================================================================
+// BlendCreationPanel.cpp — New-blend setup screen implementation
+// ============================================================================
+
 #include "BlendCreationPanel.h"
 
 #include <wx/scrolwin.h>
@@ -209,8 +213,10 @@ void BlendCreationPanel::OnAdd(wxCommandEvent& /*evt*/)
         }
     }
 
-    // Dispatch lookupUser — not yet implemented on the backend;
-    // we proceed optimistically if the name is valid.
+    // Dispatch lookupUser — not yet fully implemented on the backend.
+    // Currently we proceed optimistically (add the user regardless).
+    // TODO: Check the return value / AppState after dispatch to confirm the
+    //       user was found before adding them to m_addedUsers.
     m_controller.getEventRouter().dispatch("lookupUser",
                                            {{"username", entered}});
 
@@ -228,6 +234,13 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
 {
     if (m_addedUsers.size() < 2) return;
 
+    // Build payload: {"userID_0": "alice", "userID_1": "bob", ...}
+    // AppController::handleCreateBlend reads these in order to find each
+    // user's YouTube data and produce the blended playlist.
+    // TODO: Show a loading indicator here — createBlend may be slow if it
+    //       fetches/merges large watch-later datasets.
+    // TODO: If createBlend fails (user not found, no data), display an error
+    //       message instead of navigating to BLEND_CHAT.
     EventPayload payload;
     for (std::size_t i = 0; i < m_addedUsers.size(); ++i) {
         std::string key = "userID_" + std::to_string(i);

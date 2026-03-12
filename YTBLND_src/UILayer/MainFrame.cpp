@@ -1,3 +1,13 @@
+// ============================================================================
+// MainFrame.cpp — Root application window implementation
+//
+// All panels are constructed once in the constructor and stored as members.
+// The wxSimplebook (book) switches between them with no animation.
+//
+// NavigateTo() is the single choke-point for page transitions; add any
+// per-page setup/teardown logic there.
+// ============================================================================
+
 #include "MainFrame.h"
 
 #include <wx/simplebook.h>
@@ -86,7 +96,9 @@ MainFrame::MainFrame(AppController& controller)
 // ── Navigation ────────────────────────────────────────────────────────────────
 
 void MainFrame::NavigateTo(Page page) {
-    // Refresh / reset dynamic panels when navigating to them
+    // Refresh / reset dynamic panels when navigating to them.
+    // Add a case here whenever a new panel needs per-arrival setup.
+    // TODO: If panels become expensive to reset, guard with "is currently shown" checks.
     if (page == Page::LOGIN)           loginPanel->Reset();
     if (page == Page::BLEND_CREATION)  creationPanel->Reload();
     if (page == Page::BLEND_CHAT)      chatPanel->Reload();
@@ -190,7 +202,10 @@ void MainFrame::OnUser(wxCommandEvent&) {
 }
 
 void MainFrame::OnBlend(wxCommandEvent&) {
-    // If a blend already exists, go straight to chat; otherwise start creation
+    // If a blend was already created this session, go straight to chat.
+    // Otherwise start the creation flow.
+    // TODO: When multiple blends per user are supported, this should open
+    //       a blend-picker screen instead.
     if (AppState::getInstance().getActiveBlend() != nullptr)
         NavigateTo(Page::BLEND_CHAT);
     else

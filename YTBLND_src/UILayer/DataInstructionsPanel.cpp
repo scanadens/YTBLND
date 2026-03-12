@@ -1,3 +1,7 @@
+// ============================================================================
+// DataInstructionsPanel.cpp — Google Takeout CSV setup screen implementation
+// ============================================================================
+
 #include "DataInstructionsPanel.h"
 
 #include <wx/filedlg.h>
