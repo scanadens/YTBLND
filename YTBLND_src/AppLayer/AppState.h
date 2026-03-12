@@ -30,6 +30,10 @@ class AppState {
         // without changing this class.
         std::map<std::string, ChatRoom> chatRooms;
 
+        // Participants that have uploaded their Watch Later CSV for the
+        // current blend session, keyed by userID.
+        std::map<std::string, User> sessionUsers;
+
         // Private constructor — use getInstance()
         AppState();
 
@@ -69,10 +73,21 @@ class AppState {
         // Used to support multiple rooms in the future.
         ChatRoom* getChatRoom(const std::string& blendID);
 
+        // ── Session Users (blend participants) ────────────────────────────────
+
+        // Adds or replaces the user entry for this blend session.
+        void addSessionUser(const User& user);
+
+        // Returns all users that have uploaded data in this session.
+        std::map<std::string, User> getSessionUsers() const;
+
+        // Removes all session participants (called before starting a new blend).
+        void clearSessionUsers();
+
         // ── Session ───────────────────────────────────────────────────────────
 
         // Resets all state: clears currentUser, activeBlend, isBlendGenerating,
-        // and all chat rooms. Called by AppController on logout.
+        // chat rooms, and session users. Called by AppController on logout.
         void clearSession();
 };
 

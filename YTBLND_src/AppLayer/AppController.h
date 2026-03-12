@@ -1,11 +1,13 @@
 #ifndef APPCONTROLLER_H
 #define APPCONTROLLER_H
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "AppState.h"
 #include "EventRouter.h"
+#include "../ModelLayer/Blend.h"
 
 // Forward declarations — these classes are stubs and will be fully
 // implemented in later stages. AppController depends on their interfaces
@@ -28,6 +30,9 @@ class AppController {
         EventRouter  eventRouter; // Messenger between UI and controller
         DataManager* dataManager; // Stub — handles storage and parsing coordination
         // IBlendAlgorithm* blendAlgorithm; // Stub — added when algorithm layer is implemented
+
+        // Owns the most recently generated Blend so AppState can hold a raw pointer to it.
+        std::unique_ptr<Blend> currentBlend;
 
         // Registers all UI event handlers on the EventRouter.
         // Called once during construction.
