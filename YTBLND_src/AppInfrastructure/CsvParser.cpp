@@ -10,6 +10,7 @@ using namespace std;
 
 class CsvParser : public Parser {
 	public:
+		CsvParser() {}
 		CsvParser(list<string> raw_data) {
 			this->raw_data = raw_data;
 		} 
@@ -33,17 +34,22 @@ class CsvParser : public Parser {
 			while (!raw_data.empty()) {
 				// grab the next line
 				string line = raw_data.front();
+				raw_data.pop_front();
 
 				if (line_num == 0) { 
 					/*
 					When on the first line (the col titles)
 					save their names within col_titles to be 
-					used later. delimiting the row to get each 
-					column name
+					used later. formatting each dictionary 
+					contents as key = col_title and value =
+					row_entry 
 					*/
 					stringstream temp_ss(line);
 					string t = "";
 					while (getline(temp_ss, t, ',')) {
+						// trim any white space/newline char
+						if (!t.empty() && t.back() == '\n') {t.pop_back();}
+						// save col
 						col_titles.push_back(t);
 					}
 				} else { // for any other line, they're normal rows
@@ -55,23 +61,26 @@ class CsvParser : public Parser {
 					stringstream temp_ss(line);
 					string t = "";
 					while (getline(temp_ss, t, ',')) {
+						if (!t.empty() && t.back() == '\n') {t.pop_back();}
 						row_contents[col_titles.at(num_col++)] = t;
 					}
 
 					// add the dictionary as a line to ret
 					ret.push_back(row_contents);
 				}
+
+				line_num++;
 			}
+			
+			return ret;
 		}
 
 		void setData(list<string> data) override {
 			this->raw_data = data;
 		}
-
-		void setParseId(int id) override {this->parse_id = id;}
 		int getParseId() override {return parse_id;}
 
 	private:
 		list<string> raw_data;
-		int parse_id = -1;
+		int parse_id = File_ID::CSV;
 };

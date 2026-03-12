@@ -1,0 +1,189 @@
+/**
+ * \author Shamar Pennant
+ * \brief Parses csv file contents into a single string
+ */
+
+using namespace std;
+
+#include "Parser.hpp"
+#include "FileSource.hpp"
+
+class CsvParser : public Parser {
+	public:
+		CsvParser() {}
+		CsvParser(list<string> raw_data) {
+			this->raw_data = raw_data;
+		} 
+		~CsvParser() override = default;
+
+		list<unordered_map<string, string>> parse() override {
+			// check if raw_data is empty
+			if (raw_data.empty()) {
+				cerr << "error: raw data string is empty in CsvParser";
+				exit(1);
+			}
+
+			// returned value at end of function
+			list<unordered_map<string, string>> ret;
+			
+			// header contents
+			vector<string> col_titles;
+
+			int line_num = 0;
+			// loop through the raw_data list until it's empty
+			while (!raw_data.empty()) {
+				// grab the next line
+				string line = raw_data.front();
+				raw_data.pop_front();
+
+				if (line_num == 0) { 
+					/*
+					When on the first line (the col titles)
+					save their names within col_titles to be 
+					used later. formatting each dictionary 
+					contents as key = col_title and value =
+					row_entry 
+					*/
+					stringstream temp_ss(line);
+					string t = "";
+					while (getline(temp_ss, t, ',')) {
+						// trim any white space/newline char
+						if (!t.empty() && t.back() == '\n') {t.pop_back();}
+						// save col
+						col_titles.push_back(t);
+					}
+				} else { // for any other line, they're normal rows
+					int num_col = 0;
+					unordered_map<string, string> row_contents;
+
+					/* delimit the line/row and place key value pay 
+					<"col_name", "row_value"> inside the dictionary*/
+					stringstream temp_ss(line);
+					string t = "";
+					while (getline(temp_ss, t, ',')) {
+						if (!t.empty() && t.back() == '\n') {t.pop_back();}
+						row_contents[col_titles.at(num_col++)] = t;
+					}
+
+					// add the dictionary as a line to ret
+					ret.push_back(row_contents);
+				}
+
+				line_num++;
+			}
+			
+			return ret;
+		}
+
+		void setData(list<string> data) override {
+			this->raw_data = data;
+		}
+		int getParseId() override {return parse_id;}
+
+	private:
+		list<string> raw_data;
+		int parse_id = File_ID::CSV;
+};/**
+ * \author Shamar Pennant
+ */
+
+#include "FileSource.hpp"
+
+using namespace std;
+
+class CsvSource : public FileSource {
+	public:
+		CsvSource(string src) {
+
+			this-> src = src;
+		}
+		~CsvSource() override = default;
+
+		list<string> read() override {
+			if (src.empty()) { // in the event that src is empty
+				cerr << "error: src string is empty in CsvSource";
+				exit(1);
+			} 
+
+			// returned string container
+			list<string> ret;
+
+			// creating (in) file stream with given file source path 
+			fstream read_file_in(src, ios::in);
+
+			// holds file line
+			string line = "";
+
+			// reading the opened file stream into a temporary string
+			while (getline(read_file_in, line)) {ret.push_back(line);}
+
+			return ret;
+		}
+
+		void setSource(string src) override {this->src = src;}
+		int getSourceId() override {return source_id;}
+
+	private:
+		string src = ""; // holds the file path
+		int source_id = File_ID::CSV; // holds this objects id to match with a Parser object
+};/**
+ * \author Shamar Pennant
+ */
+
+#include "DataExtractor.hpp"
+
+using namespace std;
+
+DataExtractor::DataExtractor(unique_ptr<FileSource> src, unique_ptr<Parser> p) {
+	// change ownership of the param to this objcts instance
+	src_format = move(src);
+	par_format = move(p);
+}
+
+DataExtractor::~DataExtractor() {} 
+
+list<unordered_map<string, string>> DataExtractor::extract() {
+	// grab the respective file format ids 
+	int source_id_in_use = src_format->getSourceId();
+	int parse_id_in_use = par_format->getParseId();
+
+	// check if either id's are out of bounds (they shouldn't be)
+	if (source_id_in_use <= -1 || parse_id_in_use <= -1) {
+		cerr << "One of the provided ID's is out of bounds:\nsrc_id = " << source_id_in_use << "\nparse_id = " << parse_id_in_use;
+		exit(1);
+	} 
+
+	// check if id's match (how we know they match formats)
+	if (source_id_in_use != parse_id_in_use) {
+		cerr << "selected FileSource and Parser id's don't match: \nsrc_id = " << source_id_in_use << "\nparse_id = " << parse_id_in_use;
+		exit(1);
+	}
+
+	// ensure neither pointers are null
+	if (src_format == nullptr || par_format == nullptr) {
+		cerr << "Unable to find FileSource or Parser in extract():\nsrc_id = " 
+			 << source_id_in_use << ", " << (src_format == nullptr ? "contains nothing (nullptr)" : "has obj")
+			 << "\nparse_id = " 
+			 << parse_id_in_use << ", " << (par_format == nullptr ? "contains nothing (nullptr)" : "has obj");
+		exit(1);
+	}
+
+	// --- assuming the both source and parser are already configured ---
+
+	// grab the raw data from the file
+	auto raw_data = src_format->read();
+	// feed the raw data into the given parser
+	par_format->setData(raw_data);
+	// format the data with the repsective parser
+	list<unordered_map<string, string>> formatted_data = par_format->parse();
+
+	return formatted_data;
+}
+
+void DataExtractor::setParser(unique_ptr<Parser> parser) {
+	par_format = move(parser);
+}
+
+void DataExtractor::setSource(unique_ptr<FileSource> src) {
+	src_format = move(src);
+}

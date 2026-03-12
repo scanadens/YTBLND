@@ -1,0 +1,1 @@
+/usr/bin/g++ -g -Wl,--dependency-file=CMakeFiles/ytblnd_tests.dir/link.d CMakeFiles/ytblnd_tests.dir/tests/Test_AppInfr.cpp.o -o ytblnd_tests  -lgtest
