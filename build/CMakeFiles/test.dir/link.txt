@@ -1,1 +1,0 @@
-/usr/bin/g++ -g -Wl,--dependency-file=CMakeFiles/test.dir/link.d CMakeFiles/test.dir/YTBLND_src/tests/Test_AppInfr.cpp.o -o YTBLND_src_test.exe  -lgtest_main -lgtest -lpthread
