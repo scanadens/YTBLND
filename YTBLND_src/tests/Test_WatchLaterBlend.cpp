@@ -9,9 +9,9 @@
 #include <list>
 #include <string>
 
-// Path to the real Watch Later CSV included in the repo
+// Synthetic fixture — does not contain personal data
 static const std::string WATCH_LATER_CSV =
-    YTBLND_SRC_DIR "/Takeout/YouTube and YouTube Music/playlists/Watch later-videos.csv";
+    YTBLND_SRC_DIR "/tests/fixtures/Watch later-videos.csv";
 
 // ── WatchLaterParser ──────────────────────────────────────────────────────────
 
@@ -40,7 +40,7 @@ TEST(WatchLaterParserTest, NonIDFieldsAreEmpty) {
 
 static User makeUserWithWatchLater(const std::string& userID, const std::string& csvPath) {
     std::list<Video> videos = WatchLaterParser(csvPath).parse();
-    User user(userID, "", "");
+    User user(userID, "", "", "");
     YouTubeData yd;
     yd.setWatchLaterVideos(videos);
     user.setYouTubeData(yd);
