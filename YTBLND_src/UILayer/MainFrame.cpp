@@ -3,6 +3,8 @@
 #include <wx/simplebook.h>
 
 #include "UIColors.h"
+#include "LoginPanel.h"
+#include "DataInstructionsPanel.h"
 #include "BlendFeedPanel.h"
 #include "UserPanel.h"
 #include "BlendCreationPanel.h"
@@ -27,16 +29,30 @@ MainFrame::MainFrame(AppController& controller)
     // NavigateFn passed to all sub-panels so they can switch pages
     NavigateFn nav = [this](Page p) { NavigateTo(p); };
 
-    // ── Build pages in Page enum order ────────────────────────────────────────
-    // Page::HOME (0)
+    // ── Build pages — MUST match Page enum values exactly ─────────────────────
+
+    // Page::LOGIN (0) — first screen shown on launch
+    loginPanel = new LoginPanel(book, controller, nav);
+    book->AddPage(loginPanel, "Login");
+
+    // Page::DATA_INSTRUCTIONS (1) — shown after login when user has no data
+    dataInstrPanel = new DataInstructionsPanel(book, controller, nav);
+    book->AddPage(dataInstrPanel, "DataInstructions");
+
+    // Page::BLEND_CREATION (2)
+    creationPanel = new BlendCreationPanel(book, controller, nav);
+    book->AddPage(creationPanel, "BlendCreation");
+
+    // Page::HOME (3) — blend feed
+    // feedPanel must be constructed before BuildHomePage() so it can be reparented
     feedPanel = new BlendFeedPanel(book, controller);
     book->AddPage(BuildHomePage(), "Home");
 
-    // Page::USER (1)
+    // Page::USER (4)
     userPanel = new UserPanel(book, controller, nav);
     book->AddPage(userPanel, "User");
 
-    // Page::SETTINGS (2) — stub: just a dark panel with a Back button
+    // Page::SETTINGS (5) — stub: back button only
     {
         wxPanel* stub = new wxPanel(book, wxID_ANY);
         stub->SetBackgroundColour(UIColors::Background);
@@ -53,11 +69,7 @@ MainFrame::MainFrame(AppController& controller)
         book->AddPage(stub, "Settings");
     }
 
-    // Page::BLEND_CREATION (3)
-    creationPanel = new BlendCreationPanel(book, controller, nav);
-    book->AddPage(creationPanel, "BlendCreation");
-
-    // Page::BLEND_CHAT (4)
+    // Page::BLEND_CHAT (6)
     chatPanel = new BlendChatPanel(book, controller, nav);
     book->AddPage(chatPanel, "BlendChat");
 
@@ -67,14 +79,17 @@ MainFrame::MainFrame(AppController& controller)
     SetSizer(root);
 
     Maximize(true);
+    // Start on login screen
+    book->SetSelection(static_cast<int>(Page::LOGIN));
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 
 void MainFrame::NavigateTo(Page page) {
-    // Refresh dynamic panels when navigating to them
-    if (page == Page::BLEND_CHAT)    chatPanel->Reload();
-    if (page == Page::BLEND_CREATION) creationPanel->Reload();
+    // Refresh / reset dynamic panels when navigating to them
+    if (page == Page::LOGIN)           loginPanel->Reset();
+    if (page == Page::BLEND_CREATION)  creationPanel->Reload();
+    if (page == Page::BLEND_CHAT)      chatPanel->Reload();
     book->SetSelection(static_cast<int>(page));
 }
 
