@@ -32,6 +32,14 @@ void YouTubeData::setSubscribedChannels(const std::list<Channel>& subscribedChan
     this->subscribedChannels = subscribedChannels;
 }
 
+std::list<Video> YouTubeData::getWatchLaterVideos() const {
+    return watchLaterVideos;
+}
+
+void YouTubeData::setWatchLaterVideos(const std::list<Video>& videos) {
+    this->watchLaterVideos = videos;
+}
+
 // Computed Queries
 
 std::list<Video> YouTubeData::getMostWatchedVideos(int n) const {
