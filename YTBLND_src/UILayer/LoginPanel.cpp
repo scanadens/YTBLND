@@ -280,9 +280,25 @@ void LoginPanel::ProceedAfterLogin()
     User* user = AppState::getInstance().getCurrentUser();
     if (!user) return;
 
-    // If the user has no watch-later data yet, show upload instructions
+    // If a blend was restored by handleLogin, go straight to the feed
+    if (AppState::getInstance().getActiveBlend() != nullptr) {
+        m_nav(Page::HOME);
+        return;
+    }
+
+    // If the user has no Watch Later data, send them to the upload screen.
+    // Show an info dialog first if they were added to a blend by someone else.
     bool hasData = !user->getYouTubeData().getWatchLaterVideos().empty();
-    m_nav(hasData ? Page::BLEND_CREATION : Page::DATA_INSTRUCTIONS);
+    if (!hasData) {
+        std::string msg = AppState::getInstance().takePendingBlendMessage();
+        if (!msg.empty())
+            wxMessageBox(msg, "You're in a Blend!", wxOK | wxICON_INFORMATION, nullptr);
+        m_nav(Page::DATA_INSTRUCTIONS);
+        return;
+    }
+
+    // Has data but no blend yet — let them create one
+    m_nav(Page::BLEND_CREATION);
 }
 
 // ── Reset ─────────────────────────────────────────────────────────────────────
