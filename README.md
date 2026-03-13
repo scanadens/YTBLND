@@ -1,25 +1,103 @@
-## Before You Get Started
+# README
 
-### 1. Check the expiry of your SSH key
-You can find it easily by searching for SSH in the gitlab search tab or under settings. If it is expiring soon it would be a good idea to set up a new one. This can be done by typing `ssh-keygen -t ed25519 -C "youremail@uwo.ca"` into your terminal. After that obtain the contents of the file by typing `cat ~/.ssh/id_ed25519.pub`. Next, press add new key in your gitlab and copy the output from the previous command. 
+<aside>
+<img src="https://www.notion.so/icons/pencil_orange.svg" alt="https://www.notion.so/icons/pencil_orange.svg" width="40px" />
 
-### 2. Clone the GIT repo using SSH
-To clone the repository onto your device type `git clone ssh://git@gitlab.sci.uwo.ca:7999/courses/2026/01/COMPSCI3307/group45.git` into your terminal. If you would like this in a specific folder, navigate there before running the command.
+***Authored***: Shamar Pennant
 
-## Whenever You Are Working on the Project
-Follow the git workflow, below is a quick refresher:
+</aside>
 
-### 1. Check Your status
-`git status` - this tells you which branch you are currently working on and whether there are any uncommitted changes floating around
+# YTBLND
 
-### 2. Get the Latest Version
-`git pull` - make sure that you have the latest version of the code which prevents you from overwriting other people's work.
+A C++ desktop application that blends YouTube Watch Later data from multiple users to generate a shared recommendation feed. Users can create blends, browse a combined video feed, and chat within blend‑specific rooms.
 
-### 3. Stage Your Changes
-`git add .` stages all of your current work, however it does not add it to your remote repository. To stage a specific file replace the . with its name, and to unstage a file use `git restore --staged .`.
+## Overview
 
-### 4. Commit Your Changes
-Once your work is staged and you are happy with it being part of your remote repository use `git commit -m "Message describing the changes you made"`. Keep in mind that this does not make your changes available to other people, just adds them to your local repository.
+YTBLND is built with a modular architecture separating UI, business logic, data parsing, algorithms, and persistence. The application uses Google Takeout CSV exports to ingest YouTube data and stores all user and blend information in a local SQLite database.
 
-### 5. Push Your Changes
-To make your work visible to others push your changes to the master (remote) branch with `git push`. 
+## Features
+
+- User registration and login
+- Upload Watch Later CSV (Google Takeout)
+- Create blends with 2–8 participants
+- Randomized blended video feed (3×2 grid)
+- Paging through feed results
+- Blend‑specific chatroom
+- Persistent storage using SQLite
+
+## Dependencies
+
+Required:
+
+- CMake 3.16+
+- C++20 compiler (GCC/Clang)
+- wxWidgets (core, base, net)
+- SQLite3 and SQLiteCpp
+- GoogleTest (for tests)
+
+Optional:
+
+- Gumbo HTML parser (enables HTML history parsing)
+
+If Gumbo is not installed, HTML parsing is automatically disabled.
+
+## Building
+
+```bash
+./build_src.sh
+```
+
+This produces:
+
+- `ytblnd` — main application
+- `ytblnd_tests` — unit tests
+
+## Running
+
+To run the application after building the project with the above command, use the following command below in the project root:
+
+```bash
+./run_ytblnd_proto.sh
+```
+
+## Running Tests
+
+There is compiled gtests found within the directory `YTBLND_src/tests/`. Which after building the project can be run with the following command from the project root:
+
+```bash
+./run_test.sh
+```
+
+For additional testing purposes while running the application, there are provided data pieces (playlist files as `.csv`) within `YTBLND_src/tests/fixtures/`. These can be used for when creating user profiles if one doesn’t wan’t to provide their own.
+
+## Project Structure
+
+```
+YTBLND_src/
+├── AlgorithmLayer/        # Blend algorithms
+├── AppInfrastructure/     # CSV/HTML parsing, data extraction
+├── AppLayer/              # Controller, state, event routing
+├── ModelLayer/            # User, Video, Blend, ChatRoom
+├── ServiceLayer/          # SQLite persistence
+├── UILayer/               # wxWidgets UI panels
+└── tests/                 # GoogleTest suites
+```
+
+## Data Requirements
+
+The application expects a csv file upon creating an account. Usually comprised of playlist data which can be found within the following directory structure after downloading YouTube data from [Google Takeout](https://takeout.google.com):
+
+```bash
+YouTube and YouTube Music/playlists/
+```
+
+# Known Bugs & Issues:
+
+So far with our development, there are a couple of known issues which comprises of the following:
+
+- Chatroom does not display messages after being sent.
+- Chatroom messages are not viewable by others that are a part of the blend
+- Can generate blend by yourself (creating a blend with a user that doesn’t exist yet)
+- App crashes after multiple refreshes of the blend
+- There’s no means of editing user data after account creation
+- No over the network syncing; meaning saved data is only local to a machine
