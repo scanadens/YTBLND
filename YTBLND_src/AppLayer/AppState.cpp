@@ -89,6 +89,26 @@ void AppState::clearSessionUsers() {
     sessionUsers.clear();
 }
 
+// ── Blend creation feedback ───────────────────────────────────────────────────
+
+void AppState::setUsersWithoutData(const std::vector<std::string>& users) {
+    usersWithoutData = users;
+}
+
+std::vector<std::string> AppState::getUsersWithoutData() const {
+    return usersWithoutData;
+}
+
+void AppState::setPendingBlendMessage(const std::string& msg) {
+    pendingBlendMessage = msg;
+}
+
+std::string AppState::takePendingBlendMessage() {
+    std::string msg = pendingBlendMessage;
+    pendingBlendMessage.clear();
+    return msg;
+}
+
 // ── Session ───────────────────────────────────────────────────────────────────
 
 void AppState::clearSession() {
@@ -97,4 +117,6 @@ void AppState::clearSession() {
     isBlendGenerating = false;
     chatRooms.clear();
     sessionUsers.clear();
+    usersWithoutData.clear();
+    pendingBlendMessage.clear();
 }
