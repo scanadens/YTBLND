@@ -98,9 +98,9 @@ MainFrame::MainFrame(AppController& controller)
 void MainFrame::NavigateTo(Page page) {
     // Refresh / reset dynamic panels when navigating to them.
     // Add a case here whenever a new panel needs per-arrival setup.
-    // TODO: If panels become expensive to reset, guard with "is currently shown" checks.
     if (page == Page::LOGIN)           loginPanel->Reset();
     if (page == Page::BLEND_CREATION)  creationPanel->Reload();
+    if (page == Page::HOME)            feedPanel->LoadFromBlend();
     if (page == Page::BLEND_CHAT)      chatPanel->Reload();
     book->SetSelection(static_cast<int>(page));
 }

@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include "../ModelLayer/User.h"
 #include "../ModelLayer/Blend.h"
@@ -33,6 +34,15 @@ class AppState {
         // Participants that have uploaded their Watch Later CSV for the
         // current blend session, keyed by userID.
         std::map<std::string, User> sessionUsers;
+
+        // Set by handleCreateBlend to report participants who had no data.
+        // Cleared at the start of each createBlend call.
+        std::vector<std::string> usersWithoutData;
+
+        // Set by handleLogin when the user belongs to a blend but has no data
+        // uploaded yet. LoginPanel shows this as a dialog before DATA_INSTRUCTIONS.
+        // Cleared after being read.
+        std::string pendingBlendMessage;
 
         // Private constructor — use getInstance()
         AppState();
@@ -83,6 +93,18 @@ class AppState {
 
         // Removes all session participants (called before starting a new blend).
         void clearSessionUsers();
+
+        // ── Blend creation feedback ───────────────────────────────────────────
+
+        // Stores userIDs of participants who had no Watch Later data when the
+        // blend was last created. UI reads this after dispatching "createBlend".
+        void setUsersWithoutData(const std::vector<std::string>& users);
+        std::vector<std::string> getUsersWithoutData() const;
+
+        // One-time message set by handleLogin when the user is a blend
+        // participant but has not yet uploaded data. Cleared on read.
+        void setPendingBlendMessage(const std::string& msg);
+        std::string takePendingBlendMessage(); // returns and clears
 
         // ── Session ───────────────────────────────────────────────────────────
 

@@ -11,8 +11,8 @@
 #include "UIColors.h"
 #include "UIPages.h"
 #include "TopBar.h"
-#include "ConfirmationDialog.h"
 #include "../AppLayer/AppController.h"
+#include "../AppLayer/AppState.h"
 #include "../AppLayer/EventRouter.h"
 
 // ── Construction ──────────────────────────────────────────────────────────────
@@ -29,7 +29,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
     auto* root = new wxBoxSizer(wxVERTICAL);
 
     // ── TopBar ────────────────────────────────────────────────────────────────
-    auto* topBar = new TopBar(this, "New Blend", m_nav, Page::HOME);
+    auto* topBar = new TopBar(this, "New Blend", m_nav, Page::LOGIN);
     root->Add(topBar, 0, wxEXPAND);
 
     // ── Action row ────────────────────────────────────────────────────────────
@@ -112,9 +112,20 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 void BlendCreationPanel::Reload()
 {
     m_addedUsers.clear();
+
+    // Pre-populate with the logged-in user so they don't have to add themselves
+    User* current = AppState::getInstance().getCurrentUser();
+    if (current)
+        m_addedUsers.push_back(current->getUserID());
+
     RebuildUserList();
     UpdateCountLabel();
-    m_createBtn->Disable();
+
+    // Button enabled once there are >= 2 users (current user + at least one other)
+    if (m_addedUsers.size() >= 2)
+        m_createBtn->Enable();
+    else
+        m_createBtn->Disable();
 }
 
 // ── Private helpers ───────────────────────────────────────────────────────────
@@ -235,20 +246,33 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
     if (m_addedUsers.size() < 2) return;
 
     // Build payload: {"userID_0": "alice", "userID_1": "bob", ...}
-    // AppController::handleCreateBlend reads these in order to find each
-    // user's YouTube data and produce the blended playlist.
-    // TODO: Show a loading indicator here — createBlend may be slow if it
-    //       fetches/merges large watch-later datasets.
-    // TODO: If createBlend fails (user not found, no data), display an error
-    //       message instead of navigating to BLEND_CHAT.
     EventPayload payload;
-    for (std::size_t i = 0; i < m_addedUsers.size(); ++i) {
-        std::string key = "userID_" + std::to_string(i);
-        payload[key] = m_addedUsers[i];
-    }
+    for (std::size_t i = 0; i < m_addedUsers.size(); ++i)
+        payload["userID_" + std::to_string(i)] = m_addedUsers[i];
+
     m_controller.getEventRouter().dispatch("createBlend", payload);
 
-    m_nav(Page::BLEND_CHAT);
+    // Check if any participants were missing data
+    std::vector<std::string> missing = AppState::getInstance().getUsersWithoutData();
+    if (!missing.empty()) {
+        std::string msg = "The following users have no Watch Later data uploaded:\n";
+        for (const auto& uid : missing)
+            msg += "  \u2022 " + uid + "\n";
+
+        if (AppState::getInstance().getActiveBlend() != nullptr) {
+            // Blend was still created from whoever had data — warn and continue
+            msg += "\nTheir videos were not included. The blend was created with the remaining users.";
+            wxMessageBox(msg, "Some Users Missing Data", wxOK | wxICON_WARNING, this);
+            m_nav(Page::HOME);
+        } else {
+            // No one had data — cannot create a blend at all
+            msg += "\nNo blend could be created. Please ensure at least one user has uploaded their data.";
+            wxMessageBox(msg, "Cannot Create Blend", wxOK | wxICON_ERROR, this);
+        }
+        return;
+    }
+
+    m_nav(Page::HOME);
 }
 
 void BlendCreationPanel::OnRemoveUser(const std::string& username)

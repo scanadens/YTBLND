@@ -29,6 +29,7 @@ VideoCard::VideoCard(wxWindow* parent, AppController& controller)
     , m_controller(controller)
     , m_thumbLoading(false)
     , m_thumbFailed(false)
+    , m_generation(0)
     , m_hovered(false)
 {
     SetBackgroundColour(UIColors::Surface);
@@ -86,12 +87,14 @@ void VideoCard::FetchThumbnailAsync()
 
     m_thumbLoading = true;
     m_thumbFailed  = false;
+    ++m_generation; // invalidate any in-flight fetch for the previous video
 
-    // Capture what we need by value so the thread is self-contained
-    wxString videoID = m_videoID;
-    VideoCard* card  = this;   // raw pointer — wxQueueEvent is safe if card is gone
+    // Capture everything by value — the thread must be self-contained
+    wxString   videoID = m_videoID;
+    VideoCard* card    = this;        // wxQueueEvent is safe if card is gone
+    int        gen     = m_generation;
 
-    std::thread([videoID, card]() {
+    std::thread([videoID, card, gen]() {
         wxString url = wxString::Format(
             "http://img.youtube.com/vi/%s/hqdefault.jpg", videoID);
 
@@ -102,8 +105,6 @@ void VideoCard::FetchThumbnailAsync()
         if (wxurl.GetError() == wxURL_NOERR) {
             wxInputStream* stream = wxurl.GetInputStream();
             if (stream && stream->IsOk()) {
-                // Read the whole stream into memory so we can close the
-                // network connection before loading the image.
                 wxMemoryOutputStream memOut;
                 stream->Read(memOut);
                 delete stream;
@@ -117,9 +118,9 @@ void VideoCard::FetchThumbnailAsync()
             }
         }
 
-        // Post result back to the UI thread
-        auto* evt = new ThumbnailEvent(EVT_THUMBNAIL_LOADED, wxID_ANY, img, ok);
-        wxQueueEvent(card, evt);   // silently dropped if card has been destroyed
+        // Post result back to the UI thread; silently dropped if card is gone
+        auto* evt = new ThumbnailEvent(EVT_THUMBNAIL_LOADED, wxID_ANY, img, ok, gen);
+        wxQueueEvent(card, evt);
     }).detach();
 }
 
@@ -128,6 +129,9 @@ void VideoCard::FetchThumbnailAsync()
 // ---------------------------------------------------------------------------
 void VideoCard::OnThumbnailLoaded(ThumbnailEvent& evt)
 {
+    // Discard results from a fetch that was superseded by a later SetVideo() call
+    if (evt.generation != m_generation) return;
+
     m_thumbLoading = false;
     if (evt.success && evt.image.IsOk()) {
         m_thumbnail   = wxBitmap(evt.image);

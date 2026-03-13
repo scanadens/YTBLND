@@ -12,6 +12,7 @@
 
 #include <wx/wx.h>
 #include <wx/image.h>
+#include <wx/socket.h>
 
 #include "UILayer/MainFrame.h"
 #include "AppLayer/AppController.h"
@@ -19,6 +20,7 @@
 class YTBLNDApp : public wxApp {
 public:
     bool OnInit() override;
+    int  OnExit() override;
 
 private:
     // AppController owns AppState (singleton), EventRouter, and SqliteDataManager.
@@ -33,9 +35,19 @@ bool YTBLNDApp::OnInit() {
     // Must be called before any wxImage::LoadFile() / wxURL usage.
     wxInitAllImageHandlers();
 
+    // Initialise wxSocket on the main thread before any background thread
+    // calls wxURL::GetInputStream().  wxWidgets requires socket init to
+    // happen on the main thread; failing to do this causes the
+    // "wxWidgets sockets must be initialized in the main thread" error.
+    wxSocketBase::Initialize();
+
     // MainFrame starts maximised and shows the LOGIN page.
-    // TODO: restore last window position/size from user preferences if desired.
     auto* frame = new MainFrame(controller);
     frame->Show(true);
     return true;
+}
+
+int YTBLNDApp::OnExit() {
+    wxSocketBase::Shutdown();
+    return wxApp::OnExit();
 }
