@@ -55,11 +55,11 @@ class ThumbnailEvent : public wxEvent {
 public:
     wxImage image;
     bool    success;
+    int     generation; // must match VideoCard::m_generation or the event is stale
 
-    ThumbnailEvent(wxEventType type, int id, wxImage img, bool ok)
-        : wxEvent(id, type), image(std::move(img)), success(ok) {}
+    ThumbnailEvent(wxEventType type, int id, wxImage img, bool ok, int gen)
+        : wxEvent(id, type), image(std::move(img)), success(ok), generation(gen) {}
 
-    // Required by wxWidgets event system
     wxEvent* Clone() const override { return new ThumbnailEvent(*this); }
 };
 
@@ -92,6 +92,7 @@ private:
     wxBitmap m_thumbnail;       // valid when loaded successfully
     bool     m_thumbLoading;    // true while the fetch thread is running
     bool     m_thumbFailed;     // true when fetch finished but failed
+    int      m_generation;      // incremented on each SetVideo/Clear to discard stale events
 
     // Hover / interaction state
     bool m_hovered;
