@@ -91,8 +91,55 @@ void AppController::handleLogin(const EventPayload& payload) {
         return;
     }
 
+    // Restore persisted Watch Later data onto the user object
+    std::list<Video> watchLater = dataManager->loadWatchLater(idIt->second);
+    if (!watchLater.empty()) {
+        YouTubeData yd;
+        yd.setWatchLaterVideos(watchLater);
+        user->setYouTubeData(yd);
+        appState.addSessionUser(*user);
+    }
+
     appState.setCurrentUser(new User(*user));
     std::cout << "[AppController] Logged in as '" << user->getUsername() << "'\n";
+
+    // Check if this user belongs to a previously saved blend
+    std::optional<std::string> blendID = dataManager->findBlendForUser(idIt->second);
+    if (!blendID.has_value()) return;
+
+    // Load all participants and rebuild their YouTubeData from the DB
+    std::vector<std::string> participantIDs = dataManager->loadBlendParticipants(*blendID);
+    std::list<User> participants;
+    for (const auto& uid : participantIDs) {
+        std::optional<User> p = dataManager->findUserByID(uid);
+        if (!p.has_value()) continue;
+        std::list<Video> pVideos = dataManager->loadWatchLater(uid);
+        if (!pVideos.empty()) {
+            YouTubeData pyd;
+            pyd.setWatchLaterVideos(pVideos);
+            p->setYouTubeData(pyd);
+            participants.push_back(*p);
+        }
+    }
+
+    if (participants.empty()) return; // no one has data yet — nothing to show
+
+    // Re-run the algorithm to produce a fresh blend from current persisted data
+    currentBlend = std::make_unique<Blend>(
+        RandomBlendAlgorithm(5).generateBlend(participants)
+    );
+    appState.setActiveBlend(currentBlend.get());
+    appState.createChatRoom(*currentBlend);
+
+    // If this user has no data, leave a message for LoginPanel to display
+    if (watchLater.empty()) {
+        appState.setPendingBlendMessage(
+            "You have been added to a blend. Upload your Watch Later "
+            "data to contribute your videos to it.");
+    }
+
+    std::cout << "[AppController] Restored blend '" << *blendID
+              << "' with " << currentBlend->size() << " videos\n";
 }
 
 void AppController::handleLogout(const EventPayload& payload) {
@@ -118,29 +165,41 @@ void AppController::handleUploadData(const EventPayload& payload) {
 
     std::list<Video> watchLater = WatchLaterParser(filePath).parse();
 
-    User user(userID, "", "", "");
-    YouTubeData yd;
-    yd.setWatchLaterVideos(watchLater);
-    user.setYouTubeData(yd);
+    // Persist the parsed videos to the DB so they survive logout
+    dataManager->saveWatchLater(userID, watchLater);
 
-    appState.addSessionUser(user);
-    std::cout << "[AppController] Loaded " << watchLater.size()
+    // Update the current user's in-memory YouTubeData
+    User* currentUser = appState.getCurrentUser();
+    if (currentUser && currentUser->getUserID() == userID) {
+        YouTubeData yd;
+        yd.setWatchLaterVideos(watchLater);
+        currentUser->setYouTubeData(yd);
+        appState.addSessionUser(*currentUser);
+    }
+
+    std::cout << "[AppController] Saved " << watchLater.size()
               << " watch-later videos for user '" << userID << "'\n";
-}
 
-void AppController::handleCreateBlend(const EventPayload& payload) {
-    std::map<std::string, User> sessionUsers = appState.getSessionUsers();
-    if (sessionUsers.empty()) {
-        std::cerr << "[AppController] handleCreateBlend: no session users loaded\n";
-        return;
-    }
+    // If this user is already a blend participant, re-run the algorithm
+    // so their data is included and the blend stays up to date
+    std::optional<std::string> blendID = dataManager->findBlendForUser(userID);
+    if (!blendID.has_value()) return;
 
+    std::vector<std::string> participantIDs = dataManager->loadBlendParticipants(*blendID);
     std::list<User> participants;
-    for (const auto& entry : sessionUsers) {
-        participants.push_back(entry.second);
+    for (const auto& uid : participantIDs) {
+        std::optional<User> p = dataManager->findUserByID(uid);
+        if (!p.has_value()) continue;
+        std::list<Video> pVideos = dataManager->loadWatchLater(uid);
+        if (!pVideos.empty()) {
+            YouTubeData pyd;
+            pyd.setWatchLaterVideos(pVideos);
+            p->setYouTubeData(pyd);
+            participants.push_back(*p);
+        }
     }
 
-    appState.setIsBlendGenerating(true);
+    if (participants.empty()) return;
 
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants)
@@ -148,6 +207,69 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
 
+    std::cout << "[AppController] Re-generated blend '" << *blendID
+              << "' after data upload — now " << currentBlend->size() << " videos\n";
+}
+
+void AppController::handleCreateBlend(const EventPayload& payload) {
+    // Collect participant userIDs from the payload (userID_0, userID_1, ...)
+    std::vector<std::string> allParticipantIDs;
+    for (int i = 0; ; ++i) {
+        auto it = payload.find("userID_" + std::to_string(i));
+        if (it == payload.end()) break;
+        allParticipantIDs.push_back(it->second);
+    }
+
+    if (allParticipantIDs.empty()) {
+        std::cerr << "[AppController] handleCreateBlend: no participant IDs in payload\n";
+        return;
+    }
+
+    // For each participant, load their data from the DB
+    std::list<User> participants;
+    std::vector<std::string> missingData;
+
+    for (const auto& uid : allParticipantIDs) {
+        std::optional<User> p = dataManager->findUserByID(uid);
+        if (!p.has_value()) {
+            std::cerr << "[AppController] handleCreateBlend: user '" << uid << "' not found\n";
+            missingData.push_back(uid);
+            continue;
+        }
+        std::list<Video> pVideos = dataManager->loadWatchLater(uid);
+        if (pVideos.empty()) {
+            missingData.push_back(uid);
+        } else {
+            YouTubeData pyd;
+            pyd.setWatchLaterVideos(pVideos);
+            p->setYouTubeData(pyd);
+            participants.push_back(*p);
+        }
+    }
+
+    // Report missing-data users back to the UI via AppState
+    appState.setUsersWithoutData(missingData);
+
+    if (participants.empty()) {
+        std::cerr << "[AppController] handleCreateBlend: no participants have data\n";
+        return;
+    }
+
+    appState.setIsBlendGenerating(true);
+
+    currentBlend = std::make_unique<Blend>(
+        RandomBlendAlgorithm(5).generateBlend(participants)
+    );
+
+    // Persist the blend and all requested participants (including those without
+    // data yet, so they are found on their next login)
+    User* creator = appState.getCurrentUser();
+    std::string creatorID = creator ? creator->getUserID() : allParticipantIDs[0];
+    dataManager->saveBlend(currentBlend->getBlendID(), creatorID,
+                           currentBlend->getAlgorithmUsed(), allParticipantIDs);
+
+    appState.setActiveBlend(currentBlend.get());
+    appState.createChatRoom(*currentBlend);
     appState.setIsBlendGenerating(false);
 
     std::cout << "[AppController] Blend created with "
