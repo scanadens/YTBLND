@@ -56,6 +56,28 @@ public:
     // Clears user list and resets to empty state.
     void Reload();
 
+    // Test-friendly accessors
+    #ifdef TESTING_MODE
+    const std::vector<std::string>& GetAddedUsersForTesting() const { 
+        return m_addedUsers; 
+    }
+    wxButton* GetCreateBtnForTesting() const { return m_createBtn; }
+    wxStaticText* GetCountLabelForTesting() const { return m_countLabel; }
+    void AddUserForTesting(const std::string& username) {
+        m_addedUsers.push_back(username);
+        RebuildUserList();
+        UpdateCountLabel();
+        if (m_addedUsers.size() >= 2) m_createBtn->Enable();
+    }
+    void RemoveUserForTesting(const std::string& username) {
+        OnRemoveUser(username);
+    }
+    void CallOnCreateForTesting() {
+        wxCommandEvent evt(wxEVT_BUTTON);
+        OnCreate(evt);
+    }
+    #endif
+
 private:
     AppController& m_controller;
     NavigateFn     m_nav;
