@@ -1,15 +1,18 @@
+/**
+ * \file HtmlParser.cpp
+ * \author Shamar Pennant
+ * \brief HTML file parser implementation using Gumbo
+ * 
+ * Implements the Parser interface for HTML files using the Gumbo HTML5 parser.
+ * Extracts HTML links and their text content into list<Dict<str,str>> format.
+ */
+
 #include "Parser.hpp"
 #include <gumbo.h>
 
 using namespace std;
 
-/**
- * \author Shamar Pennant
- * \brief Extracts information from raw html file contents and parses into a usuable ADT
- * 
- * With provided data, uses gumbo to parse HTML data into the adt list<dictionary<string,string>> 
- */
-
+/// HTML file parser implementation using Gumbo.
 class HtmlParser : public Parser {
 	public:
 		HtmlParser(list<string> raw_data) {this->raw_data = raw_data;}

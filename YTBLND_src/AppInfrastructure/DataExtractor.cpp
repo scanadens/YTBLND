@@ -1,5 +1,10 @@
 /**
+ * \file DataExtractor.cpp
  * \author Shamar Pennant
+ * \brief DataExtractor class implementation
+ * 
+ * Implements the DataExtractor class which coordinates FileSource and Parser
+ * objects to read and parse file data into structured format.
  */
 
 #include "DataExtractor.hpp"

@@ -8,23 +8,38 @@
 #include "File_ID.hpp"
 
 /**
+ * \file Parser.hpp
  * \author Shamar Pennant
- * \brief Parses a string into a list<Dict<str,str>> object based on file format
+ * \brief Abstract base class for parsing file data into structured format
+ * 
+ * Defines the interface for converting raw file data into a consistent
+ * list of dictionaries format (list<Dict<string,string>>). Each dictionary
+ * represents a row/entry with column headers as keys.
  */
+/// Abstract interface for parsing file data into structured format.
 class Parser {
 	public:
 		virtual ~Parser() = default;
 
 		/**
-		 * Uses the values passed on intantiation to parse raw file data as a 
-		 * list of unorded String to String dictionaries. Then each dictionary entry 
-		 * will be of the form <"col_title" : "row_contents">. Each dictionary 
-		 * entry within the list acts as a row/entry within the "table".
-		 * */
+		 * Parses raw file data into a structured list of dictionaries.
+		 * 
+		 * Converts raw file data configured via setData() into a list of unordered
+		 * string-to-string dictionaries. Each dictionary represents a row with
+		 * column titles as keys and row contents as values.
+		 * 
+		 * \return List of unordered maps representing parsed file rows
+		 */
 		virtual std::list<std::unordered_map <std::string, std::string>> parse() = 0;
 
-		/**Makes a copy of the parameter to this instance. Used for parse()*/
+		/** Sets the raw file data to be parsed by parse().
+		 * \param data List of strings containing raw file data
+		 */
 		virtual void setData(std::list<std::string> data) = 0;
+		
+		/** Gets the file format ID associated with this parser.
+		 * \return Integer ID representing the file format (e.g., File_ID::CSV)
+		 */
 		virtual int getParseId() = 0;
 
 	protected:

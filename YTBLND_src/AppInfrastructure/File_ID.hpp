@@ -1,10 +1,14 @@
 /**
+ * \file File_ID.hpp
  * \author Shamar Pennant
+ * \brief File format ID constants
  * 
- * Contains ID's for each file type (currently recognized)
+ * Defines static integer constants mapping file types to unique identifiers.
+ * Used to validate that FileSource and Parser objects are compatible.
  */
- #pragma once
+#pragma once
 
+/// File format ID constants for validating source-parser compatibility.
 class File_ID {
 	public:
 	static int const CSV = 1;

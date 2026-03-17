@@ -1,11 +1,17 @@
 /**
+ * \file CsvSource.cpp
  * \author Shamar Pennant
+ * \brief CSV file source/reader implementation
+ * 
+ * Implements the FileSource interface for reading CSV files.
+ * Reads file contents line-by-line and returns as list<string>.
  */
 
 #include "FileSource.hpp"
 
 using namespace std;
 
+/// CSV file source/reader implementation.
 class CsvSource : public FileSource {
 	public:
 		CsvSource(string src) {

@@ -1,12 +1,17 @@
 /**
+ * \file CsvParser.cpp
  * \author Shamar Pennant
- * \brief Parses csv file contents into a single string
+ * \brief CSV file parser implementation
+ * 
+ * Implements the Parser interface for CSV files. Parses comma-separated values
+ * into list<Dict<str,str>> format where the first row is treated as column headers.
  */
 
 #include "Parser.hpp"
 
 using namespace std;
 
+/// CSV file parser implementation.
 class CsvParser : public Parser {
 	public:
 		CsvParser() {}

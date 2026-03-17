@@ -1,15 +1,18 @@
+/**
+ * \file HtmlSource.cpp
+ * \author Shamar Pennant
+ * \brief HTML file source/reader implementation
+ * 
+ * Implements the FileSource interface for reading HTML files.
+ * Reads entire HTML file contents as a single string in list<string>.
+ * Note: Returns list with single item due to Gumbo parser requirements.
+ */
+
 #include "FileSource.hpp"
 
 using namespace std;
 
-/**
- * \author Shamar Pennant
- * \brief Pulls raw file contents from a HTML file
- * 
- * Pulls raw data from an HTML file. Works slightly differently compared to CsvSource. 
- * Due to it's dependency on gumbo, read() still returns a list<string> obj, but 
- * everything is placed as a single string -- and thus, list<string> only has one item
- */
+/// HTML file source/reader implementation.
 class HtmlSource : public FileSource {
 	public:
 		HtmlSource(std::string s) {src_path = s;}

@@ -1,0 +1,65 @@
+# Doxyfile for YTBLND Project - AppInfrastructure Layer Documentation
+# Generated for C++ documentation generation
+
+PROJECT_NAME           = "YTBLND"
+PROJECT_NUMBER         = "1.0"
+PROJECT_BRIEF          = "YouTube Blender - A content aggregation and blending application"
+
+OUTPUT_DIRECTORY       = build/doxygen_output
+INPUT                  = YTBLND_src/AppInfrastructure
+FILE_PATTERNS          = *.hpp *.cpp *.h
+
+RECURSIVE              = NO
+EXCLUDE_PATTERNS       = */tests/* */.git/*
+
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+FULL_PATH_NAMES        = NO
+STRIP_FROM_PATH        = YTBLND_src/
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = YES
+LATEX_OUTPUT           = latex
+
+HAVE_DOT               = YES
+DOT_PATH               = /usr/bin
+COLLABORATION_GRAPH    = YES
+
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+GENERATE_TODOLIST      = YES
+GENERATE_BUGLIST       = YES
+
+DOXYFILE_ENCODING      = UTF-8
+INPUT_ENCODING         = UTF-8
+
+QUIET                  = NO
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_NO_PARAMDOC       = YES
+
+ENABLE_PREPROCESSING   = YES
+PREDEFINED             = __cplusplus=201703L
+
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+
+USE_MDFILE_AS_MAINPAGE = 
+MARKDOWN_SUPPORT       = YES
+
+HIDE_SCOPE_NAMES       = NO
+SORT_MEMBER_DOCS       = YES
+SORT_BY_SCOPE_NAME     = NO
+
+VERBATIM_HEADERS       = NO
+CLANG_ASSISTED_PARSING = NO
+CLANG_OPTIONS          = 
+
+GENERATE_DOCSET        = NO
+
+CREATE_SUBDIRS         = NO
+OUTPUT_LANGUAGE        = English
+LAYOUT_FILE            = 
