@@ -18,12 +18,35 @@ Note* this is the core functionality and structure of our project as of February
 
 ```cpp
 YTBLEND/
-├── DataLayer/                 //Business logic
+├── AlgorithmLayer/           
+│   ├── BasicBlendAlgorithm
+│   ├── IBlendAlgorithm
+│   ├── RandomBlendAlgorithm
+│   ├── WeightedBlendAlgorithm
+├── AppInfrastructure/           
+│   ├── CsvParser
+│   ├── CsvSource
+│   ├── DataExtractor
+│   ├── DataSaver
+│   ├── FileBin
+│   ├── FileFormatter
+│   ├── FileSource
+│   ├── File_ID
+│   ├── HtmlParser
+│   ├── HtmlSource
+│   ├── Parser
+│   ├── WaterLaterParser
+├── ModelLayer/                 //Model logic
 │   ├── User.h/.cpp
 │   ├── YouTubeData.h/.cpp
 │   ├── Blend.h/.cpp
 │   ├── BlendAlgorithm.h/.cpp  //Single algorithm class to start
 │   └── DataManager.h/.cpp     //Handles file parsing andstorage
+├── ServiceLayer/           
+│   ├── DataManager
+│   ├── SqliteDataManager
+│   ├── StorageManager
+│   ├── YouTubeAPIService
 ├── UILayer/           
 │   ├── MainFrame.h/.cpp       //Main window
 │   ├── LoginPanel.h/.cpp
