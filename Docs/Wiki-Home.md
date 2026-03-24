@@ -35,7 +35,7 @@ Links to our documentation is listed as a glossary below.
 
 [Risks](Docs/Risks)
 
-[Prototype Documentation](Docs/Prototype_Details.md])
+[Prototype Documentation](Docs/Prototype_Details.md)
 
 [Other Notes](Docs/Other_Notes)
 
