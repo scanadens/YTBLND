@@ -51,8 +51,6 @@ YTBLEND/
 │   ├── MainFrame.h/.cpp       //Main window
 │   ├── LoginPanel.h/.cpp
 │   ├── BlendPanel.h/.cpp      //Video feed display
-│   ├── FriendsPanel.h/.cpp    //Optional 
-│   ├── ChatroomPanel.h/.cpp   //Optional
 │   └── SettingsPanel.h/.cpp
 └── AppLayer/                  //Glue between interface and business logic
     ├── AppController.h/.cpp   //Coordinates everything
