@@ -45,4 +45,4 @@ Links to our documentation is listed as a glossary below.
 
 # Design and UI
 
-[Mock Product Design](Product_design.md)
+[Mock Product Design](/Docs/Product_Design.md)
