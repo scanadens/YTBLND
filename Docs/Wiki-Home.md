@@ -45,4 +45,6 @@ Links to our documentation is listed as a glossary below.
 
 # Design and UI
 
+[Page Flow and Validations](Docs/Page_Flow_and_Validations.md)
+
 [Mock Product Design](/Docs/Product_Design.md)
