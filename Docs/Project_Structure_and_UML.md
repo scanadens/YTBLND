@@ -39,4 +39,4 @@ YTBLEND/
 
 # UML Class Diagram (core functionality only)
 
-![YT-BLND-UML.drawio.svg](YT-BLND-uml-diag.drawio.svg)
+![YT-BLND-UML.drawio.svg](Docs/Resources/YT-BLND-uml-diag.drawio.svg)
