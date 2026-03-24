@@ -41,7 +41,7 @@ Links to our documentation is listed as a glossary below.
 
 [User Stories](Docs/User_Stories)
 
-[Project Structure](Docs/Project_Structure_and_UML.md)
+[Project Structure and UML](Docs/Project_Structure_and_UML.md)
 
 # Design and UI
 
