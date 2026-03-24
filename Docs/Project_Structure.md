@@ -1,4 +1,4 @@
-# Project Structure
+# Project Structure and UML
 
 <aside>
 <img src="https://www.notion.so/icons/pencil_purple.svg" alt="https://www.notion.so/icons/pencil_purple.svg" width="40px" />
