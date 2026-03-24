@@ -37,7 +37,7 @@ protected:
     NiceMock<MockEventRouter> mockRouter;
     BlendCreationPanel* panel = nullptr;
     bool navCalled = false;
-    int navPage = -1;
+    int navPage = Page::LOGIN;
 
     static void SetUpTestSuite() {
         if (!wxTheApp) {
@@ -53,7 +53,7 @@ protected:
         EXPECT_CALL(mockController, getEventRouter)
             .WillRepeatedly(::testing::ReturnRef(mockRouter));
 
-        auto navFn = [this](int page) {
+        auto navFn = [this](Page page) {
             navCalled = true;
             navPage = page;
         };

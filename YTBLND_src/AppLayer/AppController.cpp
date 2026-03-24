@@ -1,14 +1,15 @@
 #include "AppController.h"
-#include "../AppInfrastructure/WatchLaterParser.hpp"
+#include "../AppInfrastructure/YouTubeDataImporter.hpp"
 #include "../AlgorithmLayer/RandomBlendAlgorithm.h"
+#include <exception>
 #include <iostream>
 #include <list>
 
 // ── Constructor / Destructor ──────────────────────────────────────────────────
 
-AppController::AppController()
+AppController::AppController(const std::string& dbPath)
     : appState(AppState::getInstance()),
-      dataManager(std::make_unique<SqliteDataManager>("ytblnd.db"))
+      dataManager(std::make_unique<SqliteDataManager>(dbPath))
 {
     registerEvents();
 }
@@ -163,7 +164,14 @@ void AppController::handleUploadData(const EventPayload& payload) {
     const std::string& filePath = fileIt->second;
     const std::string& userID   = userIt->second;
 
-    std::list<Video> watchLater = WatchLaterParser(filePath).parse();
+    std::list<Video> watchLater;
+    try {
+        watchLater = YouTubeDataImporter().import(filePath);
+    } catch (const std::exception& ex) {
+        std::cerr << "[AppController] handleUploadData: import failed for '"
+                  << filePath << "' - " << ex.what() << "\n";
+        return;
+    }
 
     // Persist the parsed videos to the DB so they survive logout
     dataManager->saveWatchLater(userID, watchLater);

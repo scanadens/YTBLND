@@ -38,7 +38,9 @@ class AppController {
     public:
         // Initialises AppState (singleton), EventRouter, and stub backend classes.
         // Registers all event listeners.
-        AppController();
+        // dbPath defaults to ytblnd.db for normal app runtime, but tests can
+        // pass an isolated file path to avoid cross-test data leakage.
+        explicit AppController(const std::string& dbPath = "ytblnd.db");
 
         // Persists any unsaved changes, deregisters all EventRouter listeners,
         // and releases backend resources.

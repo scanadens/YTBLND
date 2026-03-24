@@ -1,59 +1,42 @@
-/**
- * \file CsvSource.cpp
- * \author Shamar Pennant
- * \brief CSV file source/reader implementation
- * 
- * Implements the FileSource interface for reading CSV files.
- * Reads file contents line-by-line and returns as list<string>.
- */
 
-#include "FileSource.hpp"
+
+#include "CsvSource.hpp"
 
 using namespace std;
 
-/// CSV file source/reader implementation.
-class CsvSource : public FileSource {
-	public:
-		CsvSource(string src) {
+CsvSource::CsvSource(string src) : src(src) {
+	source_id = File_ID::CSV;
+}
 
-			this-> src = src;
-		}
-		~CsvSource() override = default;
+list<string> CsvSource::read() {
+	if (src.empty()) { // in the event that src is empty
+		cerr << "error: src string is empty in CsvSource";
+		exit(1);
+	} 
 
-		list<string> read() override {
-			if (src.empty()) { // in the event that src is empty
-				cerr << "error: src string is empty in CsvSource";
-				exit(1);
-			} 
+	// returned string container
+	list<string> ret;
 
-			// returned string container
-			list<string> ret;
+	// creating (in) file stream with given file source path
+	fstream read_file_in(src, ios::in);
+	if (!read_file_in.is_open()) {
+		cerr << "unable to open " << src << " within CsvSource" << endl;
+		exit(1);
+	}
 
-			// creating (in) file stream with given file source path
-			fstream read_file_in(src, ios::in);
-			if (!read_file_in.is_open()) {
-				cerr << "unable to open " << src << " within CsvSource" << endl;
-				exit(1);
-			}
+	if (!read_file_in.is_open()) {
+		cerr << "error: could not open file: " << src;
+		exit(1);
+	}
 
-			if (!read_file_in.is_open()) {
-				cerr << "error: could not open file: " << src;
-				exit(1);
-			}
+	// holds file line
+	string line = "";
 
-			// holds file line
-			string line = "";
+	// reading the opened file stream into a temporary string
+	while (getline(read_file_in, line)) {ret.push_back(line);}
 
-			// reading the opened file stream into a temporary string
-			while (getline(read_file_in, line)) {ret.push_back(line);}
+	return ret;
+}
 
-			return ret;
-		}
-
-		void setSource(string src) override {this->src = src;}
-		int getSourceId() override {return source_id;}
-
-	private:
-		string src = ""; // holds the file path
-		int source_id = File_ID::CSV; // holds this objects id to match with a Parser object
-};
+void CsvSource::setSource(string src) {this->src = src;}
+int CsvSource::getSourceId() {return source_id;}

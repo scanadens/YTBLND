@@ -1,4 +1,7 @@
 #include "gtest/gtest.h"
+#include <atomic>
+#include <chrono>
+#include <filesystem>
 #include "../ServiceLayer/SqliteDataManager.h"
 #include "../AppLayer/AppController.h"
 #include "../AppLayer/AppState.h"
@@ -15,6 +18,19 @@ static User makeUser(const std::string& id = "u1",
                      const std::string& email    = "alice@example.com",
                      const std::string& password = "secret") {
     return User(id, username, email, password);
+}
+
+static std::string uniqueUserId(const std::string& prefix) {
+    static std::atomic<unsigned long long> counter{0};
+    const auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+    const auto ticks = std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
+    // Time + counter avoids collisions both within and across test runs.
+    return prefix + "_" + std::to_string(ticks) + "_" + std::to_string(++counter);
+}
+
+static std::string uniqueDbPath(const std::string& prefix) {
+    const std::filesystem::path base = std::filesystem::temp_directory_path();
+    return (base / (uniqueUserId(prefix) + ".db")).string();
 }
 
 // ── SqliteDataManager tests ───────────────────────────────────────────────────
@@ -70,7 +86,13 @@ TEST(SqliteDataManagerTest, ValidatePassword_UnknownUser_ReturnsFalse) {
 
 class AppControllerAuthTest : public ::testing::Test {
 protected:
+    std::string dbPath;
+
     void SetUp() override {
+        // Each test gets a private SQLite file so repeated runs and parallel
+        // runs never reuse rows from previous executions.
+        dbPath = uniqueDbPath("ytblnd_auth_test");
+
         // Clear any leftover session state from previous tests
         AppState& state = AppState::getInstance();
         if (state.getCurrentUser()) {
@@ -87,26 +109,32 @@ protected:
             state.setCurrentUser(nullptr);
         }
         state.clearSession();
+
+        // Best-effort cleanup for the per-test DB file.
+        std::error_code ec;
+        std::filesystem::remove(dbPath, ec);
     }
 };
 
 TEST_F(AppControllerAuthTest, Register_SetsCurrentUser) {
-    AppController ctrl;
+    AppController ctrl(dbPath);
+    const std::string userID = uniqueUserId("test_reg_user");
     ctrl.getEventRouter().dispatch("register", {
-        {"userID",   "test_reg_user"},
+        {"userID",   userID},
         {"username", "Tester"},
         {"email",    "test@example.com"},
         {"password", "pass123"}
     });
-    EXPECT_NE(nullptr, AppState::getInstance().getCurrentUser());
-    EXPECT_EQ("test_reg_user", AppState::getInstance().getCurrentUser()->getUserID());
+    ASSERT_NE(nullptr, AppState::getInstance().getCurrentUser());
+    EXPECT_EQ(userID, AppState::getInstance().getCurrentUser()->getUserID());
 }
 
 TEST_F(AppControllerAuthTest, Login_ValidCredentials_SetsCurrentUser) {
     // Register first so the account exists
-    AppController ctrl;
+    AppController ctrl(dbPath);
+    const std::string userID = uniqueUserId("test_login_user");
     ctrl.getEventRouter().dispatch("register", {
-        {"userID",   "test_login_user"},
+        {"userID",   userID},
         {"username", "LoginTester"},
         {"email",    ""},
         {"password", "mypassword"}
@@ -119,19 +147,20 @@ TEST_F(AppControllerAuthTest, Login_ValidCredentials_SetsCurrentUser) {
     }
 
     ctrl.getEventRouter().dispatch("login", {
-        {"userID",   "test_login_user"},
+        {"userID",   userID},
         {"password", "mypassword"}
     });
 
     ASSERT_NE(nullptr, AppState::getInstance().getCurrentUser());
-    EXPECT_EQ("test_login_user",
+    EXPECT_EQ(userID,
               AppState::getInstance().getCurrentUser()->getUserID());
 }
 
 TEST_F(AppControllerAuthTest, Login_WrongPassword_DoesNotSetUser) {
-    AppController ctrl;
+    AppController ctrl(dbPath);
+    const std::string userID = uniqueUserId("test_pw_user");
     ctrl.getEventRouter().dispatch("register", {
-        {"userID", "test_pw_user"}, {"username", "PWUser"},
+        {"userID", userID}, {"username", "PWUser"},
         {"email", ""}, {"password", "right"}
     });
     if (AppState::getInstance().getCurrentUser()) {
@@ -140,15 +169,16 @@ TEST_F(AppControllerAuthTest, Login_WrongPassword_DoesNotSetUser) {
     }
 
     ctrl.getEventRouter().dispatch("login", {
-        {"userID", "test_pw_user"}, {"password", "wrong"}
+        {"userID", userID}, {"password", "wrong"}
     });
     EXPECT_EQ(nullptr, AppState::getInstance().getCurrentUser());
 }
 
 TEST_F(AppControllerAuthTest, Logout_ClearsCurrentUser) {
-    AppController ctrl;
+    AppController ctrl(dbPath);
+    const std::string userID = uniqueUserId("test_logout_user");
     ctrl.getEventRouter().dispatch("register", {
-        {"userID", "test_logout_user"}, {"username", "LogoutUser"},
+        {"userID", userID}, {"username", "LogoutUser"},
         {"email", ""}, {"password", "pw"}
     });
     ASSERT_NE(nullptr, AppState::getInstance().getCurrentUser());
