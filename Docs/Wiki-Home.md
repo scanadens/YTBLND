@@ -29,19 +29,19 @@ Links to our documentation is listed as a glossary below.
 
 ## Proposal Documentation
 
-[Description](Description)
+[Description](Docs/Description)
 
-[Feature List](Feature_List)
+[Feature List](Docs/Feature_List)
 
-[Risks](Risks)
+[Risks](Docs/Risks)
 
-[Other Notes](Other_Notes)
+[Other Notes](Docs/Other_Notes)
 
 ## Requirements Formalization
 
-[User Stories](User_Stories)
+[User Stories](Docs/User_Stories)
 
-[Project Structure](Project_Structure)
+[Project Structure](Docs/Project_Structure_and_UML.md)
 
 # Design and UI
 
