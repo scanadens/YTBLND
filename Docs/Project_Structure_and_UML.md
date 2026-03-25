@@ -41,7 +41,13 @@ YTBLEND/
 │   ├── YouTubeData.h/.cpp
 │   ├── Blend.h/.cpp
 │   ├── BlendAlgorithm.h/.cpp  //Single algorithm class to start
-│   └── DataManager.h/.cpp     //Handles file parsing andstorage
+│   ├── DataManager.h/.cpp     //Handles file parsing andstorage
+│   ├── Channel
+│   ├── ChatRoom
+│   ├── Friend
+│   ├── Message
+│   ├── Video
+│   └── VideoEntry  
 ├── ServiceLayer/           
 │   ├── DataManager
 │   ├── SqliteDataManager
