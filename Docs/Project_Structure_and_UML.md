@@ -3,14 +3,12 @@
 <aside>
 <img src="https://www.notion.so/icons/pencil_purple.svg" alt="https://www.notion.so/icons/pencil_purple.svg" width="40px" />
 
-Author: Jasmine Kumar
+Author: Jasmine Kumar, Xavier Lusetti
 
 </aside>
 
 <aside>
 <img src="https://www.notion.so/icons/alert_orange.svg" alt="https://www.notion.so/icons/alert_orange.svg" width="40px" />
-
-Note* this is the core functionality and structure of our project as of February 11, 2026. Is subject to change
 
 </aside>
 
