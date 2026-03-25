@@ -57,7 +57,17 @@ YTBLEND/
 │   ├── MainFrame.h/.cpp       //Main window
 │   ├── LoginPanel.h/.cpp
 │   ├── BlendPanel.h/.cpp      //Video feed display
-│   └── SettingsPanel.h/.cpp
+│   ├── SettingsPanel.h/.cpp
+│   ├── BlendChatPanel
+│   ├── BlendCreationPanel
+│   ├── BlendFeedPanel
+│   ├── ConfirmationDialog
+│   ├── DataInstructionsPanel
+│   ├── TopBar
+│   ├── UIColors
+│   ├── UIPages
+│   ├── UserPanel
+│   └── VideoCard  
 └── AppLayer/                  //Glue between interface and business logic
     ├── AppController.h/.cpp   //Coordinates everything
     ├── AppState.h/.cpp        //Current app state (user, blend, etc.)
