@@ -12,7 +12,7 @@ Author: Jasmine Kumar, Xavier Lusetti
 
 </aside>
 
-# Initial Class Structure
+# Class Structure
 
 ```cpp
 YTBLEND/
@@ -72,6 +72,6 @@ YTBLEND/
     └── EventRouter             //Simple event system
 ```
 
-# UML Class Diagram (core functionality only)
+# UML Class Diagram
 
 ![YT-BLND-UML.drawio.svg](Docs/Resources/YT-BLND-uml-diag.drawio.svg)
