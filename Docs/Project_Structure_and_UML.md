@@ -33,7 +33,7 @@ YTBLEND/
 │   ├── HtmlParser
 │   ├── HtmlSource
 │   ├── Parser
-│   ├── WaterLaterParser
+│   ├── WatchLaterParser
 ├── ModelLayer/                 //Model logic
 │   ├── User.h/.cpp
 │   ├── YouTubeData.h/.cpp
