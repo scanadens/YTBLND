@@ -35,11 +35,11 @@ YTBLEND/
 │   ├── Parser
 │   ├── WatchLaterParser
 ├── ModelLayer/                 //Model logic
-│   ├── User.h/.cpp
-│   ├── YouTubeData.h/.cpp
-│   ├── Blend.h/.cpp
-│   ├── BlendAlgorithm.h/.cpp  //Single algorithm class to start
-│   ├── DataManager.h/.cpp     //Handles file parsing andstorage
+│   ├── User
+│   ├── YouTubeData
+│   ├── Blend
+│   ├── BlendAlgorithm          //Single algorithm class to start
+│   ├── DataManager             //Handles file parsing andstorage
 │   ├── Channel
 │   ├── ChatRoom
 │   ├── Friend
@@ -52,10 +52,10 @@ YTBLEND/
 │   ├── StorageManager
 │   ├── YouTubeAPIService
 ├── UILayer/           
-│   ├── MainFrame.h/.cpp       //Main window
-│   ├── LoginPanel.h/.cpp
-│   ├── BlendPanel.h/.cpp      //Video feed display
-│   ├── SettingsPanel.h/.cpp
+│   ├── MainFrame               //Main window
+│   ├── LoginPanel
+│   ├── BlendChatPanel          //Video feed display
+│   ├── SettingsPanel
 │   ├── BlendChatPanel
 │   ├── BlendCreationPanel
 │   ├── BlendFeedPanel
@@ -66,10 +66,10 @@ YTBLEND/
 │   ├── UIPages
 │   ├── UserPanel
 │   └── VideoCard  
-└── AppLayer/                  //Glue between interface and business logic
-    ├── AppController.h/.cpp   //Coordinates everything
-    ├── AppState.h/.cpp        //Current app state (user, blend, etc.)
-    └── EventRouter.h/.cpp     //Simple event system
+└── AppLayer/                   //Glue between interface and business logic
+    ├── AppController           //Coordinates everything
+    ├── AppState                //Current app state (user, blend, etc.)
+    └── EventRouter             //Simple event system
 ```
 
 # UML Class Diagram (core functionality only)
