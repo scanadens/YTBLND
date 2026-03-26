@@ -20,7 +20,7 @@ YTBLEND/
 │   ├── BasicBlendAlgorithm
 │   ├── IBlendAlgorithm
 │   ├── RandomBlendAlgorithm
-│   ├── WeightedBlendAlgorithm
+│   └── WeightedBlendAlgorithm
 ├── AppInfrastructure/           
 │   ├── CsvParser
 │   ├── CsvSource
@@ -34,6 +34,8 @@ YTBLEND/
 │   ├── HtmlSource
 │   ├── Parser
 │   ├── WatchLaterParser
+│   ├── WatchHistoryParser
+│   └── YouTubeDataImporter  
 ├── ModelLayer/                 //Model logic
 │   ├── User
 │   ├── YouTubeData
@@ -50,7 +52,7 @@ YTBLEND/
 │   ├── DataManager
 │   ├── SqliteDataManager
 │   ├── StorageManager
-│   ├── YouTubeAPIService
+│   └── YouTubeAPIService
 ├── UILayer/           
 │   ├── MainFrame               //Main window
 │   ├── LoginPanel
