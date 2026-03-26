@@ -11,7 +11,7 @@
 /// File format ID constants for validating source-parser compatibility.
 class File_ID {
 	public:
-	static int const CSV = 1;
-	static int const HTML = 2;
-	static int const JSON = 3;
+	static constexpr int CSV = 1;
+	static constexpr int HTML = 2;
+	static constexpr int JSON = 3;
 };
