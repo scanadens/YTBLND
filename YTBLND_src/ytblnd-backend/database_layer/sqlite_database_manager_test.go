@@ -132,4 +132,29 @@ func TestSqliteDataManager_BlendFlow(t *testing.T) {
 	if !reflect.DeepEqual(loaded, want) {
 		t.Fatalf("LoadBlendParticipants() = %v, want %v", loaded, want)
 	}
+
+	chatRoomID, err := mgr.GetChatRoomForBlend("b-1")
+	if err != nil {
+		t.Fatalf("GetChatRoomForBlend() error = %v", err)
+	}
+	if chatRoomID != "b-1" {
+		t.Fatalf("GetChatRoomForBlend() = %q, want %q", chatRoomID, "b-1")
+	}
+
+	isMember, err := mgr.IsChatRoomMember("b-1", "u-2")
+	if err != nil {
+		t.Fatalf("IsChatRoomMember() error = %v", err)
+	}
+	if !isMember {
+		t.Fatalf("IsChatRoomMember() = false, want true")
+	}
+
+	chatMembers, err := mgr.LoadChatRoomMembers("b-1")
+	if err != nil {
+		t.Fatalf("LoadChatRoomMembers() error = %v", err)
+	}
+	sort.Strings(chatMembers)
+	if !reflect.DeepEqual(chatMembers, want) {
+		t.Fatalf("LoadChatRoomMembers() = %v, want %v", chatMembers, want)
+	}
 }

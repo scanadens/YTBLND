@@ -28,4 +28,14 @@ type DataManager interface {
 
 	// LoadBlendParticipants returns all user IDs currently linked to a blend.
 	LoadBlendParticipants(blendID string) ([]string, error)
+
+	// GetChatRoomForBlend returns the chat room ID attached to a blend.
+	// Empty string means no chat room exists for that blend.
+	GetChatRoomForBlend(blendID string) (string, error)
+
+	// IsChatRoomMember reports whether a user is a member of a chat room.
+	IsChatRoomMember(chatRoomID, userID string) (bool, error)
+
+	// LoadChatRoomMembers returns all members assigned to a chat room.
+	LoadChatRoomMembers(chatRoomID string) ([]string, error)
 }

@@ -10,6 +10,7 @@ import (
 )
 
 type SqliteDatabaseManager struct {
+	// db is the shared SQLite handle used by all manager methods.
 	db *sql.DB
 }
 
@@ -60,6 +61,18 @@ func (m *SqliteDatabaseManager) initSchema() error {
         user_id TEXT NOT NULL,
         PRIMARY KEY (blend_id, user_id)
     );
+
+	CREATE TABLE IF NOT EXISTS chat_rooms (
+		chat_room_id TEXT PRIMARY KEY,
+		blend_id TEXT NOT NULL UNIQUE,
+		created_at TEXT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS chat_room_members (
+		chat_room_id TEXT NOT NULL,
+		user_id TEXT NOT NULL,
+		PRIMARY KEY (chat_room_id, user_id)
+	);
     `
 	_, err := m.db.Exec(schema)
 	return err
@@ -250,6 +263,33 @@ func (m *SqliteDatabaseManager) SaveBlend(blendID, creatorID, algorithm string, 
 		}
 	}
 
+	// Keep one chat room attached to each blend.
+	if _, err := tx.Exec(`
+        INSERT OR IGNORE INTO chat_rooms (chat_room_id, blend_id, created_at)
+        VALUES (?, ?, ?);
+    `, blendID, blendID, createdAt); err != nil {
+		return fmt.Errorf("save blend upsert chat room: %w", err)
+	}
+
+	if _, err := tx.Exec(`DELETE FROM chat_room_members WHERE chat_room_id = ?;`, blendID); err != nil {
+		return fmt.Errorf("save blend delete chat room members: %w", err)
+	}
+
+	membersStmt, err := tx.Prepare(`
+        INSERT OR IGNORE INTO chat_room_members (chat_room_id, user_id)
+        VALUES (?, ?);
+    `)
+	if err != nil {
+		return fmt.Errorf("save blend prepare chat room members: %w", err)
+	}
+	defer membersStmt.Close()
+
+	for _, userID := range participants {
+		if _, err := membersStmt.Exec(blendID, userID); err != nil {
+			return fmt.Errorf("save blend insert chat room member: %w", err)
+		}
+	}
+
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("save blend commit: %w", err)
 	}
@@ -336,4 +376,88 @@ func (m *SqliteDatabaseManager) LoadBlendParticipants(blendID string) ([]string,
 	}
 
 	return participants, nil
+}
+
+// GetChatRoomForBlend returns the chat room ID attached to a blend.
+func (m *SqliteDatabaseManager) GetChatRoomForBlend(blendID string) (string, error) {
+	if m.db == nil {
+		return "", errors.New("database is not initialized")
+	}
+
+	const query = `
+        SELECT chat_room_id
+        FROM chat_rooms
+        WHERE blend_id = ?
+        LIMIT 1;
+    `
+
+	var chatRoomID string
+	err := m.db.QueryRow(query, blendID).Scan(&chatRoomID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", nil
+		}
+		return "", fmt.Errorf("get chat room for blend: %w", err)
+	}
+
+	return chatRoomID, nil
+}
+
+// IsChatRoomMember reports whether a user belongs to a chat room.
+func (m *SqliteDatabaseManager) IsChatRoomMember(chatRoomID, userID string) (bool, error) {
+	if m.db == nil {
+		return false, errors.New("database is not initialized")
+	}
+
+	const query = `
+        SELECT 1
+        FROM chat_room_members
+        WHERE chat_room_id = ? AND user_id = ?
+        LIMIT 1;
+    `
+
+	var exists int
+	err := m.db.QueryRow(query, chatRoomID, userID).Scan(&exists)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, fmt.Errorf("is chat room member: %w", err)
+	}
+
+	return true, nil
+}
+
+// LoadChatRoomMembers returns all user IDs assigned to a chat room.
+func (m *SqliteDatabaseManager) LoadChatRoomMembers(chatRoomID string) ([]string, error) {
+	if m.db == nil {
+		return nil, errors.New("database is not initialized")
+	}
+
+	const query = `
+        SELECT user_id
+        FROM chat_room_members
+        WHERE chat_room_id = ?;
+    `
+
+	rows, err := m.db.Query(query, chatRoomID)
+	if err != nil {
+		return nil, fmt.Errorf("load chat room members query: %w", err)
+	}
+	defer rows.Close()
+
+	members := make([]string, 0)
+	for rows.Next() {
+		var userID string
+		if err := rows.Scan(&userID); err != nil {
+			return nil, fmt.Errorf("load chat room members scan: %w", err)
+		}
+		members = append(members, userID)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("load chat room members rows: %w", err)
+	}
+
+	return members, nil
 }
