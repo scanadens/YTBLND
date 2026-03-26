@@ -1,17 +1,29 @@
 #include "gtest/gtest.h"
 
+#include "../AppInfrastructure/WatchHistoryParser.hpp"
 #include "../AppInfrastructure/WatchLaterParser.hpp"
+#include "../AppInfrastructure/YouTubeDataImporter.hpp"
 #include "../AlgorithmLayer/RandomBlendAlgorithm.h"
 #include "../ModelLayer/User.h"
 #include "../ModelLayer/YouTubeData.h"
 #include "../ModelLayer/Blend.h"
 
 #include <list>
+#include <stdexcept>
 #include <string>
+
+#ifndef YTBLND_SRC_DIR
+#define YTBLND_SRC_DIR "."
+#endif
 
 // Synthetic fixture — does not contain personal data
 static const std::string WATCH_LATER_CSV =
-    YTBLND_SRC_DIR "/tests/fixtures/Watch later-videos.csv";
+    // Use the committed fixture filename exactly as it appears in the repo.
+    YTBLND_SRC_DIR "/tests/fixtures/jas_watch_later-videos.csv";
+
+// Synthetic fixture — does not contain personal data
+static const std::string WATCH_HISTORY_HTML =
+    YTBLND_SRC_DIR "/tests/fixtures/shamar_sample_watch-history.html";
 
 // ── WatchLaterParser ──────────────────────────────────────────────────────────
 
@@ -34,6 +46,37 @@ TEST(WatchLaterParserTest, NonIDFieldsAreEmpty) {
     EXPECT_TRUE(first.getTitle().empty());
     EXPECT_TRUE(first.getChannelID().empty());
     EXPECT_EQ(0, first.getDuration());
+}
+
+// ── WatchHistoryParser ────────────────────────────────────────────────────────
+
+TEST(WatchHistoryParserTest, ParsesNonEmptyList) {
+    std::list<Video> videos = WatchHistoryParser(WATCH_HISTORY_HTML).parse();
+    EXPECT_FALSE(videos.empty()) << "Expected at least one video in watch-history HTML";
+}
+
+TEST(WatchHistoryParserTest, EachVideoHasNonEmptyID) {
+    std::list<Video> videos = WatchHistoryParser(WATCH_HISTORY_HTML).parse();
+    for (const Video& v : videos) {
+        EXPECT_FALSE(v.getVideoID().empty()) << "Found a Video with an empty videoID";
+    }
+}
+
+// ── YouTubeDataImporter ───────────────────────────────────────────────────────
+
+TEST(YouTubeDataImporterTest, ImportsCsvAndHtmlFixtures) {
+    YouTubeDataImporter importer;
+
+    std::list<Video> csvVideos = importer.import(WATCH_LATER_CSV);
+    std::list<Video> htmlVideos = importer.import(WATCH_HISTORY_HTML);
+
+    EXPECT_FALSE(csvVideos.empty());
+    EXPECT_FALSE(htmlVideos.empty());
+}
+
+TEST(YouTubeDataImporterTest, ThrowsOnUnsupportedExtension) {
+    YouTubeDataImporter importer;
+    EXPECT_THROW(importer.import("fixtures/not_supported.txt"), std::invalid_argument);
 }
 
 // ── RandomBlendAlgorithm ──────────────────────────────────────────────────────
