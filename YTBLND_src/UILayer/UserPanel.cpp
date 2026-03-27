@@ -10,7 +10,7 @@
 #include "UIPages.h"
 #include "TopBar.h"
 #include "ConfirmationDialog.h"
-#include "../AppLayer/AppController.h"
+#include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.h"
 #include "../AppLayer/EventRouter.h"
 #include "../ModelLayer/User.h"

@@ -1,4 +1,4 @@
-#include "AppController.h"
+#include "AppController.hpp"
 #include "../AppInfrastructure/YouTubeDataImporter.hpp"
 #include "../AlgorithmLayer/RandomBlendAlgorithm.h"
 #include <exception>

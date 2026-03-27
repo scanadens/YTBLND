@@ -3,7 +3,7 @@
 #include <chrono>
 #include <filesystem>
 #include "../ServiceLayer/SqliteDataManager.h"
-#include "../AppLayer/AppController.h"
+#include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.h"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

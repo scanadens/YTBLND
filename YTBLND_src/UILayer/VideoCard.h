@@ -46,7 +46,7 @@
 #include <wx/graphics.h>
 
 #include "../ModelLayer/Video.h"
-#include "../AppLayer/AppController.h"
+#include "../AppLayer/AppController.hpp"
 
 // ---------------------------------------------------------------------------
 // Custom event: fired on the VideoCard when the async thumbnail fetch finishes

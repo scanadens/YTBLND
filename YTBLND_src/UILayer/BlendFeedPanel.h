@@ -28,7 +28,7 @@
 #include <wx/wx.h>
 
 #include "VideoCard.h"
-#include "../AppLayer/AppController.h"
+#include "../AppLayer/AppController.hpp"
 
 class BlendFeedPanel : public wxPanel {
 public:

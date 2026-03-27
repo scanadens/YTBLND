@@ -8,7 +8,7 @@
 #include <wx/statline.h>
 
 #include "UIColors.h"
-#include "../AppLayer/AppController.h"
+#include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.h"
 #include "../AppLayer/EventRouter.h"
 #include "../ModelLayer/User.h"

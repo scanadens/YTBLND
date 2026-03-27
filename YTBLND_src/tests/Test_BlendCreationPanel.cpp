@@ -3,7 +3,7 @@
 #include <wx/app.h>
 #include <wx/frame.h>
 #include "../UILayer/BlendCreationPanel.h"
-#include "../AppLayer/AppController.h"
+#include "../AppLayer/AppController.hpp"
 #include "../AppLayer/EventRouter.h"
 
 using ::testing::_;

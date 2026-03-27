@@ -1,5 +1,5 @@
-#ifndef APPCONTROLLER_H
-#define APPCONTROLLER_H
+#ifndef APPCONTROLLER_HPP
+#define APPCONTROLLER_HPP
 
 #include <memory>
 #include <string>

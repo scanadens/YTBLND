@@ -19,7 +19,7 @@
 #include "UserPanel.h"
 #include "BlendCreationPanel.h"
 #include "BlendChatPanel.h"
-#include "../AppLayer/AppController.h"
+#include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.h"
 
 // ── Construction ─────────────────────────────────────────────────────────────

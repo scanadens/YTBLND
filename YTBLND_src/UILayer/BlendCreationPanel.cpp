@@ -11,7 +11,7 @@
 #include "UIColors.h"
 #include "UIPages.h"
 #include "TopBar.h"
-#include "../AppLayer/AppController.h"
+#include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.h"
 #include "../AppLayer/EventRouter.h"
 

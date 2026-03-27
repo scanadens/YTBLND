@@ -15,7 +15,7 @@
 #include <wx/socket.h>
 
 #include "UILayer/MainFrame.h"
-#include "AppLayer/AppController.h"
+#include "AppLayer/AppController.hpp"
 
 class YTBLNDApp : public wxApp {
 public:

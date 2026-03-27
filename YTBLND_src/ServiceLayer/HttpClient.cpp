@@ -1,0 +1,93 @@
+/**
+ * test implementation of http client wrapper for centralized use.
+ * should act as a singleton within each app instace to avoid 
+ * deadlocks or livelocks
+ */
+
+#include "HttpClient.hpp"
+
+#include <stdexcept>
+
+using namespace std;
+
+HttpClient::HttpClient(string base) {
+	baseUrl = move(base);
+}
+
+string HttpClient::get(const string& path) {
+	return request(G, path, "");
+}
+
+string HttpClient::post(const string& path, const string& json) {
+	return request(P, path, json);
+}
+
+string HttpClient::request(const string& method, const string& path, const string&body) {
+	// grabbing a new curl object
+	CURL* curl = curl_easy_init();
+	if (!curl) {
+		throw runtime_error("HttpClient failed to initialize CURL handle");
+	}
+
+	// string containing the response from the HTTP method
+	string response;
+	// full path to endpoint
+	const string fullUrl = baseUrl + path;
+
+	// --- setting up curl for requests ---
+
+	// instruct curl where to send the the request
+	curl_easy_setopt(curl, CURLOPT_URL, fullUrl.c_str());
+	// curl doesnt return the call directly, so we need write_callback()
+	// before being able to grabe the response
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+
+	// create the header for our request (following curl design patterns)
+	struct curl_slist* headers = nullptr;
+	headers = curl_slist_append(headers, hdr.c_str());
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+	
+
+	// --- handling given method ---
+	if (method == P) { // POST
+		// send the given body
+		curl_easy_setopt(curl, CURLOPT_POST, 1L);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(body.size()));
+
+	} else if (method == G) { // GET
+		/**
+		 * just have this here for comepleteness
+		 * libcurl will by default request through GET.
+		 * but with the above cmd, libcurl will 
+		 * switch to POST automatically
+		 * 
+		 * within the future can add extra blocks for 
+		 * other request methods
+		 */
+
+		curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+	} else {
+		curl_easy_cleanup(curl);
+		curl_slist_free_all(headers);
+		throw invalid_argument("HttpClient::request received unsupported method: " + method);
+	}
+
+	// firing off the request and clean up all pointers
+	CURLcode result = curl_easy_perform(curl);
+	curl_easy_cleanup(curl);
+	curl_slist_free_all(headers);
+
+	if (result != CURLE_OK) {
+		throw runtime_error(string("HttpClient request failed: ") + curl_easy_strerror(result));
+	}
+
+	return response;
+}
+
+size_t HttpClient::write_callback (void* contents, size_t size, size_t nmemb, string* out) {
+	out->append((char*)contents, size * nmemb);
+
+	return size * nmemb;
+}
