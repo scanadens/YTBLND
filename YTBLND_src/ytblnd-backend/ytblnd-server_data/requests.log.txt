@@ -1,0 +1,6 @@
+2026/03/29 17:41:05.510976 event=http_request method=GET path=/squid-internal-mgr/cachemgr.cgi raw_query="" status=404 latency=538ns client_ip=129.212.190.51
+2026/03/29 18:25:37.765525 event=http_request method=GET path=/ raw_query="" status=404 latency=587ns client_ip=152.32.149.118
+2026/03/29 18:25:56.119772 event=http_request method=GET path=/favicon.ico raw_query="" status=404 latency=352ns client_ip=152.32.149.118
+2026/03/29 18:25:57.861309 event=http_request method=GET path=/robots.txt raw_query="" status=404 latency=345ns client_ip=152.32.149.118
+2026/03/29 18:25:59.184071 event=http_request method=GET path=/sitemap.xml raw_query="" status=404 latency=396ns client_ip=152.32.149.118
+2026/03/29 18:28:15.625566 event=http_request method=GET path=/ raw_query="" status=404 latency=604ns client_ip=149.86.227.60

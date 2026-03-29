@@ -33,13 +33,17 @@ void SqliteDataManager::initSchema() {
         ");"
 
         // ── Watch Later videos per user ────────────────────────────────────────
-        // Stores each parsed video as a row; replaced in bulk on re-upload.
-        // position preserves original playlist order for display.
+        // Stores each parsed + API-enriched video as a row; replaced in bulk
+        // on re-upload. position preserves original playlist order for display.
         "CREATE TABLE IF NOT EXISTS user_watch_later ("
-        "  user_id  TEXT NOT NULL,"
-        "  video_id TEXT NOT NULL,"
-        "  title    TEXT,"
-        "  position INTEGER NOT NULL DEFAULT 0,"
+        "  user_id         TEXT NOT NULL,"
+        "  video_id        TEXT NOT NULL,"
+        "  title           TEXT,"
+        "  channel_id      TEXT,"
+        "  channel_name    TEXT,"
+        "  channel_logo_url TEXT,"
+        "  thumbnail_url   TEXT,"
+        "  position        INTEGER NOT NULL DEFAULT 0,"
         "  PRIMARY KEY (user_id, video_id)"
         ");"
 
@@ -65,6 +69,18 @@ void SqliteDataManager::initSchema() {
     if (rc != SQLITE_OK) {
         std::cerr << "[SqliteDataManager] Schema init failed: " << errMsg << "\n";
         sqlite3_free(errMsg);
+    }
+
+    // Migration: add new columns to pre-existing databases that have the old
+    // user_watch_later schema (SQLite ignores "duplicate column" errors).
+    const char* migrations[] = {
+        "ALTER TABLE user_watch_later ADD COLUMN channel_id       TEXT;",
+        "ALTER TABLE user_watch_later ADD COLUMN channel_name     TEXT;",
+        "ALTER TABLE user_watch_later ADD COLUMN channel_logo_url TEXT;",
+        "ALTER TABLE user_watch_later ADD COLUMN thumbnail_url    TEXT;",
+    };
+    for (const char* m : migrations) {
+        sqlite3_exec(db, m, nullptr, nullptr, nullptr); // ignore error if column exists
     }
 }
 
@@ -156,8 +172,9 @@ bool SqliteDataManager::saveWatchLater(const std::string& userID,
     sqlite3_finalize(del);
 
     const char* insSql =
-        "INSERT OR REPLACE INTO user_watch_later (user_id, video_id, title, position) "
-        "VALUES (?, ?, ?, ?);";
+        "INSERT OR REPLACE INTO user_watch_later "
+        "(user_id, video_id, title, channel_id, channel_name, channel_logo_url, thumbnail_url, position) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
     sqlite3_stmt* ins = nullptr;
     if (sqlite3_prepare_v2(db, insSql, -1, &ins, nullptr) != SQLITE_OK) {
         std::cerr << "[SqliteDataManager] saveWatchLater insert prepare failed: "
@@ -167,10 +184,14 @@ bool SqliteDataManager::saveWatchLater(const std::string& userID,
 
     int pos = 0;
     for (const Video& v : videos) {
-        sqlite3_bind_text(ins, 1, userID.c_str(),        -1, SQLITE_TRANSIENT);
-        sqlite3_bind_text(ins, 2, v.getVideoID().c_str(), -1, SQLITE_TRANSIENT);
-        sqlite3_bind_text(ins, 3, v.getTitle().c_str(),   -1, SQLITE_TRANSIENT);
-        sqlite3_bind_int (ins, 4, pos++);
+        sqlite3_bind_text(ins, 1, userID.c_str(),                -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(ins, 2, v.getVideoID().c_str(),         -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(ins, 3, v.getTitle().c_str(),           -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(ins, 4, v.getChannelID().c_str(),       -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(ins, 5, v.getChannelName().c_str(),     -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(ins, 6, v.getChannelLogoURL().c_str(),  -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(ins, 7, v.getThumbnailURL().c_str(),    -1, SQLITE_TRANSIENT);
+        sqlite3_bind_int (ins, 8, pos++);
         if (sqlite3_step(ins) != SQLITE_DONE) {
             std::cerr << "[SqliteDataManager] saveWatchLater insert failed: "
                       << sqlite3_errmsg(db) << "\n";
@@ -186,7 +207,8 @@ std::list<Video> SqliteDataManager::loadWatchLater(const std::string& userID) {
     if (!db) return result;
 
     const char* sql =
-        "SELECT video_id, title FROM user_watch_later "
+        "SELECT video_id, title, channel_id, channel_name, channel_logo_url, thumbnail_url "
+        "FROM user_watch_later "
         "WHERE user_id = ? ORDER BY position ASC;";
     sqlite3_stmt* stmt = nullptr;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
@@ -196,10 +218,22 @@ std::list<Video> SqliteDataManager::loadWatchLater(const std::string& userID) {
     }
     sqlite3_bind_text(stmt, 1, userID.c_str(), -1, SQLITE_TRANSIENT);
 
+    auto colText = [&](int col) -> std::string {
+        const unsigned char* p = sqlite3_column_text(stmt, col);
+        return p ? reinterpret_cast<const char*>(p) : "";
+    };
+
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        std::string videoID = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        std::string title   = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        result.emplace_back(videoID, title, "", "", 0, std::list<std::string>{});
+        result.emplace_back(
+            colText(0), // videoID
+            colText(1), // title
+            colText(2), // channelID
+            colText(5), // thumbnailURL
+            0,
+            std::list<std::string>{},
+            colText(3), // channelName
+            colText(4)  // channelLogoURL
+        );
     }
     sqlite3_finalize(stmt);
     return result;

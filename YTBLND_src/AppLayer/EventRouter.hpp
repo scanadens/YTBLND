@@ -1,31 +1,37 @@
 #ifndef EVENTROUTER_H
 #define EVENTROUTER_H
 
+/**
+ * \file EventRouter.hpp
+ * \brief Lightweight event-dispatch system connecting the UI layer to AppController.
+ *  \author Jasmine Kumar
+ *
+ * UI panels dispatch named events with a string-to-string payload map.
+ * AppController registers a handler for each event name during construction.
+ * Panels never call AppController directly; AppController never polls the UI.
+ *
+ * Payload conventions by event name:
+ * - \c "login"       → { "userID": "...", "password": "..." }
+ * - \c "logout"      → {}
+ * - \c "uploadData"  → { "filePath": "...", "userID": "..." }
+ * - \c "createBlend" → { "userID_0": "...", "userID_1": "..." }
+ * - \c "playVideo"   → { "videoID": "..." }
+ * - \c "refresh"     → {}
+ * - \c "openChat"    → {}
+ * - \c "sendMessage" → { "userID": "...", "text": "..." }
+ */
+
 #include <functional>
 #include <map>
 #include <string>
 
-// Payload type — a simple string-to-string map.
-// Examples of what each event puts in the payload:
-//   "login"       → { "email": "...", "password": "..." }
-//   "logout"      → {}
-//   "uploadData"  → { "filePath": "..." }
-//   "createBlend" → { "userID_0": "...", "userID_1": "..." }
-//   "playVideo"   → { "videoID": "..." }
-//   "refresh"     → {}
-//   "openChat"    → {}
-//   "sendMessage" → { "userID": "...", "text": "..." }
+/// String-to-string map passed with every dispatched event.
 using EventPayload = std::map<std::string, std::string>;
 
-// Handler type — any callable that accepts an EventPayload
+/// Any callable that accepts an EventPayload.
 using EventHandler = std::function<void(const EventPayload&)>;
 
-// EventRouter is the application's messenger system.
-// UI panels dispatch named events with a payload.
-// EventRouter maps each event name to a handler registered by AppController.
-//
-// Panels never call AppController directly — they call router.dispatch().
-// AppController never polls the UI — it only reacts to dispatched events.
+/// Lightweight event-dispatch system connecting the UI layer to AppController.
 class EventRouter {
     private:
         std::map<std::string, EventHandler> listeners;
@@ -33,18 +39,26 @@ class EventRouter {
     public:
         EventRouter();
 
-        // Registers a handler for the given event name.
-        // If a handler already exists for that name it is replaced.
-        // Called by AppController's constructor to wire up all events.
+        /**
+         * Registers a handler for the given event name.
+         * Replaces any existing handler registered under the same name.
+         * \param eventName Unique name for this event.
+         * \param handler   Callable invoked when the event is dispatched.
+         */
         void registerListener(const std::string& eventName, EventHandler handler);
 
-        // Called by UI panels when an event occurs.
-        // Looks up the handler by eventName and calls it with the payload.
-        // Logs a warning and does nothing if the event name is unrecognised.
+        /**
+         * Dispatches a named event to its registered handler.
+         * Logs a warning and does nothing if the event name is unrecognised.
+         * \param eventName Name of the event to dispatch.
+         * \param payload   Key-value data passed to the handler.
+         */
         void dispatch(const std::string& eventName, const EventPayload& payload = {});
 
-        // Removes all registered listeners.
-        // Called by AppController's destructor during teardown.
+        /**
+         * Removes all registered listeners.
+         * Called by AppController's destructor during teardown.
+         */
         void deregisterAll();
 };
 

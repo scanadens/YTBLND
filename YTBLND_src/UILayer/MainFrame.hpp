@@ -1,29 +1,24 @@
-// ============================================================================
-// MainFrame.hpp — Root application window
-//
-// MainFrame is the single top-level wxFrame.  It contains a wxSimplebook
-// that acts as a full-window page switcher (no visible tabs).  Every panel
-// is created once at startup and kept alive for the lifetime of the app;
-// navigation just changes which page is visible.
-//
-// PAGE ORDER (must match the Page enum in UIPages.hpp exactly):
-//   0  LOGIN            — LoginPanel
-//   1  DATA_INSTRUCTIONS— DataInstructionsPanel
-//   2  BLEND_CREATION   — BlendCreationPanel
-//   3  HOME             — built by BuildHomePage() (contains BlendFeedPanel)
-//   4  USER             — UserPanel
-//   5  SETTINGS         — stub wxPanel (back button only)
-//   6  BLEND_CHAT       — BlendChatPanel
-//
-// NAVIGATION PATTERN
-//   NavigateTo(page) is the only entry point.  It calls Reset() / Reload()
-//   on the target panel (if applicable) before flipping the page so panels
-//   always receive fresh data on arrival.
-//
-// TODO: Consider loading a splash / loading screen before pages are built.
-// TODO: Settings page is a stub; replace with a real SettingsPanel when
-//       implemented.
-// ============================================================================
+/**
+ * \file MainFrame.hpp
+ * \brief Root application window containing the full-window page switcher.
+ *  \author Jasmine Kumar
+ *
+ * MainFrame is the single top-level wxFrame.  It contains a wxSimplebook that
+ * acts as a full-window page switcher (no visible tabs).  Every panel is
+ * created once at startup and kept alive for the application's lifetime;
+ * navigation simply changes which page is visible.
+ *
+ * ### Page order (must match the Page enum in UIPages.hpp exactly)
+ * | Index | Enum               | Panel                  |
+ * |-------|--------------------|------------------------|
+ * | 0     | LOGIN              | LoginPanel             |
+ * | 1     | DATA_INSTRUCTIONS  | DataInstructionsPanel  |
+ * | 2     | BLEND_CREATION     | BlendCreationPanel     |
+ * | 3     | HOME               | BlendFeedPanel wrapper |
+ * | 4     | USER               | UserPanel              |
+ * | 5     | SETTINGS           | Stub wxPanel           |
+ * | 6     | BLEND_CHAT         | BlendChatPanel         |
+ */
 
 #pragma once
 #include <wx/wx.h>
@@ -38,36 +33,49 @@ class UserPanel;
 class BlendCreationPanel;
 class BlendChatPanel;
 
+/// Root application window containing the full-window page switcher.
 class MainFrame : public wxFrame {
 public:
+    /**
+     * Constructs and shows the MainFrame.
+     * All sub-panels are created and added to the wxSimplebook here.
+     * \param controller Application controller shared by all panels.
+     */
     explicit MainFrame(AppController& controller);
 
-    // Switch to a page. Call this from sub-panels via the NavigateFn callback.
+    /**
+     * Switches to the specified page, calling Reset()/Reload() on the target
+     * panel where applicable so it always shows fresh data on arrival.
+     * \param page Page to navigate to.
+     */
     void NavigateTo(Page page);
 
-    // Called by the Refresh button to tell the feed to advance its page.
+    /**
+     * Advances the blend feed by one page of videos.
+     * Called by the Refresh button on the home screen.
+     */
     void TriggerFeedRefresh();
 
 private:
     AppController& controller;
 
-    wxSimplebook*           book;
-    LoginPanel*             loginPanel;
-    DataInstructionsPanel*  dataInstrPanel;
-    BlendCreationPanel*     creationPanel;
-    BlendFeedPanel*         feedPanel;
-    UserPanel*              userPanel;
-    wxPanel*                settingsPanel;  // stub — back button only for now
-    BlendChatPanel*         chatPanel;
+    wxSimplebook*          book;
+    LoginPanel*            loginPanel;
+    DataInstructionsPanel* dataInstrPanel;
+    BlendCreationPanel*    creationPanel;
+    BlendFeedPanel*        feedPanel;
+    UserPanel*             userPanel;
+    wxPanel*               settingsPanel;  ///< Stub — back button only.
+    BlendChatPanel*        chatPanel;
 
-    // Builds the home page (top bar + title + feed + refresh) and returns it.
-    // BlendFeedPanel is constructed separately (with book as parent) so it can
-    // be reparented to the home page panel here.
+    /**
+     * Builds the home page composite (top bar + title + feed + refresh button).
+     * \return Pointer to the constructed home page wxPanel.
+     */
     wxPanel* BuildHomePage();
 
-    // Top-bar button handlers on the home page
-    void OnSettings(wxCommandEvent&);
-    void OnUser    (wxCommandEvent&);
-    void OnBlend   (wxCommandEvent&);   // goes to BLEND_CHAT or BLEND_CREATION
-    void OnRefresh (wxCommandEvent&);   // advances the feed by one page
+    void OnSettings(wxCommandEvent&);  ///< Navigates to SETTINGS.
+    void OnUser    (wxCommandEvent&);  ///< Navigates to USER.
+    void OnBlend   (wxCommandEvent&);  ///< Navigates to BLEND_CHAT or BLEND_CREATION.
+    void OnRefresh (wxCommandEvent&);  ///< Advances the feed by one page.
 };

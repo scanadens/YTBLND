@@ -17,14 +17,20 @@ import (
 )
 
 func main() {
+
+	// set to release
+	gin.SetMode(gin.ReleaseMode)
+
+	data_save_path := "/opt/ytblnd-backend/ytblnd-server_data/"
+
 	requestLogPath := os.Getenv("YTBLND_REQUEST_LOG_PATH")
 	if requestLogPath == "" {
-		requestLogPath = "./data/requests.log.txt"
+		requestLogPath = data_save_path + "requests.log.txt"
 	}
 
 	eventLogPath := os.Getenv("YTBLND_EVENT_LOG_PATH")
 	if eventLogPath == "" {
-		eventLogPath = "./data/events.log.txt"
+		eventLogPath = data_save_path + "events.log.txt"
 	}
 
 	if err := os.MkdirAll(filepath.Dir(requestLogPath), 0o755); err != nil {
@@ -47,7 +53,7 @@ func main() {
 	// Use an env override for DB path so local/dev/prod can vary storage.
 	dbPath := os.Getenv("YTBLND_DB_PATH")
 	if dbPath == "" {
-		dbPath = "./data/dev.db"
+		dbPath = data_save_path + "dev.db"
 	}
 
 	// Ensure DB parent directory exists before SQLite tries to open the file.

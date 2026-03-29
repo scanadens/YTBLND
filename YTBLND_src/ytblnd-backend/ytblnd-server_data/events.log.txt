@@ -1,0 +1,23 @@
+2026/03/29 04:36:10.642666 event=server_start db_path=./data/dev.db request_log_path=./data/requests.log.txt event_log_path=./data/events.log.txt started_at=2026-03-29T04:36:10Z
+2026/03/29 04:36:52.572252 event=server_signal_received signal=terminated received_at=2026-03-29T04:36:52Z
+2026/03/29 04:36:52.584127 event=server_shutdown signal=terminated graceful_shutdown=true stopped_at=2026-03-29T04:36:52Z
+2026/03/29 17:35:25.496289 event=server_start db_path=/root/ytblnd-backend/ytblnd-server_data/dev.db request_log_path=/root/ytblnd-backend/ytblnd-server_data/requests.log.txt event_log_path=/root/ytblnd-backend/ytblnd-server_data/events.log.txt started_at=2026-03-29T17:35:25Z
+2026/03/29 17:35:37.037884 event=server_signal_received signal=interrupt received_at=2026-03-29T17:35:37Z
+2026/03/29 17:35:37.037991 event=server_shutdown signal=interrupt graceful_shutdown=true stopped_at=2026-03-29T17:35:37Z
+2026/03/29 17:40:15.894275 event=server_start db_path=/root/ytblnd-backend/ytblnd-server_data/dev.db request_log_path=/root/ytblnd-backend/ytblnd-server_data/requests.log.txt event_log_path=/root/ytblnd-backend/ytblnd-server_data/events.log.txt started_at=2026-03-29T17:40:15Z
+2026/03/29 17:41:20.326709 event=server_signal_received signal=interrupt received_at=2026-03-29T17:41:20Z
+2026/03/29 17:41:20.326849 event=server_shutdown signal=interrupt graceful_shutdown=true stopped_at=2026-03-29T17:41:20Z
+2026/03/29 18:05:08.342080 event=server_start db_path=/root/ytblnd-backend/ytblnd-server_data/dev.db request_log_path=/root/ytblnd-backend/ytblnd-server_data/requests.log.txt event_log_path=/root/ytblnd-backend/ytblnd-server_data/events.log.txt started_at=2026-03-29T18:05:08Z
+2026/03/29 18:05:59.083889 event=server_signal_received signal=interrupt received_at=2026-03-29T18:05:59Z
+2026/03/29 18:05:59.084004 event=server_shutdown signal=interrupt graceful_shutdown=true stopped_at=2026-03-29T18:05:59Z
+2026/03/29 18:06:28.195851 event=server_start db_path=/root/ytblnd-backend/ytblnd-server_data/dev.db request_log_path=/root/ytblnd-backend/ytblnd-server_data/requests.log.txt event_log_path=/root/ytblnd-backend/ytblnd-server_data/events.log.txt started_at=2026-03-29T18:06:28Z
+2026/03/29 18:07:01.298627 event=server_signal_received signal=interrupt received_at=2026-03-29T18:07:01Z
+2026/03/29 18:07:01.298743 event=server_shutdown signal=interrupt graceful_shutdown=true stopped_at=2026-03-29T18:07:01Z
+2026/03/29 18:23:18.118907 event=server_start db_path=/opt/ytblnd-backend/ytblnd-server_data/dev.db request_log_path=/opt/ytblnd-backend/ytblnd-server_data/requests.log.txt event_log_path=/opt/ytblnd-backend/ytblnd-server_data/events.log.txt started_at=2026-03-29T18:23:18Z
+2026/03/29 18:24:59.362753 event=server_start db_path=/opt/ytblnd-backend/ytblnd-server_data/dev.db request_log_path=/opt/ytblnd-backend/ytblnd-server_data/requests.log.txt event_log_path=/opt/ytblnd-backend/ytblnd-server_data/events.log.txt started_at=2026-03-29T18:24:59Z
+2026/03/29 18:27:10.329372 event=server_signal_received signal=terminated received_at=2026-03-29T18:27:10Z
+2026/03/29 18:27:10.329466 event=server_shutdown signal=terminated graceful_shutdown=true stopped_at=2026-03-29T18:27:10Z
+2026/03/29 18:27:18.546268 event=server_start db_path=/opt/ytblnd-backend/ytblnd-server_data/dev.db request_log_path=/opt/ytblnd-backend/ytblnd-server_data/requests.log.txt event_log_path=/opt/ytblnd-backend/ytblnd-server_data/events.log.txt started_at=2026-03-29T18:27:18Z
+2026/03/29 18:29:51.154548 event=server_signal_received signal=interrupt received_at=2026-03-29T18:29:51Z
+2026/03/29 18:29:51.154673 event=server_shutdown signal=interrupt graceful_shutdown=true stopped_at=2026-03-29T18:29:51Z
+2026/03/29 18:30:29.554348 event=server_start db_path=/opt/ytblnd-backend/ytblnd-server_data/dev.db request_log_path=/opt/ytblnd-backend/ytblnd-server_data/requests.log.txt event_log_path=/opt/ytblnd-backend/ytblnd-server_data/events.log.txt started_at=2026-03-29T18:30:29Z

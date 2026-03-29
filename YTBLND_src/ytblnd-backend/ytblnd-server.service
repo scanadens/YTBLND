@@ -1,0 +1,15 @@
+[Unit]
+Description=ytblnd server for YTBLND client communications
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/ytblnd-backend
+ExecStart=/usr/local/bin/ytblnd-server
+Restart=on-failure
+User=ytblnd-admin
+Group=ytblnd-server
+RestartSec=55s
+
+[Install]
+WantedBy=multi-user.target
+
