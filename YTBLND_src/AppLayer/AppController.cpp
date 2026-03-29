@@ -1,9 +1,12 @@
 #include "AppController.hpp"
 #include "../AppInfrastructure/YouTubeDataImporter.hpp"
 #include "../AlgorithmLayer/RandomBlendAlgorithm.hpp"
+#include "../ServiceLayer/YouTubeMetadataFetcher.hpp"
 #include <exception>
 #include <iostream>
 #include <list>
+
+static const std::string kYouTubeAPIKey = "AIzaSyBDzH4_T9NSaAh_s59sFYrHtNnKvHmyARM";
 
 // ── Constructor / Destructor ──────────────────────────────────────────────────
 
@@ -173,7 +176,18 @@ void AppController::handleUploadData(const EventPayload& payload) {
         return;
     }
 
-    // Persist the parsed videos to the DB so they survive logout
+    // Enrich with title, channel name, thumbnail URL, and channel logo via the API
+    std::cout << "[AppController] Fetching YouTube metadata for "
+              << watchLater.size() << " videos...\n";
+    try {
+        watchLater = YouTubeMetadataFetcher(kYouTubeAPIKey).enrich(watchLater);
+    } catch (const std::exception& ex) {
+        std::cerr << "[AppController] handleUploadData: metadata fetch failed: "
+                  << ex.what() << "\n";
+        // Non-fatal — continue with whatever data we have
+    }
+
+    // Persist the enriched videos to the DB so they survive logout
     dataManager->saveWatchLater(userID, watchLater);
 
     // Update the current user's in-memory YouTubeData
