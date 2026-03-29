@@ -1,5 +1,5 @@
 // ============================================================================
-// DataInstructionsPanel.h — Google Takeout CSV setup screen
+// DataInstructionsPanel.hpp — Google Takeout CSV setup screen
 //
 // Shown after login when the user has no YouTube Watch Later data.
 // Walks them through exporting from Google Takeout and loading the CSV.
@@ -34,7 +34,7 @@
 
 #pragma once
 #include <wx/wx.h>
-#include "UIPages.h"
+#include "UIPages.hpp"
 
 class AppController;
 

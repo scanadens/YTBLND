@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 #include <list>
-#include "../ModelLayer/User.h"
-#include "../ModelLayer/Video.h"
+#include "../ModelLayer/User.hpp"
+#include "../ModelLayer/Video.hpp"
 
 /**
  * \brief Interface for all user-persistence operations.

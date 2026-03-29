@@ -1,4 +1,4 @@
-#include "User.h"
+#include "User.hpp"
 
 User::User(const std::string& userID,
            const std::string& username,

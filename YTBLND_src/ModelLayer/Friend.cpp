@@ -1,4 +1,4 @@
-#include "Friend.h"
+#include "Friend.hpp"
 
 //
 Friend::Friend(const std::string& userID,

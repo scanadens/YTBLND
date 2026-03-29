@@ -5,7 +5,7 @@
 #include <list>
 #include <vector>
 
-#include "Message.h"
+#include "Message.hpp"
 
 // ChatRoom represents an in-memory chat session tied to a specific Blend.
 // It is identified by the blendID of the Blend it belongs to.

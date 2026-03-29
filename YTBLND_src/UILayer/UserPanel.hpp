@@ -1,5 +1,5 @@
 // ============================================================================
-// UserPanel.h — Account info and logout screen
+// UserPanel.hpp — Account info and logout screen
 //
 // A simple panel that shows the current user's username and email, plus a
 // Log Out button at the bottom.
@@ -38,7 +38,7 @@
 
 #include <wx/wx.h>
 
-#include "UIPages.h"
+#include "UIPages.hpp"
 
 class AppController;
 class wxStaticText;

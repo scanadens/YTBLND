@@ -8,19 +8,19 @@
 // per-page setup/teardown logic there.
 // ============================================================================
 
-#include "MainFrame.h"
+#include "MainFrame.hpp"
 
 #include <wx/simplebook.h>
 
-#include "UIColors.h"
-#include "LoginPanel.h"
-#include "DataInstructionsPanel.h"
-#include "BlendFeedPanel.h"
-#include "UserPanel.h"
-#include "BlendCreationPanel.h"
-#include "BlendChatPanel.h"
+#include "UIColors.hpp"
+#include "LoginPanel.hpp"
+#include "DataInstructionsPanel.hpp"
+#include "BlendFeedPanel.hpp"
+#include "UserPanel.hpp"
+#include "BlendCreationPanel.hpp"
+#include "BlendChatPanel.hpp"
 #include "../AppLayer/AppController.hpp"
-#include "../AppLayer/AppState.h"
+#include "../AppLayer/AppState.hpp"
 
 // ── Construction ─────────────────────────────────────────────────────────────
 

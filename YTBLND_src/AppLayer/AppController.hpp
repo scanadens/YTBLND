@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 
-#include "AppState.h"
-#include "EventRouter.h"
-#include "../ModelLayer/Blend.h"
-#include "../ServiceLayer/SqliteDataManager.h"
+#include "AppState.hpp"
+#include "EventRouter.hpp"
+#include "../ModelLayer/Blend.hpp"
+#include "../ServiceLayer/SqliteDataManager.hpp"
 
 class YouTubeDataParser;  // stub for future use
 

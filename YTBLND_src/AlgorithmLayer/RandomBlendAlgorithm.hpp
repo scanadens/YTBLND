@@ -1,7 +1,7 @@
 #ifndef RANDOM_BLEND_ALGORITHM_H
 #define RANDOM_BLEND_ALGORITHM_H
 
-#include "IBlendAlgorithm.h"
+#include "IBlendAlgorithm.hpp"
 
 /**
  * \brief Blend algorithm that picks a random subset of videos from each

@@ -1,5 +1,5 @@
 // ============================================================================
-// UIColors.h — Shared dark-theme colour palette
+// UIColors.hpp — Shared dark-theme colour palette
 //
 // All wxColour constants used across the UI live here so the look is
 // consistent and easy to retheme.  Include this header instead of

@@ -1,5 +1,5 @@
 // ============================================================================
-// ConfirmationDialog.h — Dark-themed modal confirmation dialog
+// ConfirmationDialog.hpp — Dark-themed modal confirmation dialog
 //
 // A simple two-button (OK / Cancel) dialog that matches the YTBLND dark theme.
 // Use the static Confirm() helper for the common one-shot pattern, or

@@ -1,5 +1,5 @@
-#include "ConfirmationDialog.h"
-#include "UIColors.h"
+#include "ConfirmationDialog.hpp"
+#include "UIColors.hpp"
 #include <wx/stattext.h>
 #include <wx/button.h>
 #include <wx/sizer.h>

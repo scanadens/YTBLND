@@ -1,5 +1,5 @@
 // ============================================================================
-// BlendChatPanel.h — Blend chat screen
+// BlendChatPanel.hpp — Blend chat screen
 //
 // Displays the chat room associated with the active blend and lets the user
 // send new messages.
@@ -38,7 +38,7 @@
 
 #include <wx/wx.h>
 
-#include "UIPages.h"
+#include "UIPages.hpp"
 
 class AppController;
 class wxScrolledWindow;

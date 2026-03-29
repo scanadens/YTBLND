@@ -1,5 +1,5 @@
 // ============================================================================
-// UIPages.h — Page enum and NavigateFn type
+// UIPages.hpp — Page enum and NavigateFn type
 //
 // Defines every top-level page that lives in the MainFrame wxSimplebook and
 // provides the NavigateFn callback type used by all sub-panels.
@@ -10,7 +10,7 @@
 // order as the Page enum values (0, 1, 2, …).  Each sub-panel constructor
 // receives a NavigateFn (a std::function<void(Page)>) that, when called,
 // asks MainFrame to switch the visible page.  This way panels can trigger
-// navigation without including MainFrame.h (which would create a circular
+// navigation without including MainFrame.hpp (which would create a circular
 // dependency).
 //
 // ADDING A NEW PAGE

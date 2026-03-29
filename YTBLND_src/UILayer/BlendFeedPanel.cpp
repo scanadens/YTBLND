@@ -2,12 +2,12 @@
 // BlendFeedPanel.cpp — 3×2 video grid for the Home page implementation
 // ============================================================================
 
-#include "BlendFeedPanel.h"
+#include "BlendFeedPanel.hpp"
 
 #include <wx/sizer.h>
 
-#include "UIColors.h"
-#include "../AppLayer/AppState.h"
+#include "UIColors.hpp"
+#include "../AppLayer/AppState.hpp"
 
 // ---------------------------------------------------------------------------
 // Constructor

@@ -1,4 +1,4 @@
-#include "AppState.h"
+#include "AppState.hpp"
 
 AppState::AppState()
     : currentUser(nullptr), activeBlend(nullptr), isBlendGenerating(false) {}

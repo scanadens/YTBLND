@@ -158,3 +158,35 @@ func TestSqliteDataManager_BlendFlow(t *testing.T) {
 		t.Fatalf("LoadChatRoomMembers() = %v, want %v", chatMembers, want)
 	}
 }
+
+func TestSqliteDataManager_ChatHistory(t *testing.T) {
+	mgr := newTestManager(t)
+
+	if err := mgr.SaveBlend("b-chat", "u-1", "round_robin", []string{"u-1", "u-2"}); err != nil {
+		t.Fatalf("SaveBlend() error = %v", err)
+	}
+
+	first := NewChatMessageRecord("b-chat", "u-1", "hello", "2026-03-29T04:30:00Z")
+	second := NewChatMessageRecord("b-chat", "u-2", "hi back", "2026-03-29T04:30:01Z")
+	third := NewChatMessageRecord("b-chat", "u-1", "follow up", "2026-03-29T04:30:02Z")
+
+	if err := mgr.SaveChatMessage("b-chat", first); err != nil {
+		t.Fatalf("SaveChatMessage(first) error = %v", err)
+	}
+	if err := mgr.SaveChatMessage("b-chat", second); err != nil {
+		t.Fatalf("SaveChatMessage(second) error = %v", err)
+	}
+	if err := mgr.SaveChatMessage("b-chat", third); err != nil {
+		t.Fatalf("SaveChatMessage(third) error = %v", err)
+	}
+
+	loaded, err := mgr.LoadChatMessages("b-chat", 2)
+	if err != nil {
+		t.Fatalf("LoadChatMessages() error = %v", err)
+	}
+
+	want := []ChatMessageRecord{second, third}
+	if !reflect.DeepEqual(loaded, want) {
+		t.Fatalf("LoadChatMessages() = %#v, want %#v", loaded, want)
+	}
+}

@@ -73,6 +73,14 @@ func (m *SqliteDatabaseManager) initSchema() error {
 		user_id TEXT NOT NULL,
 		PRIMARY KEY (chat_room_id, user_id)
 	);
+
+	CREATE TABLE IF NOT EXISTS chat_messages (
+		message_id INTEGER PRIMARY KEY AUTOINCREMENT,
+		chat_room_id TEXT NOT NULL,
+		sender_id TEXT NOT NULL,
+		content TEXT NOT NULL,
+		sent_at TEXT NOT NULL
+	);
     `
 	_, err := m.db.Exec(schema)
 	return err
@@ -460,4 +468,68 @@ func (m *SqliteDatabaseManager) LoadChatRoomMembers(chatRoomID string) ([]string
 	}
 
 	return members, nil
+}
+
+// SaveChatMessage appends a chat message to room history for later replay.
+func (m *SqliteDatabaseManager) SaveChatMessage(chatRoomID string, message ChatMessageRecord) error {
+	if m.db == nil {
+		return errors.New("database is not initialized")
+	}
+
+	const query = `
+        INSERT INTO chat_messages (chat_room_id, sender_id, content, sent_at)
+        VALUES (?, ?, ?, ?);
+    `
+
+	_, err := m.db.Exec(query, chatRoomID, message.GetSenderID(), message.GetContent(), message.GetSentAt())
+	if err != nil {
+		return fmt.Errorf("save chat message: %w", err)
+	}
+
+	return nil
+}
+
+// LoadChatMessages returns stored room history ordered from oldest to newest.
+func (m *SqliteDatabaseManager) LoadChatMessages(chatRoomID string, limit int) ([]ChatMessageRecord, error) {
+	if m.db == nil {
+		return nil, errors.New("database is not initialized")
+	}
+	if limit <= 0 {
+		limit = 100
+	}
+
+	const query = `
+        SELECT sender_id, content, sent_at
+        FROM (
+            SELECT sender_id, content, sent_at
+            FROM chat_messages
+            WHERE chat_room_id = ?
+            ORDER BY sent_at DESC, message_id DESC
+            LIMIT ?
+        ) recent
+        ORDER BY sent_at ASC;
+    `
+
+	rows, err := m.db.Query(query, chatRoomID, limit)
+	if err != nil {
+		return nil, fmt.Errorf("load chat messages query: %w", err)
+	}
+	defer rows.Close()
+
+	messages := make([]ChatMessageRecord, 0)
+	for rows.Next() {
+		var senderID string
+		var content string
+		var sentAt string
+		if err := rows.Scan(&senderID, &content, &sentAt); err != nil {
+			return nil, fmt.Errorf("load chat messages scan: %w", err)
+		}
+		messages = append(messages, NewChatMessageRecord(chatRoomID, senderID, content, sentAt))
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("load chat messages rows: %w", err)
+	}
+
+	return messages, nil
 }

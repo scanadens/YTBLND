@@ -2,18 +2,18 @@
 // UserPanel.cpp — Account info and logout screen implementation
 // ============================================================================
 
-#include "UserPanel.h"
+#include "UserPanel.hpp"
 
 #include <wx/statline.h>
 
-#include "UIColors.h"
-#include "UIPages.h"
-#include "TopBar.h"
-#include "ConfirmationDialog.h"
+#include "UIColors.hpp"
+#include "UIPages.hpp"
+#include "TopBar.hpp"
+#include "ConfirmationDialog.hpp"
 #include "../AppLayer/AppController.hpp"
-#include "../AppLayer/AppState.h"
-#include "../AppLayer/EventRouter.h"
-#include "../ModelLayer/User.h"
+#include "../AppLayer/AppState.hpp"
+#include "../AppLayer/EventRouter.hpp"
+#include "../ModelLayer/User.hpp"
 
 // ── Construction ──────────────────────────────────────────────────────────────
 

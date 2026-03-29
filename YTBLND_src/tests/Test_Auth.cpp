@@ -2,9 +2,9 @@
 #include <atomic>
 #include <chrono>
 #include <filesystem>
-#include "../ServiceLayer/SqliteDataManager.h"
+#include "../ServiceLayer/SqliteDataManager.hpp"
 #include "../AppLayer/AppController.hpp"
-#include "../AppLayer/AppState.h"
+#include "../AppLayer/AppState.hpp"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

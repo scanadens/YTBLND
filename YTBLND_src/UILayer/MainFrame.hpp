@@ -1,12 +1,12 @@
 // ============================================================================
-// MainFrame.h — Root application window
+// MainFrame.hpp — Root application window
 //
 // MainFrame is the single top-level wxFrame.  It contains a wxSimplebook
 // that acts as a full-window page switcher (no visible tabs).  Every panel
 // is created once at startup and kept alive for the lifetime of the app;
 // navigation just changes which page is visible.
 //
-// PAGE ORDER (must match the Page enum in UIPages.h exactly):
+// PAGE ORDER (must match the Page enum in UIPages.hpp exactly):
 //   0  LOGIN            — LoginPanel
 //   1  DATA_INSTRUCTIONS— DataInstructionsPanel
 //   2  BLEND_CREATION   — BlendCreationPanel
@@ -28,7 +28,7 @@
 #pragma once
 #include <wx/wx.h>
 #include <wx/simplebook.h>
-#include "UIPages.h"
+#include "UIPages.hpp"
 
 class AppController;
 class LoginPanel;

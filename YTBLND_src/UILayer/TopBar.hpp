@@ -1,5 +1,5 @@
 // ============================================================================
-// TopBar.h — Reusable interior-page header bar
+// TopBar.hpp — Reusable interior-page header bar
 //
 // Displays a "< Back" button on the left and a bold, centred page title.
 // Used by every interior page (BlendCreationPanel, BlendChatPanel,
@@ -18,7 +18,7 @@
 
 #pragma once
 #include <wx/wx.h>
-#include "UIPages.h"
+#include "UIPages.hpp"
 
 // A reusable horizontal top bar for interior pages.
 // Displays a "< Back" button on the left and a centred bold title.

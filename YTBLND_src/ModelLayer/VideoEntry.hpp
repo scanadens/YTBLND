@@ -1,7 +1,7 @@
 #ifndef VIDEOENTRY_H
 #define VIDEOENTRY_H
 
-#include "Video.h"
+#include "Video.hpp"
 
 class VideoEntry {
     private:

@@ -1,5 +1,5 @@
 // ============================================================================
-// BlendFeedPanel.h — 3×2 video grid for the Home page
+// BlendFeedPanel.hpp — 3×2 video grid for the Home page
 //
 // Displays 6 VideoCards in a fixed 3-column × 2-row grid.  Each card shows
 // one video from the active blend (AppState::getActiveBlend()).
@@ -27,7 +27,7 @@
 
 #include <wx/wx.h>
 
-#include "VideoCard.h"
+#include "VideoCard.hpp"
 #include "../AppLayer/AppController.hpp"
 
 class BlendFeedPanel : public wxPanel {

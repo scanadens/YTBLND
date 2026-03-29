@@ -2,7 +2,7 @@
 // BlendChatPanel.cpp — Blend chat screen implementation
 // ============================================================================
 
-#include "BlendChatPanel.h"
+#include "BlendChatPanel.hpp"
 
 #include <wx/scrolwin.h>
 #include <wx/statline.h>
@@ -10,16 +10,16 @@
 #include <iomanip>
 #include <sstream>
 
-#include "UIColors.h"
-#include "UIPages.h"
-#include "TopBar.h"
-#include "ConfirmationDialog.h"
+#include "UIColors.hpp"
+#include "UIPages.hpp"
+#include "TopBar.hpp"
+#include "ConfirmationDialog.hpp"
 #include "../AppLayer/AppController.hpp"
-#include "../AppLayer/AppState.h"
-#include "../AppLayer/EventRouter.h"
-#include "../ModelLayer/ChatRoom.h"
-#include "../ModelLayer/Message.h"
-#include "../ModelLayer/Blend.h"
+#include "../AppLayer/AppState.hpp"
+#include "../AppLayer/EventRouter.hpp"
+#include "../ModelLayer/ChatRoom.hpp"
+#include "../ModelLayer/Message.hpp"
+#include "../ModelLayer/Blend.hpp"
 
 // ── Helper: format a Unix timestamp as HH:MM ─────────────────────────────────
 

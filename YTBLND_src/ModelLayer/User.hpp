@@ -4,8 +4,8 @@
 #include <string>
 #include <list>
 
-#include "Friend.h"
-#include "YouTubeData.h"
+#include "Friend.hpp"
+#include "YouTubeData.hpp"
 
 class User {
     private:

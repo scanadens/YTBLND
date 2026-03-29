@@ -38,4 +38,10 @@ type DataManager interface {
 
 	// LoadChatRoomMembers returns all members assigned to a chat room.
 	LoadChatRoomMembers(chatRoomID string) ([]string, error)
+
+	// SaveChatMessage appends one chat message to the room history store.
+	SaveChatMessage(chatRoomID string, message ChatMessageRecord) error
+
+	// LoadChatMessages returns the room message history ordered oldest to newest.
+	LoadChatMessages(chatRoomID string, limit int) ([]ChatMessageRecord, error)
 }

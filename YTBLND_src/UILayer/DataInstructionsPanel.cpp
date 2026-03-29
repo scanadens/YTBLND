@@ -2,16 +2,16 @@
 // DataInstructionsPanel.cpp — Google Takeout CSV setup screen implementation
 // ============================================================================
 
-#include "DataInstructionsPanel.h"
+#include "DataInstructionsPanel.hpp"
 
 #include <wx/filedlg.h>
 #include <wx/statline.h>
 
-#include "UIColors.h"
+#include "UIColors.hpp"
 #include "../AppLayer/AppController.hpp"
-#include "../AppLayer/AppState.h"
-#include "../AppLayer/EventRouter.h"
-#include "../ModelLayer/User.h"
+#include "../AppLayer/AppState.hpp"
+#include "../AppLayer/EventRouter.hpp"
+#include "../ModelLayer/User.hpp"
 
 DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
                                              AppController& controller,

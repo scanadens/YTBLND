@@ -2,7 +2,7 @@
 // VideoCard.cpp — Custom video preview card widget implementation
 // ============================================================================
 
-#include "VideoCard.h"
+#include "VideoCard.hpp"
 
 #include <thread>
 
@@ -14,7 +14,7 @@
 #include <wx/image.h>
 #include <wx/utils.h>   // wxLaunchDefaultBrowser
 
-#include "UIColors.h"
+#include "UIColors.hpp"
 
 // ---------------------------------------------------------------------------
 // Event definition

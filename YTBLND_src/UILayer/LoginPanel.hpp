@@ -1,5 +1,5 @@
 // ============================================================================
-// LoginPanel.h — Sign In / Register screen
+// LoginPanel.hpp — Sign In / Register screen
 //
 // The first screen the user sees.  Contains a two-tab form card (Sign In
 // and Register) rendered on top of the dark background with the YTBLND title.
@@ -37,7 +37,7 @@
 #pragma once
 #include <wx/wx.h>
 #include <wx/simplebook.h>
-#include "UIPages.h"
+#include "UIPages.hpp"
 
 class AppController;
 

@@ -4,8 +4,8 @@
 #include<string>
 #include<list>
 
-#include "User.h"
-#include "Video.h"
+#include "User.hpp"
+#include "Video.hpp"
 
 class Blend {
     private:

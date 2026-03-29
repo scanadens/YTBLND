@@ -2,18 +2,18 @@
 // BlendCreationPanel.cpp — New-blend setup screen implementation
 // ============================================================================
 
-#include "BlendCreationPanel.h"
+#include "BlendCreationPanel.hpp"
 
 #include <wx/scrolwin.h>
 #include <wx/textdlg.h>
 #include <wx/statline.h>
 
-#include "UIColors.h"
-#include "UIPages.h"
-#include "TopBar.h"
+#include "UIColors.hpp"
+#include "UIPages.hpp"
+#include "TopBar.hpp"
 #include "../AppLayer/AppController.hpp"
-#include "../AppLayer/AppState.h"
-#include "../AppLayer/EventRouter.h"
+#include "../AppLayer/AppState.hpp"
+#include "../AppLayer/EventRouter.hpp"
 
 // ── Construction ──────────────────────────────────────────────────────────────
 

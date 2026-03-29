@@ -17,6 +17,33 @@ import (
 )
 
 func main() {
+	requestLogPath := os.Getenv("YTBLND_REQUEST_LOG_PATH")
+	if requestLogPath == "" {
+		requestLogPath = "./data/requests.log.txt"
+	}
+
+	eventLogPath := os.Getenv("YTBLND_EVENT_LOG_PATH")
+	if eventLogPath == "" {
+		eventLogPath = "./data/events.log.txt"
+	}
+
+	if err := os.MkdirAll(filepath.Dir(requestLogPath), 0o755); err != nil {
+		log.Fatalf("failed to create log directory: %v", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(eventLogPath), 0o755); err != nil {
+		log.Fatalf("failed to create event log directory: %v", err)
+	}
+
+	serverLoggers, err := routelayer.NewServerLoggers(requestLogPath, eventLogPath)
+	if err != nil {
+		log.Fatalf("failed to initialize loggers: %v", err)
+	}
+	defer func() {
+		if err := serverLoggers.Close(); err != nil {
+			log.Printf("logger close error: %v", err)
+		}
+	}()
+
 	// Use an env override for DB path so local/dev/prod can vary storage.
 	dbPath := os.Getenv("YTBLND_DB_PATH")
 	if dbPath == "" {
@@ -33,20 +60,22 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to initialize sqlite manager: %v", err)
 	}
+	serverLoggers.Events.LogEvent("server_start", "db_path=%s request_log_path=%s event_log_path=%s started_at=%s", dbPath, requestLogPath, eventLogPath, time.Now().UTC().Format(time.RFC3339))
 
 	// Start the in-memory chat fanout loop used by websocket clients.
-	hub := routelayer.NewChatHub()
+	hub := routelayer.NewChatHub(dbManager, serverLoggers.Events)
 	go hub.Run()
 
 	r := gin.Default()
+	r.Use(serverLoggers.Requests.RequestMiddleware())
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
 
 	// Group all product API endpoints under a versioned prefix.
 	api := r.Group("/api/v1")
-	routelayer.RegisterAuthRoutes(api, dbManager)
-	routelayer.RegisterBlendRoutes(api, dbManager)
+	routelayer.RegisterAuthRoutes(api, dbManager, serverLoggers.Events)
+	routelayer.RegisterBlendRoutes(api, dbManager, serverLoggers.Events)
 	routelayer.RegisterChatRoutes(api, dbManager, hub)
 
 	server := &http.Server{
@@ -64,7 +93,8 @@ func main() {
 	// Block until termination signals arrive.
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
+	receivedSignal := <-quit
+	serverLoggers.Events.LogEvent("server_signal_received", "signal=%s received_at=%s", receivedSignal.String(), time.Now().UTC().Format(time.RFC3339))
 
 	// Gracefully drain requests before process exit.
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -72,5 +102,7 @@ func main() {
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
 		log.Printf("server shutdown error: %v", err)
+		serverLoggers.Events.LogEvent("server_shutdown_error", "signal=%s error=%v", receivedSignal.String(), err)
 	}
+	serverLoggers.Events.LogEvent("server_shutdown", "signal=%s graceful_shutdown=true stopped_at=%s", receivedSignal.String(), time.Now().UTC().Format(time.RFC3339))
 }

@@ -1,5 +1,5 @@
 // ============================================================================
-// BlendCreationPanel.h — New-blend setup screen
+// BlendCreationPanel.hpp — New-blend setup screen
 //
 // Lets the logged-in user assemble a group of up to 8 participants (by
 // username) and then create a blend from their combined YouTube data.
@@ -42,7 +42,7 @@
 #include <string>
 #include <vector>
 
-#include "UIPages.h"
+#include "UIPages.hpp"
 
 class AppController;
 class wxScrolledWindow;

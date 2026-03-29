@@ -3,9 +3,9 @@
 
 #include <list>
 
-#include "VideoEntry.h"
-#include "Channel.h"
-#include "Video.h"
+#include "VideoEntry.hpp"
+#include "Channel.hpp"
+#include "Video.hpp"
 
 class YouTubeData {
     private:

@@ -2,9 +2,9 @@
 #include <gmock/gmock.h>
 #include <wx/app.h>
 #include <wx/frame.h>
-#include "../UILayer/BlendCreationPanel.h"
+#include "../UILayer/BlendCreationPanel.hpp"
 #include "../AppLayer/AppController.hpp"
-#include "../AppLayer/EventRouter.h"
+#include "../AppLayer/EventRouter.hpp"
 
 using ::testing::_;
 using ::testing::NiceMock;

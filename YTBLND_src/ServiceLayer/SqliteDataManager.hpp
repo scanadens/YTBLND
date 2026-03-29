@@ -1,7 +1,7 @@
 #ifndef SQLITE_DATA_MANAGER_H
 #define SQLITE_DATA_MANAGER_H
 
-#include "DataManager.h"
+#include "DataManager.hpp"
 #include <sqlite3.h>
 #include <string>
 #include <vector>

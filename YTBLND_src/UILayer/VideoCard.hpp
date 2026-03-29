@@ -1,5 +1,5 @@
 // ============================================================================
-// VideoCard.h — Custom video preview card widget
+// VideoCard.hpp — Custom video preview card widget
 //
 // A self-contained wxPanel that displays a single YouTube video:
 //   • Top 72% — thumbnail fetched asynchronously from img.youtube.com
@@ -45,7 +45,7 @@
 #include <wx/wx.h>
 #include <wx/graphics.h>
 
-#include "../ModelLayer/Video.h"
+#include "../ModelLayer/Video.hpp"
 #include "../AppLayer/AppController.hpp"
 
 // ---------------------------------------------------------------------------

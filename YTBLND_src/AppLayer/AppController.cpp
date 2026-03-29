@@ -1,6 +1,6 @@
 #include "AppController.hpp"
 #include "../AppInfrastructure/YouTubeDataImporter.hpp"
-#include "../AlgorithmLayer/RandomBlendAlgorithm.h"
+#include "../AlgorithmLayer/RandomBlendAlgorithm.hpp"
 #include <exception>
 #include <iostream>
 #include <list>

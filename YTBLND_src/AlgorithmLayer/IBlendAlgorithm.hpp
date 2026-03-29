@@ -2,8 +2,8 @@
 #define IBLEND_ALGORITHM_H
 
 #include <list>
-#include "../ModelLayer/User.h"
-#include "../ModelLayer/Blend.h"
+#include "../ModelLayer/User.hpp"
+#include "../ModelLayer/Blend.hpp"
 
 class IBlendAlgorithm {
 public:

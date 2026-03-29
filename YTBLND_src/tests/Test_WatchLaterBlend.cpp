@@ -3,10 +3,10 @@
 #include "../AppInfrastructure/WatchHistoryParser.hpp"
 #include "../AppInfrastructure/WatchLaterParser.hpp"
 #include "../AppInfrastructure/YouTubeDataImporter.hpp"
-#include "../AlgorithmLayer/RandomBlendAlgorithm.h"
-#include "../ModelLayer/User.h"
-#include "../ModelLayer/YouTubeData.h"
-#include "../ModelLayer/Blend.h"
+#include "../AlgorithmLayer/RandomBlendAlgorithm.hpp"
+#include "../ModelLayer/User.hpp"
+#include "../ModelLayer/YouTubeData.hpp"
+#include "../ModelLayer/Blend.hpp"
 
 #include <list>
 #include <stdexcept>

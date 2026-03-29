@@ -127,3 +127,26 @@ func (b Blend) GetVideo(index int) (Video, error) {
 func (b Blend) Size() int {
 	return len(b.VideoList)
 }
+
+// ChatMessageRecord is the persisted representation of one chat message.
+type ChatMessageRecord struct {
+	RoomID   string
+	SenderID string
+	Content  string
+	SentAt   string
+}
+
+// NewChatMessageRecord keeps message construction consistent across layers.
+func NewChatMessageRecord(roomID, senderID, content, sentAt string) ChatMessageRecord {
+	return ChatMessageRecord{
+		RoomID:   roomID,
+		SenderID: senderID,
+		Content:  content,
+		SentAt:   sentAt,
+	}
+}
+
+func (m ChatMessageRecord) GetRoomID() string   { return m.RoomID }
+func (m ChatMessageRecord) GetSenderID() string { return m.SenderID }
+func (m ChatMessageRecord) GetContent() string  { return m.Content }
+func (m ChatMessageRecord) GetSentAt() string   { return m.SentAt }

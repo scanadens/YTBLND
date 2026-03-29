@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#include "../ModelLayer/User.h"
-#include "../ModelLayer/Blend.h"
-#include "../ModelLayer/ChatRoom.h"
+#include "../ModelLayer/User.hpp"
+#include "../ModelLayer/Blend.hpp"
+#include "../ModelLayer/ChatRoom.hpp"
 
 // AppState is the application's session-scoped memory.
 // It holds what is currently happening while the program is running:
