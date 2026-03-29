@@ -1,4 +1,4 @@
-#include "VideoEntry.h"
+#include "VideoEntry.hpp"
 
 VideoEntry::VideoEntry(const Video& video, int watchCount, int lastWatched)
     : video(video), watchCount(watchCount), lastWatched(lastWatched) {}

@@ -4,6 +4,9 @@ option(YTBLND_BUILD_TESTS "Build unit tests" ON)
 option(YTBLND_BUILD_UI_TESTS "Build wxWidgets/UI tests" OFF)
 option(YTBLND_REQUIRE_WX "Fail configure if wxWidgets is missing" OFF)
 
+# Pull ixwebsocket from source so builds remain portable across distros.
+include(FetchContent)
+
 # Core sources shared between the main executable and tests (no UI, no main)
 file(GLOB_RECURSE YTBLND_CORE_SOURCES
     AlgorithmLayer/*.cpp
@@ -47,6 +50,18 @@ endif()
 # main.cpp is at YTBLND_src root — added explicitly so it is NOT picked up by
 # the test GLOB and does not conflict with GTest's own main.
 find_package(SQLite3 REQUIRED)
+find_package(CURL REQUIRED)
+
+set(IXWEBSOCKET_BUILD_TEST OFF CACHE BOOL "Disable ixwebsocket tests" FORCE)
+set(IXWEBSOCKET_USE_TLS ON CACHE BOOL "Enable TLS support in ixwebsocket" FORCE)
+
+FetchContent_Declare(
+    ixwebsocket
+    GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
+    GIT_TAG v11.4.5
+)
+FetchContent_MakeAvailable(ixwebsocket)
+
 if(YTBLND_HAS_WX)
     add_executable(ytblnd
         ${YTBLND_CORE_SOURCES}
@@ -65,6 +80,8 @@ if(YTBLND_HAS_WX)
 
     target_link_libraries(ytblnd PRIVATE
         SQLite::SQLite3
+        CURL::libcurl
+        ixwebsocket::ixwebsocket
         ${wxWidgets_LIBRARIES}
     )
 endif()
@@ -120,6 +137,8 @@ if(YTBLND_BUILD_TESTS)
         GTest::gtest
         GTest::gtest_main
         SQLite::SQLite3
+        CURL::libcurl
+        ixwebsocket::ixwebsocket
     )
 
     if(YTBLND_BUILD_UI_TESTS AND YTBLND_HAS_WX)

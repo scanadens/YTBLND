@@ -14,8 +14,8 @@
 #include <wx/image.h>
 #include <wx/socket.h>
 
-#include "UILayer/MainFrame.h"
-#include "AppLayer/AppController.h"
+#include "UILayer/MainFrame.hpp"
+#include "AppLayer/AppController.hpp"
 
 class YTBLNDApp : public wxApp {
 public:

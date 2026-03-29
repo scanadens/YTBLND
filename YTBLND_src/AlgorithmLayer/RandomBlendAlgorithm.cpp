@@ -1,4 +1,4 @@
-#include "RandomBlendAlgorithm.h"
+#include "RandomBlendAlgorithm.hpp"
 
 #include <algorithm>
 #include <random>

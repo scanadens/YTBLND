@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
-#include "../ModelLayer/User.h"
-#include "../ModelLayer/Friend.h"
-#include "../ModelLayer/Video.h"
-#include "../ModelLayer/VideoEntry.h"
-#include "../ModelLayer/Channel.h"
-#include "../ModelLayer/YouTubeData.h"
-#include "../ModelLayer/Blend.h"
-#include "../ModelLayer/ChatRoom.h"
-#include "../ModelLayer/Message.h"
+#include "../ModelLayer/User.hpp"
+#include "../ModelLayer/Friend.hpp"
+#include "../ModelLayer/Video.hpp"
+#include "../ModelLayer/VideoEntry.hpp"
+#include "../ModelLayer/Channel.hpp"
+#include "../ModelLayer/YouTubeData.hpp"
+#include "../ModelLayer/Blend.hpp"
+#include "../ModelLayer/ChatRoom.hpp"
+#include "../ModelLayer/Message.hpp"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

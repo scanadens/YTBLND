@@ -1,4 +1,4 @@
-#include "EventRouter.h"
+#include "EventRouter.hpp"
 #include <iostream>
 
 EventRouter::EventRouter() {}

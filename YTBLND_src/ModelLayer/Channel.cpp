@@ -1,4 +1,4 @@
-#include "Channel.h"
+#include "Channel.hpp"
 
 Channel::Channel(const std::string& channelID,
                  const std::string& displayName,

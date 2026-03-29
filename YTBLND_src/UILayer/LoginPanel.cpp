@@ -2,16 +2,16 @@
 // LoginPanel.cpp — Sign In / Register screen implementation
 // ============================================================================
 
-#include "LoginPanel.h"
+#include "LoginPanel.hpp"
 
 #include <wx/simplebook.h>
 #include <wx/statline.h>
 
-#include "UIColors.h"
-#include "../AppLayer/AppController.h"
-#include "../AppLayer/AppState.h"
-#include "../AppLayer/EventRouter.h"
-#include "../ModelLayer/User.h"
+#include "UIColors.hpp"
+#include "../AppLayer/AppController.hpp"
+#include "../AppLayer/AppState.hpp"
+#include "../AppLayer/EventRouter.hpp"
+#include "../ModelLayer/User.hpp"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

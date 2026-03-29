@@ -1,0 +1,116 @@
+#ifndef APPSTATE_H
+#define APPSTATE_H
+
+#include <map>
+#include <string>
+#include <vector>
+
+#include "../ModelLayer/User.hpp"
+#include "../ModelLayer/Blend.hpp"
+#include "../ModelLayer/ChatRoom.hpp"
+
+// AppState is the application's session-scoped memory.
+// It holds what is currently happening while the program is running:
+// who is logged in, what blend is active, and what chat rooms exist.
+//
+// This class is a Singleton — only one instance can ever exist.
+// Use AppState::getInstance() to access it everywhere.
+// The constructor is private to enforce this.
+//
+// AppState holds no business logic and performs no I/O.
+// It is updated exclusively by AppController.
+class AppState {
+    private:
+        User*  currentUser;       // Logged-in user. Null if no session is active.
+        Blend* activeBlend;       // Most recently generated or loaded Blend. Null if none.
+        bool   isBlendGenerating; // True while BlendAlgorithm is running.
+
+        // All chat rooms for this session, keyed by blendID.
+        // Currently only the active blend's room is used, but the map
+        // structure allows multiple rooms to be supported in the future
+        // without changing this class.
+        std::map<std::string, ChatRoom> chatRooms;
+
+        // Participants that have uploaded their Watch Later CSV for the
+        // current blend session, keyed by userID.
+        std::map<std::string, User> sessionUsers;
+
+        // Set by handleCreateBlend to report participants who had no data.
+        // Cleared at the start of each createBlend call.
+        std::vector<std::string> usersWithoutData;
+
+        // Set by handleLogin when the user belongs to a blend but has no data
+        // uploaded yet. LoginPanel shows this as a dialog before DATA_INSTRUCTIONS.
+        // Cleared after being read.
+        std::string pendingBlendMessage;
+
+        // Private constructor — use getInstance()
+        AppState();
+
+        // Delete copy constructor and assignment to prevent cloning the singleton
+        AppState(const AppState&)            = delete;
+        AppState& operator=(const AppState&) = delete;
+
+    public:
+        // Returns the single global AppState instance.
+        // Creates it on first call; returns the same instance on every subsequent call.
+        static AppState& getInstance();
+
+        // ── Current User ──────────────────────────────────────────────────────
+        User* getCurrentUser()               const;
+        void  setCurrentUser(User* user);
+
+        // ── Active Blend ──────────────────────────────────────────────────────
+        Blend* getActiveBlend()              const;
+        void   setActiveBlend(Blend* blend);
+
+        // ── Blend Generation Flag ─────────────────────────────────────────────
+        bool isGeneratingBlend()             const;
+        void setIsBlendGenerating(bool flag);
+
+        // ── Chat Rooms ────────────────────────────────────────────────────────
+
+        // Returns a pointer to the ChatRoom for the active Blend.
+        // Returns nullptr if there is no active blend or no room exists for it.
+        ChatRoom* getActiveChatRoom();
+
+        // Creates a ChatRoom for the given Blend using its participant IDs.
+        // If a room already exists for that blendID it is replaced.
+        void createChatRoom(const Blend& blend);
+
+        // Returns a pointer to the ChatRoom for the given blendID.
+        // Returns nullptr if no room exists for that ID.
+        // Used to support multiple rooms in the future.
+        ChatRoom* getChatRoom(const std::string& blendID);
+
+        // ── Session Users (blend participants) ────────────────────────────────
+
+        // Adds or replaces the user entry for this blend session.
+        void addSessionUser(const User& user);
+
+        // Returns all users that have uploaded data in this session.
+        std::map<std::string, User> getSessionUsers() const;
+
+        // Removes all session participants (called before starting a new blend).
+        void clearSessionUsers();
+
+        // ── Blend creation feedback ───────────────────────────────────────────
+
+        // Stores userIDs of participants who had no Watch Later data when the
+        // blend was last created. UI reads this after dispatching "createBlend".
+        void setUsersWithoutData(const std::vector<std::string>& users);
+        std::vector<std::string> getUsersWithoutData() const;
+
+        // One-time message set by handleLogin when the user is a blend
+        // participant but has not yet uploaded data. Cleared on read.
+        void setPendingBlendMessage(const std::string& msg);
+        std::string takePendingBlendMessage(); // returns and clears
+
+        // ── Session ───────────────────────────────────────────────────────────
+
+        // Resets all state: clears currentUser, activeBlend, isBlendGenerating,
+        // chat rooms, and session users. Called by AppController on logout.
+        void clearSession();
+};
+
+#endif

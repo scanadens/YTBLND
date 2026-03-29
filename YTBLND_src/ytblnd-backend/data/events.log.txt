@@ -1,0 +1,3 @@
+2026/03/29 04:36:10.642666 event=server_start db_path=./data/dev.db request_log_path=./data/requests.log.txt event_log_path=./data/events.log.txt started_at=2026-03-29T04:36:10Z
+2026/03/29 04:36:52.572252 event=server_signal_received signal=terminated received_at=2026-03-29T04:36:52Z
+2026/03/29 04:36:52.584127 event=server_shutdown signal=terminated graceful_shutdown=true stopped_at=2026-03-29T04:36:52Z

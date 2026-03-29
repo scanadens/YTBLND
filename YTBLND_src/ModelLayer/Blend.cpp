@@ -1,4 +1,4 @@
-#include "Blend.h"
+#include "Blend.hpp"
 #include <stdexcept>
 
 Blend::Blend(const std::string& blendID,

@@ -1,4 +1,4 @@
-#include "ChatRoom.h"
+#include "ChatRoom.hpp"
 #include <algorithm>
 
 ChatRoom::ChatRoom(const std::string& blendID,

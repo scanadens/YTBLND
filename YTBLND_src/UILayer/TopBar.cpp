@@ -2,8 +2,8 @@
 // TopBar.cpp — Reusable interior-page header bar implementation
 // ============================================================================
 
-#include "TopBar.h"
-#include "UIColors.h"
+#include "TopBar.hpp"
+#include "UIColors.hpp"
 #include <wx/font.h>
 
 TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page backDest)
