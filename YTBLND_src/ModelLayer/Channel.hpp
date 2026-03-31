@@ -19,5 +19,7 @@ class Channel {
         std::string getChannelID()    const;
         std::string getDisplayName()  const;
         std::list<std::string> getCategories() const;
+
+        std::string toString() const;
 };
 #endif

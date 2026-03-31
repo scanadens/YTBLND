@@ -8,6 +8,7 @@
 #include "../ModelLayer/User.hpp"
 #include "../ModelLayer/Blend.hpp"
 #include "../ModelLayer/ChatRoom.hpp"
+#include "../ServiceLayer/HttpClient.hpp"
 
 // AppState is the application's session-scoped memory.
 // It holds what is currently happening while the program is running:
@@ -21,9 +22,9 @@
 // It is updated exclusively by AppController.
 class AppState {
     private:
-        User*  currentUser;       // Logged-in user. Null if no session is active.
-        Blend* activeBlend;       // Most recently generated or loaded Blend. Null if none.
-        bool   isBlendGenerating; // True while BlendAlgorithm is running.
+        User*  currentUser;                 // Logged-in user. Null if no session is active.
+        Blend* activeBlend;                 // Most recently generated or loaded Blend. Null if none.
+        bool   isBlendGenerating;           // True while BlendAlgorithm is running.
 
         // All chat rooms for this session, keyed by blendID.
         // Currently only the active blend's room is used, but the map

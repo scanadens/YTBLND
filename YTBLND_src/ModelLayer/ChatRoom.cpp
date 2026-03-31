@@ -1,5 +1,8 @@
 #include "ChatRoom.hpp"
+#include "JsonUtils.hpp"
+
 #include <algorithm>
+#include <sstream>
 
 ChatRoom::ChatRoom(const std::string& blendID,
                    const std::vector<std::string>& participantIDs)
@@ -32,4 +35,43 @@ bool ChatRoom::isParticipant(const std::string& userID) const {
 
 void ChatRoom::clearMessages() {
     messages.clear();
+}
+
+std::string ChatRoom::toString() const {
+    std::ostringstream membersJson;
+    membersJson << "[";
+    bool firstMember = true;
+    for (const auto& participantID : participantIDs) {
+        if (!firstMember) {
+            membersJson << ",";
+        }
+        membersJson << ModelJson::quote(participantID);
+        firstMember = false;
+    }
+    membersJson << "]";
+
+    std::ostringstream messagesJson;
+    messagesJson << "[";
+    bool firstMessage = true;
+    for (const auto& message : messages) {
+        if (!firstMessage) {
+            messagesJson << ",";
+        }
+        messagesJson << "{"
+                     << "\"type\":\"chat_message\"," 
+                     << "\"room_id\":" << ModelJson::quote(blendID) << ","
+                     << "\"sender_id\":" << ModelJson::quote(message.userID) << ","
+                     << "\"content\":" << ModelJson::quote(message.text) << ","
+                     << "\"sent_at\":" << ModelJson::quote(ModelJson::toIso8601(message.timestamp))
+                     << "}";
+        firstMessage = false;
+    }
+    messagesJson << "]";
+
+    return "{"
+           "\"blend_id\":" + ModelJson::quote(blendID) + ","
+           "\"chat_room_id\":" + ModelJson::quote(blendID) + ","
+           "\"member_users\":" + membersJson.str() + ","
+           "\"messages\":" + messagesJson.str()
+           + "}";
 }

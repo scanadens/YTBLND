@@ -4,14 +4,31 @@
 #include <exception>
 #include <iostream>
 #include <list>
+#include <sstream>
+
+using namespace std;
 
 // ── Constructor / Destructor ──────────────────────────────────────────────────
 
-AppController::AppController(const std::string& dbPath)
-    : appState(AppState::getInstance()),
-      dataManager(std::make_unique<SqliteDataManager>(dbPath))
+AppController::AppController(const std::string& dbPath): 
+    appState(AppState::getInstance()),
+    dataManager(std::make_unique<SqliteDataManager>(dbPath)),  
+    server_url("http://<137.220.58.22>:8080"), 
+    http(server_url),
+    isConnected(false)
 {
     registerEvents();
+    // performing http health check to ensure connection was successull
+    string resp = http.get("/ping"); //grab the server response
+    if (resp.find("pong")) {
+        cout << "[AppState] Successful connection to the server" << endl;
+        isConnected = true;
+    } else {
+        cout << "[AppState] Was unable to connect to the server. Try checking internet connection and restart the app." << endl;
+        isConnected = false;
+    }
+
+    //TODO: add some sort of counter-measure or alternative behaviour if theres no connection
 }
 
 AppController::~AppController() {
@@ -43,25 +60,39 @@ EventRouter& AppController::getEventRouter() {
 // ── Event Handlers ────────────────────────────────────────────────────────────
 
 void AppController::handleRegister(const EventPayload& payload) {
+    // verifying user data structure
     auto idIt   = payload.find("userID");
     auto unIt   = payload.find("username");
     auto emIt   = payload.find("email");
     auto pwIt   = payload.find("password");
 
     if (idIt == payload.end() || unIt == payload.end() ||
-        pwIt == payload.end()) {
+        pwIt == payload.end()) { // if user data is malformed, notify
         std::cerr << "[AppController] handleRegister: missing required fields\n";
         return;
     }
 
+    // building user data structure
     User newUser(idIt->second,
                  unIt->second,
                  emIt != payload.end() ? emIt->second : "",
                  pwIt->second);
 
-    if (!dataManager->createUser(newUser)) {
-        std::cerr << "[AppController] handleRegister: userID '"
-                  << idIt->second << "' already exists\n";
+    const string registerResponse = http.post(http.REG_USER, newUser.toString());
+    if (!http.wasLastRequestSuccessful(http.P)) {
+        if (http.getLastStatusCode() == http.DUPLICATE) {
+            cerr << "[AppController] handleRegister: userID '"
+                 << idIt->second 
+                 << "' already exists"
+                 << endl;
+            return;
+        }
+
+        cerr << "[AppController] handleRegister: server rejected registration with HTTP "
+             << http.getLastStatusCode() 
+             << " response=" 
+             << registerResponse 
+             << endl;
         return;
     }
 
@@ -72,6 +103,7 @@ void AppController::handleRegister(const EventPayload& payload) {
 }
 
 void AppController::handleLogin(const EventPayload& payload) {
+    // verifing incorrect userID and password combination
     auto idIt = payload.find("userID");
     auto pwIt = payload.find("password");
 
@@ -79,6 +111,11 @@ void AppController::handleLogin(const EventPayload& payload) {
         std::cerr << "[AppController] handleLogin: missing 'userID' or 'password'\n";
         return;
     }
+
+    stringstream login_json; 
+    login_json << "{\"user_id\":" << // TODO: left off here
+
+    const string loginResponse = http.post(http.LOGIN, )
 
     if (!dataManager->validatePassword(idIt->second, pwIt->second)) {
         std::cerr << "[AppController] handleLogin: invalid credentials for '"

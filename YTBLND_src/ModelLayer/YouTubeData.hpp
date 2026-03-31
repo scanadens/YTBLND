@@ -32,5 +32,7 @@ class YouTubeData {
         //Computed queries
         std::list<Video> getMostWatchedVideos(int n)   const; //returns n most replayed videos
         std::list<Channel> getTopChannels(int n)       const; //returns n most frequently watched channels
+
+        std::string toString() const;
 };
 #endif

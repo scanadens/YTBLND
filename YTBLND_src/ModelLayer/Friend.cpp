@@ -1,4 +1,5 @@
 #include "Friend.hpp"
+#include "JsonUtils.hpp"
 
 //
 Friend::Friend(const std::string& userID,
@@ -28,4 +29,12 @@ void Friend::setDisplayName(const std::string& displayName) {
 
 void Friend::setEmail(const std::string& email) {
     this->email = email;
+}
+
+std::string Friend::toString() const {
+    return "{"
+           "\"user_id\":" + ModelJson::quote(userID) + ","
+           "\"username\":" + ModelJson::quote(displayName) + ","
+           "\"email\":" + ModelJson::quote(email)
+           + "}";
 }

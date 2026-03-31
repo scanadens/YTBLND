@@ -28,5 +28,7 @@ class Video {
         std::string getThumbnailURL() const;
         int         getDuration()     const;
         std::list<std::string> getTags() const;
+
+        std::string toString() const;
 };
 #endif

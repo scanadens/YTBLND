@@ -1,5 +1,9 @@
 #include "User.hpp"
 
+#include "JsonUtils.hpp"
+
+#include <sstream>
+
 User::User(const std::string& userID,
            const std::string& username,
            const std::string& email,
@@ -41,4 +45,26 @@ void User::removeFriend(const std::string& userID) {
     friends.remove_if([&userID](const Friend& f) {
         return f.getUserID() == userID;
     });
+}
+
+std::string User::toString() const {
+    std::ostringstream friendsJson;
+    friendsJson << "[";
+    bool firstFriend = true;
+    for (const auto& friendUser : friends) {
+        if (!firstFriend) {
+            friendsJson << ",";
+        }
+        friendsJson << friendUser.toString();
+        firstFriend = false;
+    }
+    friendsJson << "]";
+
+    return "{"
+           "\"user_id\":" + ModelJson::quote(userID) + ","
+           "\"username\":" + ModelJson::quote(username) + ","
+           "\"email\":" + ModelJson::quote(email) + ","
+           "\"friends\":" + friendsJson.str() + ","
+           "\"youtube_data\":" + youTubeData.toString()
+           + "}";
 }

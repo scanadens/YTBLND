@@ -42,6 +42,8 @@ class ChatRoom {
         // Clears all messages from memory. Does not affect persistence
         // since persistence is not implemented yet.
         void clearMessages();
+
+        std::string toString() const;
 };
 
 #endif

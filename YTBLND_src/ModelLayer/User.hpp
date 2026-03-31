@@ -39,6 +39,8 @@ class User {
 
         void addFriend(const User& user);
         void removeFriend(const std::string& userID);
+
+        std::string toString() const;
 };
 
 #endif

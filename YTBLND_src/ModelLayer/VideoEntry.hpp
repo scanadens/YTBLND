@@ -20,6 +20,8 @@ class VideoEntry {
         // Setters — watch data can be updated as the user's activity changes
         void setWatchCount(int watchCount);
         void setLastWatched(int lastWatched);
+
+        std::string toString() const;
 };
 
 #endif

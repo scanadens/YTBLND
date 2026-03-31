@@ -9,6 +9,7 @@
 #include "EventRouter.hpp"
 #include "../ModelLayer/Blend.hpp"
 #include "../ServiceLayer/SqliteDataManager.hpp"
+#include "../ServiceLayer/HttpClient.hpp"
 
 class YouTubeDataParser;  // stub for future use
 
@@ -26,6 +27,10 @@ class AppController {
         AppState&    appState;    // Singleton session state
         EventRouter  eventRouter; // Messenger between UI and controller
         std::unique_ptr<SqliteDataManager> dataManager;
+        HttpClient http;                    // http client wrapper for server communications
+        const std::string server_url;       // url and port to the server
+        bool isConnected;                   // tracks whether AppState has a connection to the server
+
         // IBlendAlgorithm* blendAlgorithm; // Stub — added when algorithm layer is implemented
 
         // Owns the most recently generated Blend so AppState can hold a raw pointer to it.

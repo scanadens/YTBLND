@@ -22,6 +22,8 @@ class Friend {
         // Setters
         void setDisplayName(const std::string& displayName);
         void setEmail(const std::string& email);
+
+        std::string toString() const;
 };
 
 #endif

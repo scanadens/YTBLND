@@ -33,5 +33,7 @@ class Blend {
 
         // Size of the blend
         int size() const;
+
+        std::string toString() const;
     };
 #endif
