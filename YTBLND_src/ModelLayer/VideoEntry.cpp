@@ -25,3 +25,11 @@ void VideoEntry::setWatchCount(int watchCount) {
 void VideoEntry::setLastWatched(int lastWatched) {
     this->lastWatched = lastWatched;
 }
+
+std::string VideoEntry::toString() const {
+    return "{"
+           "\"video\":" + video.toString() + ","
+           "\"watch_count\":" + std::to_string(watchCount) + ","
+           "\"last_watched\":" + std::to_string(lastWatched)
+           + "}";
+}

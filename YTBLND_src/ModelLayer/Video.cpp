@@ -1,4 +1,7 @@
 #include "Video.hpp"
+#include "JsonUtils.hpp"
+
+#include <sstream>
 
 Video::Video(const std::string& videoID,
              const std::string& title,
@@ -47,4 +50,27 @@ std::string Video::getChannelName() const {
 
 std::string Video::getChannelLogoURL() const {
     return channelLogoURL;
+}
+
+std::string Video::toString() const {
+    std::ostringstream tagsJson;
+    tagsJson << "[";
+    bool first = true;
+    for (const auto& tag : tags) {
+        if (!first) {
+            tagsJson << ",";
+        }
+        tagsJson << ModelJson::quote(tag);
+        first = false;
+    }
+    tagsJson << "]";
+
+    return "{"
+           "\"video_id\":" + ModelJson::quote(videoID) + ","
+           "\"title\":" + ModelJson::quote(title) + ","
+           "\"channel_id\":" + ModelJson::quote(channelID) + ","
+           "\"thumbnail_url\":" + ModelJson::quote(thumbnailURL) + ","
+           "\"duration\":" + std::to_string(duration) + ","
+           "\"tags\":" + tagsJson.str()
+           + "}";
 }

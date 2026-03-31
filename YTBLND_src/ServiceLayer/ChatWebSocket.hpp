@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <sstream>
 #include <string>
+#include "HttpClient.hpp"
 
 /**
  * \file WebSocket.hpp
@@ -17,7 +18,6 @@
 
 class ChatWebSocket {
 	public:
-
 	/**
 	 * Sets up WebSocket to perform specialized actions upon successful 
 	 * connection, message recieving, and errors. Given the WebSocket 
@@ -37,6 +37,7 @@ class ChatWebSocket {
 	 * \param blendID the blend id to be set
 	 */
 	void set_blendID(const std::string blendID);
+
 	/**
 	 * Sets userID
 	 * \param userID the user id to be set

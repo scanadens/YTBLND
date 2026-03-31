@@ -38,6 +38,8 @@ class Friend {
         void setDisplayName(const std::string& displayName);
         /// \param email New email address.
         void setEmail(const std::string& email);
+
+        std::string toString() const;
 };
 
 #endif

@@ -1,7 +1,11 @@
 #include "AppState.hpp"
 
-AppState::AppState()
-    : currentUser(nullptr), activeBlend(nullptr), isBlendGenerating(false) {}
+using namespace std;
+
+AppState::AppState(): 
+    currentUser(nullptr), 
+    activeBlend(nullptr), 
+    isBlendGenerating(false) {}
 
 // ── Singleton ─────────────────────────────────────────────────────────────────
 

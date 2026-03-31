@@ -199,6 +199,38 @@ TEST(HttpClientWrapperTest, GetAndPostRoundTripAgainstLoopbackServer) {
     EXPECT_EQ(postResponse, payload);
 }
 
+TEST(HttpClientWrapperTest, StaticStatusHandlerMatchesFrontendContract) {
+    EXPECT_TRUE(HttpClient::isRequestSuccessful("GET", 200));
+    EXPECT_FALSE(HttpClient::isRequestSuccessful("GET", 201));
+    EXPECT_FALSE(HttpClient::isRequestSuccessful("GET", 404));
+
+    EXPECT_TRUE(HttpClient::isRequestSuccessful("POST", 200));
+    EXPECT_TRUE(HttpClient::isRequestSuccessful("POST", 201));
+    EXPECT_FALSE(HttpClient::isRequestSuccessful("POST", 400));
+}
+
+TEST(HttpClientWrapperTest, LastStatusHelpersReflectMostRecentRequest) {
+    LocalHttpServer server;
+    HttpClient client("http://127.0.0.1:" + std::to_string(server.port()));
+
+    (void)client.get("/ping");
+    EXPECT_EQ(client.getLastStatusCode(), 200);
+    EXPECT_TRUE(client.wasLastRequestSuccessful("GET"));
+
+    const std::string payload = "{\"hello\":\"world\"}";
+    (void)client.post("/echo", payload);
+    EXPECT_EQ(client.getLastStatusCode(), 200);
+    EXPECT_TRUE(client.wasLastRequestSuccessful("POST"));
+
+    (void)client.get("/missing");
+    EXPECT_EQ(client.getLastStatusCode(), 404);
+    EXPECT_FALSE(client.wasLastRequestSuccessful("GET"));
+}
+
+TEST(HttpClientWrapperTest, StaticStatusHandlerRejectsUnsupportedMethods) {
+    EXPECT_THROW(HttpClient::isRequestSuccessful("DELETE", 200), std::invalid_argument);
+}
+
 TEST(ChatWebSocketWrapperTest, MissingIDsThrowsValidationError) {
     // Wrapper must reject sends when required route parameters are absent.
     ChatWebSocket ws("ws://127.0.0.1:65530/api/v1/ws/chats/");

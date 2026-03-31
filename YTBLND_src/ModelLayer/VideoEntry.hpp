@@ -39,6 +39,8 @@ class VideoEntry {
         void setWatchCount(int watchCount);
         /// \param lastWatched Updated last-watched Unix timestamp.
         void setLastWatched(int lastWatched);
+
+        std::string toString() const;
 };
 
 #endif

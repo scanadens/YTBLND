@@ -2,6 +2,7 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 YouTubeData::YouTubeData() {}
 
@@ -87,4 +88,61 @@ std::list<Channel> YouTubeData::getTopChannels(int n) const {
         count++;
     }
     return result;
+}
+
+std::string YouTubeData::toString() const {
+    std::ostringstream watchHistoryJson;
+    watchHistoryJson << "[";
+    bool firstWatch = true;
+    for (const auto& entry : watchHistory) {
+        if (!firstWatch) {
+            watchHistoryJson << ",";
+        }
+        watchHistoryJson << entry.toString();
+        firstWatch = false;
+    }
+    watchHistoryJson << "]";
+
+    std::ostringstream likedJson;
+    likedJson << "[";
+    bool firstLiked = true;
+    for (const auto& video : likedVideos) {
+        if (!firstLiked) {
+            likedJson << ",";
+        }
+        likedJson << video.toString();
+        firstLiked = false;
+    }
+    likedJson << "]";
+
+    std::ostringstream channelsJson;
+    channelsJson << "[";
+    bool firstChannel = true;
+    for (const auto& channel : subscribedChannels) {
+        if (!firstChannel) {
+            channelsJson << ",";
+        }
+        channelsJson << channel.toString();
+        firstChannel = false;
+    }
+    channelsJson << "]";
+
+    std::ostringstream watchLaterJson;
+    watchLaterJson << "[";
+    bool firstLater = true;
+    for (const auto& video : watchLaterVideos) {
+        if (!firstLater) {
+            watchLaterJson << ",";
+        }
+        watchLaterJson << video.toString();
+        firstLater = false;
+    }
+    watchLaterJson << "]";
+
+    return "{"
+           "\"watch_history\":" + watchHistoryJson.str() + ","
+           "\"liked_videos\":" + likedJson.str() + ","
+           "\"subscribed_channels\":" + channelsJson.str() + ","
+           "\"watch_later\":{\"videos\":" + watchLaterJson.str() + "}"
+           + "}";
 }

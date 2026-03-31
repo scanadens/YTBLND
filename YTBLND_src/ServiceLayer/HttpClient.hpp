@@ -22,12 +22,76 @@ class HttpClient {
 		// Constant for getting to eleminate typing errors
 		const std::string G = "GET";
 
+		// --- endpoint constants ---
+
+		// user registration endpoint
+		const std::string REG_USER = "/api/v1/auth/register";
+		// user login endpoint
+		const std::string LOGIN = "/api/v1/auth/login";
+		// endpoint pertaining to creating a blend
+		const std::string BLEND = "/api/v1/blends";
+
+		// --- status codes ---
+		
+		const int SUCC = 200; // success
+		const int ALT_SUCC = 201; // alt success
+		const int MAL_REQ_ERR = 400; // malformed request error
+		const int INV_USR_LOG_ERR = 401; // invalid login creditionals
+		const int UNAUTH_RES_REQ_ERR = 403; // user not authorized for request resource
+		const int MISS_RM_CNTXT = 404; // missing user or blend room context
+		const int DUPLICATE = 409; // duplicate entry
+		const int SERVER_ERR = 500; // server error
+		//
+
 		/**
 		 * Basic constructor. Assigns base url to this instance
 		 * \param base string that will be saved to this instance
 		 */
 		HttpClient(std::string base);
 		~HttpClient() = default;
+
+		/**
+		 * \brief Evaluates whether an HTTP status code should be treated as a
+		 * successful result for a specific request method.
+		 *
+		 * This is the central error-code handler for HttpClient. Use it whenever
+		 * you need to decide if a completed request succeeded semantically, not
+		 * just transport-wise.
+		 *
+		 * Success rules are intentionally aligned with the frontend/backend
+		 * contract in `Docs/Front_End_Requirements_for_Server_Communication.md`:
+		 * - `GET` is successful only for `200 OK`.
+		 * - `POST` is successful for `200 OK` or `201 Created`.
+		 * - All other status codes are considered failures.
+		 *
+		 * \param method HTTP verb string (`"GET"` or `"POST"`).
+		 * \param statusCode Numeric HTTP status code returned by the server.
+		 * \return `true` when the code represents success for the given method;
+		 *         `false` otherwise.
+		 * \throws std::invalid_argument if the method is unsupported.
+		 */
+		static bool isRequestSuccessful(const std::string& method, long statusCode);
+
+		/**
+		 * \brief Returns the HTTP status code from the most recent successful
+		 * libcurl transfer initiated by this client instance.
+		 *
+		 * This value is updated by `request()` after `curl_easy_perform()` and is
+		 * available to callers who need post-call diagnostics.
+		 *
+		 * \return Last response status code, or `0` before any request has run.
+		 */
+		long getLastStatusCode() const;
+
+		/**
+		 * \brief Convenience helper that applies `isRequestSuccessful()` to the
+		 * latest response code captured by this client.
+		 *
+		 * \param method HTTP verb to evaluate (`"GET"` or `"POST"`).
+		 * \return `true` when the latest response code is successful for `method`.
+		 * \throws std::invalid_argument if the method is unsupported.
+		 */
+		bool wasLastRequestSuccessful(const std::string& method) const;
 		
 		
 		/**
@@ -45,12 +109,43 @@ class HttpClient {
 		 */
 		std::string post(const std::string& path, const std::string& json);
 
+		/**
+		 * Builds save watch later endpoint given it's dependant on userID
+		 * \param userID string ID for user
+		 * \return the string endpoint built from the given ID
+		 */
+		std::string build_watch_later_endpoint(std::string userID);
+
+		/**
+		 * Builds latest blend endpoint based on the user
+		 * \param userID userID to use for the endpoint
+		 * \return the built string for the endpoint in respect to userID
+		 */
+		std::string build_latest_blend_endpoint(std::string userID);
+
+		/**
+		 * Builds endpoint in regards to blend participants
+		 * \param blendID the ID needed to build the respective end 
+		 * \return the built string endpoint in respect to the blendID
+		 */
+		std::string build_blend_participant_endpoint(std::string blendID);
+
+		/**
+		 * Builds the endpoint for the specific chatroom details
+		 * \param blendID use in paralell as the chatroomID for the endpoint
+		 * \return the structured string endpoint in respect to blendID
+		 */
+		std::string build_chatroom_detail_endpoint(std::string blendID);
+
 	private:
 		// Holds the base url for server communication
 		std::string baseUrl;
 
 		// used as a header internally (specifically for our server)
 		const std::string hdr = "Content-Type: application/json";
+
+		// HTTP status code from the latest response (0 means not set yet).
+		long lastStatusCode = 0;
 
 		/**
 		 * Helper function. Does the grunt work of retrieving and posting data to the server

@@ -62,6 +62,9 @@ class Blend {
 
         /// \return Number of videos in the blend.
         int size() const;
+
+        /// \return JSON string representation of this blend.
+        std::string toString() const;
 };
 
 #endif

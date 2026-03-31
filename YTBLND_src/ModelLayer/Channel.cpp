@@ -1,4 +1,7 @@
 #include "Channel.hpp"
+#include "JsonUtils.hpp"
+
+#include <sstream>
 
 Channel::Channel(const std::string& channelID,
                  const std::string& displayName,
@@ -17,4 +20,24 @@ std::string Channel::getDisplayName() const {
 
 std::list<std::string> Channel::getCategories() const {
     return categories;
+}
+
+std::string Channel::toString() const {
+    std::ostringstream categoriesJson;
+    categoriesJson << "[";
+    bool first = true;
+    for (const auto& category : categories) {
+        if (!first) {
+            categoriesJson << ",";
+        }
+        categoriesJson << ModelJson::quote(category);
+        first = false;
+    }
+    categoriesJson << "]";
+
+    return "{"
+           "\"channel_id\":" + ModelJson::quote(channelID) + ","
+           "\"display_name\":" + ModelJson::quote(displayName) + ","
+           "\"categories\":" + categoriesJson.str()
+           + "}";
 }

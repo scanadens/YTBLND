@@ -74,6 +74,8 @@ class User {
          * \param userID ID of the friend to remove.
          */
         void removeFriend(const std::string& userID);
+
+        std::string toString() const;
 };
 
 #endif

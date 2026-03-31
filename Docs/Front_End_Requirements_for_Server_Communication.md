@@ -9,11 +9,11 @@
 
 ## 1. Base Configuration
 
-- **Base origin:** `http://<server-host>:8080`
+- **Base origin:** `http://137.220.58.22:8080`
 - **REST prefix:** `/api/v1`
 - **REST request body:** `application/json`
 - **REST response type:** JSON
-- **WebSocket endpoint:** `ws://<server-host>:8080/api/v1/ws/chats/:blendID?user_id=<userID>`
+- **WebSocket endpoint:** `ws://137.220.58.22:8080/api/v1/ws/chats/:blendID?user_id=<userID>`
 
 **Example local REST base:**
 
@@ -185,7 +185,7 @@ Returns up to 100 messages, oldest → newest.
 ### Connect WebSocket
 
 ```
-ws://<server-host>:8080/api/v1/ws/chats/:blendID?user_id=:userID
+ws://137.220.58.22:8080/api/v1/ws/chats/:blendID?user_id=:userID
 ```
 
 ### Outbound Message (client → server)

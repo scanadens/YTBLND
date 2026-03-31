@@ -1,5 +1,9 @@
 #include "Blend.hpp"
+#include "JsonUtils.hpp"
+
 #include <stdexcept>
+
+#include <sstream>
 
 Blend::Blend(const std::string& blendID,
              const std::string& algorithmUsed,
@@ -48,4 +52,38 @@ Video Blend::getVideo(int index) const {
 
 int Blend::size() const {
     return static_cast<int>(videoList.size());
+}
+
+std::string Blend::toString() const {
+    std::ostringstream participantsJson;
+    participantsJson << "[";
+    bool firstParticipant = true;
+    for (const auto& participant : participants) {
+        if (!firstParticipant) {
+            participantsJson << ",";
+        }
+        participantsJson << ModelJson::quote(participant.getUserID());
+        firstParticipant = false;
+    }
+    participantsJson << "]";
+
+    std::ostringstream videosJson;
+    videosJson << "[";
+    bool firstVideo = true;
+    for (const auto& video : videoList) {
+        if (!firstVideo) {
+            videosJson << ",";
+        }
+        videosJson << video.toString();
+        firstVideo = false;
+    }
+    videosJson << "]";
+
+    return "{"
+            "\"blend_id\":" + ModelJson::quote(blendID) + ","
+            "\"chat_room_id\":" + ModelJson::quote(blendID) + ","
+            "\"algorithm\":" + ModelJson::quote(algorithmUsed) + ","
+           "\"participants\":" + participantsJson.str() + ","
+           "\"videos\":" + videosJson.str()
+           + "}";
 }

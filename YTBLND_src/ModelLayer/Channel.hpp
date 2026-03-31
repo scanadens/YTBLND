@@ -34,6 +34,8 @@ class Channel {
         std::string getDisplayName()  const;
         /// \return Content categories for this channel.
         std::list<std::string> getCategories() const;
+
+        std::string toString() const;
 };
 
 #endif

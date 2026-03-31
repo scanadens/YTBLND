@@ -20,6 +20,7 @@
 #include "../ModelLayer/User.hpp"
 #include "../ModelLayer/Blend.hpp"
 #include "../ModelLayer/ChatRoom.hpp"
+#include "../ServiceLayer/HttpClient.hpp"
 
 /// Session-scoped singleton holding all runtime application state.
 class AppState {

@@ -23,6 +23,7 @@
 #include "EventRouter.hpp"
 #include "../ModelLayer/Blend.hpp"
 #include "../ServiceLayer/SqliteDataManager.hpp"
+#include "../ServiceLayer/HttpClient.hpp"
 
 class YouTubeDataParser;  ///< Stub for future use.
 
@@ -32,6 +33,9 @@ class AppController {
         AppState&    appState;     ///< Singleton session state.
         EventRouter  eventRouter;  ///< Messenger between UI and controller.
         std::unique_ptr<SqliteDataManager> dataManager;
+        HttpClient        http;        ///< HTTP client wrapper for server communications.
+        std::string       server_url;  ///< URL and port of the backend server.
+        bool              isConnected; ///< True when the client has a live server connection.
 
         /// Owns the most recently generated Blend so AppState can hold a raw pointer.
         std::unique_ptr<Blend> currentBlend;

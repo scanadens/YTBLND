@@ -3,7 +3,11 @@
 #include <list>
 #include <unordered_map>
 #include <string>
-#include <bits/stdc++.h>
+
+#include <iostream>
+#include <algorithm>
+#include <sstream>
+
 #include <vector>
 #include "File_ID.hpp"
 

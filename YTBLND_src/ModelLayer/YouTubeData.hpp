@@ -58,6 +58,9 @@ class YouTubeData {
          * \return List of up to n Channels sorted by descending view count.
          */
         std::list<Channel> getTopChannels(int n) const;
+
+        /// \return JSON string representation of this YouTubeData object.
+        std::string toString() const;
 };
 
 #endif

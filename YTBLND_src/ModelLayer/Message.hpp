@@ -30,6 +30,8 @@ struct Message {
             const std::string& text,
             std::time_t timestamp = std::time(nullptr))
         : userID(userID), text(text), timestamp(timestamp) {}
+
+    std::string toString() const;
 };
 
 #endif

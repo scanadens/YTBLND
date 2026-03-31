@@ -14,6 +14,25 @@ HttpClient::HttpClient(string base) {
 	baseUrl = move(base);
 }
 
+bool HttpClient::isRequestSuccessful(const string& method, long statusCode) {
+	if (method == "GET") {
+		return statusCode == 200;
+	}
+	if (method == "POST") {
+		return statusCode == 200 || statusCode == 201;
+	}
+
+	throw invalid_argument("HttpClient::isRequestSuccessful received unsupported method: " + method);
+}
+
+long HttpClient::getLastStatusCode() const {
+	return lastStatusCode;
+}
+
+bool HttpClient::wasLastRequestSuccessful(const string& method) const {
+	return isRequestSuccessful(method, lastStatusCode);
+}
+
 string HttpClient::get(const string& path) {
 	return request(G, path, "");
 }
@@ -76,6 +95,11 @@ string HttpClient::request(const string& method, const string& path, const strin
 
 	// firing off the request and clean up all pointers
 	CURLcode result = curl_easy_perform(curl);
+
+	long statusCode = 0;
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &statusCode);
+	lastStatusCode = statusCode;
+
 	curl_easy_cleanup(curl);
 	curl_slist_free_all(headers);
 

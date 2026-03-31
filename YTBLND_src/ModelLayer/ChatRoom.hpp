@@ -63,6 +63,8 @@ class ChatRoom {
          * Has no effect on persistence since persistence is not implemented yet.
          */
         void clearMessages();
+
+        std::string toString() const;
 };
 
 #endif

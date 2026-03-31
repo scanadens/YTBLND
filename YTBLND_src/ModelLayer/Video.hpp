@@ -62,6 +62,9 @@ class Video {
         std::string getChannelName()    const;
         /// \return URL of the channel's profile picture.
         std::string getChannelLogoURL() const;
+
+        /// \return JSON string representation of this video.
+        std::string toString() const;
 };
 
 #endif
