@@ -60,15 +60,13 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
     GIT_TAG v11.4.5
 )
-
 FetchContent_Declare(
     nlohmann_json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
     GIT_TAG v3.11.3
 )
-set(JSON_BuildTests OFF CACHE BOOL "Disable nlohmann/json tests" FORCE)
-
-FetchContent_MakeAvailable(ixwebsocket nlohmann_json)
+FetchContent_MakeAvailable(ixwebsocket)
+FetchContent_MakeAvailable(nlohmann_json)
 
 if(YTBLND_HAS_WX)
     add_executable(ytblnd
