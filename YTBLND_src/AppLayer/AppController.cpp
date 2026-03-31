@@ -82,25 +82,34 @@ void AppController::handleRegister(const EventPayload& payload) {
                  emIt != payload.end() ? emIt->second : "",
                  pwIt->second);
 
-    const std::string registerResponse = http.post(http.REG_USER, newUser.toString());
-    if (!http.wasLastRequestSuccessful(http.P)) {
-        if (http.getLastStatusCode() == http.DUPLICATE) {
-            std::cerr << "[AppController] handleRegister: userID '"
-                      << idIt->second
-                      << "' already exists"
-                      << std::endl;
-            return;
+    // Attempt server registration when online; bail on definitive server errors.
+    if (isConnected) {
+        try {
+            const std::string registerResponse = http.post(http.REG_USER, newUser.toString());
+            if (!http.wasLastRequestSuccessful(http.P)) {
+                if (http.getLastStatusCode() == http.DUPLICATE) {
+                    std::cerr << "[AppController] handleRegister: userID '"
+                              << idIt->second << "' already exists on server\n";
+                    return;
+                }
+                std::cerr << "[AppController] handleRegister: server error "
+                          << http.getLastStatusCode()
+                          << " response=" << registerResponse << "\n";
+                return;
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "[AppController] handleRegister: HTTP unavailable, registering locally: "
+                      << e.what() << "\n";
         }
+    }
 
-        std::cerr << "[AppController] handleRegister: server rejected registration with HTTP "
-                  << http.getLastStatusCode()
-                  << " response="
-                  << registerResponse
-                  << std::endl;
+    // Always persist to local DB — needed for login validation regardless of server state.
+    if (!dataManager->createUser(newUser)) {
+        std::cerr << "[AppController] handleRegister: userID '"
+                  << idIt->second << "' already exists locally\n";
         return;
     }
 
-    // Log the new user in immediately after registration
     appState.setCurrentUser(new User(newUser));
     std::cout << "[AppController] Registered and logged in as '"
               << newUser.getUsername() << "'\n";
