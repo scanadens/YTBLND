@@ -46,6 +46,16 @@ class AppController {
          */
         void registerEvents();
 
+        /**
+         * Re-enriches \p videos via the YouTube API if any are missing a title.
+         * Saves the updated list back to the database when enrichment occurs.
+         * No-op if all videos already have titles.
+         * \param userID Owner of the video list (used for the DB save).
+         * \param videos Video list to inspect and potentially update in-place.
+         */
+        void enrichIfMissingMetadata(const std::string& userID,
+                                     std::list<Video>&  videos);
+
     public:
         /**
          * Initialises AppState, EventRouter, and backend services.
@@ -103,7 +113,9 @@ class AppController {
         void handlePlayVideo(const EventPayload& payload);
 
         /**
-         * Re-fetches YouTube data for the current user and refreshes the active panel.
+         * Generates a new blend from the existing participants, excluding videos
+         * already in the current blend.  Re-enriches any videos missing metadata
+         * via the YouTube API before sampling.
          * \param payload {}
          */
         void handleRefresh(const EventPayload& payload);
@@ -114,6 +126,13 @@ class AppController {
          * \param payload {}
          */
         void handleOpenChat(const EventPayload& payload);
+
+        /**
+         * Checks whether a user with the given ID exists in the database.
+         * \param userID The user ID to look up.
+         * \return \c true if the user was found, \c false otherwise.
+         */
+        bool lookupUser(const std::string& userID);
 
         /**
          * Validates the sender is a blend participant, then adds the message.

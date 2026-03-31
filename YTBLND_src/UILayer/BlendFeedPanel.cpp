@@ -42,13 +42,19 @@ void BlendFeedPanel::NextPage()
 {
     Blend* blend = AppState::getInstance().getActiveBlend();
     if (!blend || blend->size() == 0) {
-        // Nothing to page through — just stay at 0 and show placeholders
         m_offset = 0;
         LoadFromBlend();
         return;
     }
 
-    m_offset = (m_offset + kPageSize) % blend->size();
+    int nextOffset = m_offset + kPageSize;
+    if (blend->size() - nextOffset < kPageSize) {
+        // Not enough videos remaining to fill a full page — refresh with unseen videos
+        m_controller.getEventRouter().dispatch("refresh");
+        m_offset = 0;
+    } else {
+        m_offset = nextOffset;
+    }
     LoadFromBlend();
 }
 
@@ -75,7 +81,10 @@ void BlendFeedPanel::LoadFromBlend()
     }
 
     for (int i = 0; i < kPageSize; ++i) {
-        int idx = (m_offset + i) % total;
-        m_cards[i]->SetVideo(blend->getVideo(idx));
+        int idx = m_offset + i;
+        if (idx < total)
+            m_cards[i]->SetVideo(blend->getVideo(idx));
+        else
+            m_cards[i]->Clear();
     }
 }

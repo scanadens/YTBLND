@@ -4,7 +4,7 @@
 /**
  * \file ChatRoom.hpp
  * \brief In-memory chat session tied to a specific Blend.
- *  \author Jasmine KUmar
+ *  \author Jasmine Kumar
  *
  * Identified by the blendID of the Blend it belongs to.  Messages are not
  * persisted in this version — all chat history is lost when the session ends.

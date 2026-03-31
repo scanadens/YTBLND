@@ -2,12 +2,12 @@
 #include "../AppInfrastructure/YouTubeDataImporter.hpp"
 #include "../AlgorithmLayer/RandomBlendAlgorithm.hpp"
 #include "../ServiceLayer/YouTubeMetadataFetcher.hpp"
+#include <algorithm>
 #include <exception>
 #include <iostream>
 #include <list>
+#include <set>
 #include <sstream>
-
-using namespace std;
 
 static const std::string kYouTubeAPIKey = "AIzaSyBDzH4_T9NSaAh_s59sFYrHtNnKvHmyARM";
 
@@ -22,12 +22,12 @@ AppController::AppController(const std::string& dbPath):
 {
     registerEvents();
     // performing http health check to ensure connection was successull
-    string resp = http.get("/ping"); //grab the server response
+    std::string resp = http.get("/ping"); //grab the server response
     if (resp.find("pong")) {
-        cout << "[AppState] Successful connection to the server" << endl;
+        std::cout << "[AppState] Successful connection to the server" << std::endl;
         isConnected = true;
     } else {
-        cout << "[AppState] Was unable to connect to the server. Try checking internet connection and restart the app." << endl;
+        std::cout << "[AppState] Was unable to connect to the server. Try checking internet connection and restart the app." << std::endl;
         isConnected = false;
     }
 
@@ -81,21 +81,21 @@ void AppController::handleRegister(const EventPayload& payload) {
                  emIt != payload.end() ? emIt->second : "",
                  pwIt->second);
 
-    const string registerResponse = http.post(http.REG_USER, newUser.toString());
+    const std::string registerResponse = http.post(http.REG_USER, newUser.toString());
     if (!http.wasLastRequestSuccessful(http.P)) {
         if (http.getLastStatusCode() == http.DUPLICATE) {
-            cerr << "[AppController] handleRegister: userID '"
-                 << idIt->second 
-                 << "' already exists"
-                 << endl;
+            std::cerr << "[AppController] handleRegister: userID '"
+                      << idIt->second
+                      << "' already exists"
+                      << std::endl;
             return;
         }
 
-        cerr << "[AppController] handleRegister: server rejected registration with HTTP "
-             << http.getLastStatusCode() 
-             << " response=" 
-             << registerResponse 
-             << endl;
+        std::cerr << "[AppController] handleRegister: server rejected registration with HTTP "
+                  << http.getLastStatusCode()
+                  << " response="
+                  << registerResponse
+                  << std::endl;
         return;
     }
 
@@ -115,10 +115,10 @@ void AppController::handleLogin(const EventPayload& payload) {
         return;
     }
 
-    stringstream login_json; 
+    std::stringstream login_json;
     login_json << "{\"user_id\":" << // TODO: left off here
 
-    const string loginResponse = http.post(http.LOGIN, )
+    const std::string loginResponse = http.post(http.LOGIN, )
 
     if (!dataManager->validatePassword(idIt->second, pwIt->second)) {
         std::cerr << "[AppController] handleLogin: invalid credentials for '"
@@ -156,6 +156,7 @@ void AppController::handleLogin(const EventPayload& payload) {
         if (!p.has_value()) continue;
         std::list<Video> pVideos = dataManager->loadWatchLater(uid);
         if (!pVideos.empty()) {
+            enrichIfMissingMetadata(uid, pVideos);
             YouTubeData pyd;
             pyd.setWatchLaterVideos(pVideos);
             p->setYouTubeData(pyd);
@@ -216,12 +217,21 @@ void AppController::handleUploadData(const EventPayload& payload) {
     // Enrich with title, channel name, thumbnail URL, and channel logo via the API
     std::cout << "[AppController] Fetching YouTube metadata for "
               << watchLater.size() << " videos...\n";
+    bool enriched = false;
     try {
         watchLater = YouTubeMetadataFetcher(kYouTubeAPIKey).enrich(watchLater);
+        enriched = !kYouTubeAPIKey.empty();
     } catch (const std::exception& ex) {
         std::cerr << "[AppController] handleUploadData: metadata fetch failed: "
                   << ex.what() << "\n";
         // Non-fatal — continue with whatever data we have
+    }
+
+    // Drop videos the API couldn't find — they are deleted, private, or unavailable
+    if (enriched) {
+        watchLater.remove_if([](const Video& v) { return v.getTitle().empty(); });
+        std::cout << "[AppController] " << watchLater.size()
+                  << " videos available after filtering unavailable entries\n";
     }
 
     // Persist the enriched videos to the DB so they survive logout
@@ -286,19 +296,21 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
 
     // For each participant, load their data from the DB
     std::list<User> participants;
-    std::vector<std::string> missingData;
+    std::vector<std::string> notFound;
+    std::vector<std::string> noData;
 
     for (const auto& uid : allParticipantIDs) {
         std::optional<User> p = dataManager->findUserByID(uid);
         if (!p.has_value()) {
             std::cerr << "[AppController] handleCreateBlend: user '" << uid << "' not found\n";
-            missingData.push_back(uid);
+            notFound.push_back(uid);
             continue;
         }
         std::list<Video> pVideos = dataManager->loadWatchLater(uid);
         if (pVideos.empty()) {
-            missingData.push_back(uid);
+            noData.push_back(uid);
         } else {
+            enrichIfMissingMetadata(uid, pVideos);
             YouTubeData pyd;
             pyd.setWatchLaterVideos(pVideos);
             p->setYouTubeData(pyd);
@@ -306,8 +318,9 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
         }
     }
 
-    // Report missing-data users back to the UI via AppState
-    appState.setUsersWithoutData(missingData);
+    // Report users without uploaded data back to the UI via AppState
+    // (non-existent users are excluded — they should have been rejected at the UI level)
+    appState.setUsersWithoutData(noData);
 
     if (participants.empty()) {
         std::cerr << "[AppController] handleCreateBlend: no participants have data\n";
@@ -320,12 +333,18 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
         RandomBlendAlgorithm(5).generateBlend(participants)
     );
 
-    // Persist the blend and all requested participants (including those without
-    // data yet, so they are found on their next login)
+    // Persist the blend and all valid participants (existing users, even those
+    // without data yet, so they are found on their next login).
+    // Non-existent users (notFound) are excluded — they have no DB row.
+    std::vector<std::string> validParticipantIDs;
+    for (const auto& uid : allParticipantIDs) {
+        bool isNotFound = std::find(notFound.begin(), notFound.end(), uid) != notFound.end();
+        if (!isNotFound) validParticipantIDs.push_back(uid);
+    }
     User* creator = appState.getCurrentUser();
-    std::string creatorID = creator ? creator->getUserID() : allParticipantIDs[0];
+    std::string creatorID = creator ? creator->getUserID() : validParticipantIDs[0];
     dataManager->saveBlend(currentBlend->getBlendID(), creatorID,
-                           currentBlend->getAlgorithmUsed(), allParticipantIDs);
+                           currentBlend->getAlgorithmUsed(), validParticipantIDs);
 
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
@@ -335,16 +354,90 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
               << currentBlend->size() << " videos\n";
 }
 
+bool AppController::lookupUser(const std::string& userID) {
+    return dataManager->findUserByID(userID).has_value();
+}
+
+// ── Private helpers ───────────────────────────────────────────────────────────
+
+void AppController::enrichIfMissingMetadata(const std::string& userID,
+                                             std::list<Video>&  videos) {
+    bool needsEnrichment = std::any_of(videos.begin(), videos.end(),
+        [](const Video& v) { return v.getTitle().empty(); });
+    if (!needsEnrichment) return;
+
+    std::cout << "[AppController] enrichIfMissingMetadata: re-enriching "
+              << videos.size() << " videos for '" << userID << "'\n";
+    try {
+        videos = YouTubeMetadataFetcher(kYouTubeAPIKey).enrich(videos);
+        // Drop any video still missing a title — confirmed unavailable on YouTube
+        if (!kYouTubeAPIKey.empty())
+            videos.remove_if([](const Video& v) { return v.getTitle().empty(); });
+        dataManager->saveWatchLater(userID, videos);
+    } catch (const std::exception& ex) {
+        std::cerr << "[AppController] enrichIfMissingMetadata failed for '"
+                  << userID << "': " << ex.what() << "\n";
+    }
+}
+
 void AppController::handlePlayVideo(const EventPayload& payload) {
     // TODO: read "videoID" from payload
     // TODO: open the video — exact mechanism (browser, in-app) TBD
     std::cout << "[AppController] handlePlayVideo called (stub)\n";
 }
 
-void AppController::handleRefresh(const EventPayload& payload) {
-    // TODO: re-parse or re-fetch YouTube data for the current user
-    // TODO: update AppState and notify the active panel
-    std::cout << "[AppController] handleRefresh called (stub)\n";
+void AppController::handleRefresh(const EventPayload& /*payload*/) {
+    Blend* existing = appState.getActiveBlend();
+    if (!existing) {
+        std::cerr << "[AppController] handleRefresh: no active blend\n";
+        return;
+    }
+
+    // Build the set of video IDs already shown in the current blend
+    std::set<std::string> shownIDs;
+    for (const auto& v : existing->getVideoList())
+        shownIDs.insert(v.getVideoID());
+
+    // Reload each participant's full video pool from DB, then exclude shown videos
+    std::list<User> participants;
+    for (const User& participant : existing->getParticipants()) {
+        const std::string& uid = participant.getUserID();
+        std::optional<User> p = dataManager->findUserByID(uid);
+        if (!p.has_value()) continue;
+
+        std::list<Video> allVideos = dataManager->loadWatchLater(uid);
+        if (allVideos.empty()) continue;
+
+        // Re-enrich any videos that are still missing metadata; saves to DB
+        enrichIfMissingMetadata(uid, allVideos);
+
+        // Build a fresh pool of videos not yet shown
+        std::list<Video> freshPool;
+        for (const auto& v : allVideos) {
+            if (shownIDs.find(v.getVideoID()) == shownIDs.end())
+                freshPool.push_back(v);
+        }
+        // If all of this user's videos were already shown, reset to the full pool
+        if (freshPool.empty()) freshPool = allVideos;
+
+        YouTubeData pyd;
+        pyd.setWatchLaterVideos(freshPool);
+        p->setYouTubeData(pyd);
+        participants.push_back(*p);
+    }
+
+    if (participants.empty()) {
+        std::cerr << "[AppController] handleRefresh: no participants have data\n";
+        return;
+    }
+
+    currentBlend = std::make_unique<Blend>(
+        RandomBlendAlgorithm(5).generateBlend(participants)
+    );
+    appState.setActiveBlend(currentBlend.get());
+
+    std::cout << "[AppController] Blend refreshed with "
+              << currentBlend->size() << " new videos\n";
 }
 
 void AppController::handleOpenChat(const EventPayload& payload) {

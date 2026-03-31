@@ -224,12 +224,12 @@ void BlendCreationPanel::OnAdd(wxCommandEvent& /*evt*/)
         }
     }
 
-    // Dispatch lookupUser — not yet fully implemented on the backend.
-    // Currently we proceed optimistically (add the user regardless).
-    // TODO: Check the return value / AppState after dispatch to confirm the
-    //       user was found before adding them to m_addedUsers.
-    m_controller.getEventRouter().dispatch("lookupUser",
-                                           {{"username", entered}});
+    if (!m_controller.lookupUser(entered)) {
+        wxMessageBox("User \"" + entered + "\" does not exist.\n"
+                     "Please ask them to create an account first.",
+                     "User Not Found", wxOK | wxICON_ERROR, this);
+        return;
+    }
 
     m_addedUsers.push_back(entered);
     RebuildUserList();
