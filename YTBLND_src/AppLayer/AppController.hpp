@@ -119,6 +119,12 @@ class AppController {
         explicit AppController();
 
         /**
+         * Compatibility constructor used by tests that inject a DB path.
+         * The current HTTP-backed controller ignores this value.
+         */
+        explicit AppController(const std::string& dbPath);
+
+        /**
          * Persists any unsaved changes, deregisters all EventRouter listeners,
          * and releases backend resources.
          */

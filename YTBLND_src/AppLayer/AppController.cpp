@@ -166,6 +166,9 @@ AppController::AppController():
     }
 }
 
+AppController::AppController(const std::string& /*dbPath*/)
+    : AppController() {}
+
 AppController::~AppController() {
     eventRouter.deregisterAll();
 }
@@ -325,7 +328,7 @@ void AppController::handleLogin(const EventPayload& payload) {
     if (!http.wasLastRequestSuccessful(http.G)) {
         return;
     }
-    vector<string> blendID = parseBlendID(latestBlendResponse);
+    std::optional<std::string> blendID = parseBlendID(latestBlendResponse);
     if (!blendID.has_value()) {
         return;
     }
@@ -513,9 +516,17 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
     // Non-existent users (notFound) are excluded — they have no DB row.
     std::vector<std::string> validParticipantIDs;
     for (const auto& uid : allParticipantIDs) {
-        bool isNotFound = std::find(notFound.begin(), notFound.end(), uid) != notFound.end();
-        if (!isNotFound) validParticipantIDs.push_back(uid);
+        if (lookupUser(uid)) {
+            validParticipantIDs.push_back(uid);
+        }
     }
+
+    if (validParticipantIDs.empty()) {
+        appState.setIsBlendGenerating(false);
+        std::cerr << "[AppController] handleCreateBlend: no valid participants found\n";
+        return;
+    }
+
     User* creator = appState.getCurrentUser();
     std::string creatorID = creator ? creator->getUserID() : allParticipantIDs[0];
     const std::string createBlendResponse =
@@ -523,7 +534,7 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
                   RequestJsonBuilder::buildBlendJson(currentBlend->getBlendID(),
                                                      creatorID,
                                                      currentBlend->getAlgorithmUsed(),
-                                                     allParticipantIDs));
+                                                     validParticipantIDs));
     if (!http.wasLastRequestSuccessful(http.P)) {
         appState.setIsBlendGenerating(false);
         std::cerr << "[AppController] handleCreateBlend: failed to persist blend, HTTP "
@@ -540,7 +551,12 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
 }
 
 bool AppController::lookupUser(const std::string& userID) {
-    return dataManager->findUserByID(userID).has_value();
+    try {
+        http.get(http.build_watch_later_endpoint(userID));
+        return http.wasLastRequestSuccessful(http.G);
+    } catch (const std::exception&) {
+        return false;
+    }
 }
 
 // ── Private helpers ───────────────────────────────────────────────────────────
@@ -558,7 +574,15 @@ void AppController::enrichIfMissingMetadata(const std::string& userID,
         // Drop any video still missing a title — confirmed unavailable on YouTube
         if (!kYouTubeAPIKey.empty())
             videos.remove_if([](const Video& v) { return v.getTitle().empty(); });
-        dataManager->saveWatchLater(userID, videos);
+
+        const std::string saveResponse =
+            http.post(http.build_watch_later_endpoint(userID),
+                      RequestJsonBuilder::buildWatchLaterJson(videos));
+        if (!http.wasLastRequestSuccessful(http.P)) {
+            std::cerr << "[AppController] enrichIfMissingMetadata: failed to persist refreshed metadata for '"
+                      << userID << "', HTTP " << http.getLastStatusCode()
+                      << " response=" << saveResponse << "\n";
+        }
     } catch (const std::exception& ex) {
         std::cerr << "[AppController] enrichIfMissingMetadata failed for '"
                   << userID << "': " << ex.what() << "\n";
@@ -583,32 +607,34 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
     for (const auto& v : existing->getVideoList())
         shownIDs.insert(v.getVideoID());
 
-    // Reload each participant's full video pool from DB, then exclude shown videos
-    std::list<User> participants;
+    // Reload each participant's full video pool from the backend, then exclude shown videos
+    std::vector<std::string> participantIDs;
     for (const User& participant : existing->getParticipants()) {
-        const std::string& uid = participant.getUserID();
-        std::optional<User> p = dataManager->findUserByID(uid);
-        if (!p.has_value()) continue;
+        participantIDs.push_back(participant.getUserID());
+    }
 
-        std::list<Video> allVideos = dataManager->loadWatchLater(uid);
+    std::list<User> loadedParticipants = loadParticipantsWithWatchLater(participantIDs, nullptr);
+    std::list<User> participants;
+    for (User p : loadedParticipants) {
+        std::list<Video> allVideos = p.getYouTubeData().getWatchLaterVideos();
         if (allVideos.empty()) continue;
-
-        // Re-enrich any videos that are still missing metadata; saves to DB
-        enrichIfMissingMetadata(uid, allVideos);
 
         // Build a fresh pool of videos not yet shown
         std::list<Video> freshPool;
         for (const auto& v : allVideos) {
-            if (shownIDs.find(v.getVideoID()) == shownIDs.end())
+            if (shownIDs.find(v.getVideoID()) == shownIDs.end()) {
                 freshPool.push_back(v);
+            }
         }
         // If all of this user's videos were already shown, reset to the full pool
-        if (freshPool.empty()) freshPool = allVideos;
+        if (freshPool.empty()) {
+            freshPool = allVideos;
+        }
 
         YouTubeData pyd;
         pyd.setWatchLaterVideos(freshPool);
-        p->setYouTubeData(pyd);
-        participants.push_back(*p);
+        p.setYouTubeData(pyd);
+        participants.push_back(p);
     }
 
     if (participants.empty()) {
