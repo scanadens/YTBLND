@@ -11,7 +11,8 @@
 #include <wx/graphics.h>
 #include <wx/mstream.h>
 #include <wx/image.h>
-#include <wx/utils.h>   // wxLaunchDefaultBrowser
+#include <wx/settings.h>  // wxSystemSettings
+#include <wx/utils.h>     // wxLaunchDefaultBrowser
 
 #include <curl/curl.h>
 
@@ -301,8 +302,8 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
         // else: no video set — blank
 
         if (!label.IsEmpty()) {
-            wxFont lf(m_thumbFailed ? 26 : 11, wxFONTFAMILY_DEFAULT,
-                      wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+            wxFont lf = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+            lf.SetPointSize(m_thumbFailed ? 26 : 11);
             gc->SetFont(lf, UIColors::TextMuted);
             double tw, th, td, tex;
             gc->GetTextExtent(label, &tw, &th, &td, &tex);
@@ -316,8 +317,9 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
     double       curY   = thumbH + 8.0;
 
     if (!m_title.IsEmpty()) {
-        wxFont titleFont(10, wxFONTFAMILY_DEFAULT,
-                         wxFONTSTYLE_NORMAL, wxFONTWEIGHT_SEMIBOLD);
+        wxFont titleFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+        titleFont.SetPointSize(10);
+        titleFont.SetWeight(wxFONTWEIGHT_SEMIBOLD);
         gc->SetFont(titleFont, UIColors::TextPrimary);
         curY = DrawWrappedText(gc, m_title, 2, padX, curY, textW);
         curY += 4.0;
@@ -357,8 +359,8 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
         }
 
         if (!chanLabel.IsEmpty()) {
-            wxFont chanFont(9, wxFONTFAMILY_DEFAULT,
-                            wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+            wxFont chanFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+            chanFont.SetPointSize(9);
             gc->SetFont(chanFont, UIColors::TextSecondary);
 
             const double textX     = padX + logoSize + 5.0;
