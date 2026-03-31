@@ -97,7 +97,9 @@ std::list<Video> AppController::parseWatchLaterVideos(const std::string& respons
             item.value("channel_id", ""),
             item.value("thumbnail_url", ""),
             item.value("duration", 0),
-            std::list<std::string>{}
+            std::list<std::string>{},
+            item.value("channel_name", ""),
+            item.value("channel_logo_url", "")
         );
     }
 
@@ -311,6 +313,7 @@ void AppController::handleLogin(const EventPayload& payload) {
 
     if (http.wasLastRequestSuccessful(http.G)) {
         watchLater = parseWatchLaterVideos(watchLaterResponse);
+        enrichIfMissingMetadata(idIt->second, watchLater);
     }
 
     if (!watchLater.empty()) {
@@ -564,7 +567,13 @@ bool AppController::lookupUser(const std::string& userID) {
 void AppController::enrichIfMissingMetadata(const std::string& userID,
                                              std::list<Video>&  videos) {
     bool needsEnrichment = std::any_of(videos.begin(), videos.end(),
-        [](const Video& v) { return v.getTitle().empty(); });
+        [](const Video& v) {
+            return v.getTitle().empty() ||
+                   v.getChannelID().empty() ||
+                   v.getChannelName().empty() ||
+                   v.getThumbnailURL().empty() ||
+                   v.getChannelLogoURL().empty();
+        });
     if (!needsEnrichment) return;
 
     std::cout << "[AppController] enrichIfMissingMetadata: re-enriching "
@@ -645,6 +654,17 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants)
     );
+
+    // Prevent duplicate videos within the same refreshed blend payload.
+    std::set<std::string> seenVideoIDs;
+    std::list<Video> uniqueVideos;
+    for (const auto& video : currentBlend->getVideoList()) {
+        if (seenVideoIDs.insert(video.getVideoID()).second) {
+            uniqueVideos.push_back(video);
+        }
+    }
+    currentBlend->setVideoList(uniqueVideos);
+
     appState.setActiveBlend(currentBlend.get());
 
     std::cout << "[AppController] Blend refreshed with "

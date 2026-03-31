@@ -10,8 +10,12 @@ import (
 
 // VideoDTO is a transport-safe representation of video metadata used by routes.
 type VideoDTO struct {
-	VideoID string `json:"video_id" binding:"required"`
-	Title   string `json:"title"`
+	VideoID        string `json:"video_id" binding:"required"`
+	Title          string `json:"title"`
+	ChannelID      string `json:"channel_id,omitempty"`
+	ChannelName    string `json:"channel_name,omitempty"`
+	ThumbnailURL   string `json:"thumbnail_url,omitempty"`
+	ChannelLogoURL string `json:"channel_logo_url,omitempty"`
 }
 
 // SaveWatchLaterRequest replaces the entire watch-later list for a user.
@@ -100,7 +104,16 @@ func (h *BlendHandler) SaveWatchLater(c *gin.Context) {
 	// Translate route DTOs into database-layer video models.
 	videos := make([]database_layer.Video, 0, len(req.Videos))
 	for _, v := range req.Videos {
-		videos = append(videos, database_layer.NewVideo(v.VideoID, v.Title, "", "", 0, nil))
+		videos = append(videos, database_layer.NewVideo(
+			v.VideoID,
+			v.Title,
+			v.ChannelID,
+			v.ChannelName,
+			v.ThumbnailURL,
+			v.ChannelLogoURL,
+			0,
+			nil,
+		))
 	}
 
 	if err := h.dataManager.SaveWatchLater(userID, videos); err != nil {
@@ -138,8 +151,12 @@ func (h *BlendHandler) GetWatchLater(c *gin.Context) {
 	respVideos := make([]VideoDTO, 0, len(videos))
 	for _, v := range videos {
 		respVideos = append(respVideos, VideoDTO{
-			VideoID: v.GetVideoID(),
-			Title:   v.GetTitle(),
+			VideoID:        v.GetVideoID(),
+			Title:          v.GetTitle(),
+			ChannelID:      v.GetChannelID(),
+			ChannelName:    v.GetChannelName(),
+			ThumbnailURL:   v.GetThumbnailURL(),
+			ChannelLogoURL: v.GetChannelLogoURL(),
 		})
 	}
 

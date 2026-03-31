@@ -59,7 +59,7 @@ Use this as the frontend completion list for first-pass integration.
 - [ ]  Health check: `GET /ping` → `{ "message": "pong" }`
 - [ ]  Register users: `POST /api/v1/auth/register` with `user_id`, `username`, `password`, optional `email`
 - [ ]  Login users: `POST /api/v1/auth/login` with `user_id`, `password`
-- [ ]  Save watch-later list: `POST /api/v1/users/:userID/watch-later` with full `videos` array
+- [ ]  Save watch-later list: `POST /api/v1/users/:userID/watch-later` with full `videos` array (include channel/thumbnail metadata when available)
 - [ ]  Load watch-later list: `GET /api/v1/users/:userID/watch-later`
 - [ ]  Create/update blend: `POST /api/v1/blends` with `blend_id`, `creator_id`, `algorithm`, `participants[]`
 - [ ]  Persist returned `chat_room_id` as the source of truth
@@ -108,12 +108,28 @@ POST /api/v1/auth/login
 
 ### Save Watch-Later
 
+**Backward compatibility note:** `channel_id`, `channel_name`, `thumbnail_url`, and `channel_logo_url` are optional. Frontends may continue sending only `video_id` and `title`, but should include the metadata fields whenever available to improve UI quality.
+
 ```json
 POST /api/v1/users/:userID/watch-later
 {
   "videos": [
-    { "video_id": "vid1", "title": "Video One" },
-    { "video_id": "vid2", "title": "Video Two" }
+    {
+      "video_id": "vid1",
+      "title": "Video One",
+      "channel_id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+      "channel_name": "Google for Developers",
+      "thumbnail_url": "https://i.ytimg.com/vi/vid1/hqdefault.jpg",
+      "channel_logo_url": "https://yt3.ggpht.com/example1"
+    },
+    {
+      "video_id": "vid2",
+      "title": "Video Two",
+      "channel_id": "UC-lHJZR3Gqxm24_Vd_AJ5Yw",
+      "channel_name": "PewDiePie",
+      "thumbnail_url": "https://i.ytimg.com/vi/vid2/hqdefault.jpg",
+      "channel_logo_url": "https://yt3.ggpht.com/example2"
+    }
   ]
 }
 ```
@@ -126,7 +142,23 @@ POST /api/v1/users/:userID/watch-later
 GET /api/v1/users/:userID/watch-later
 ```
 
-**Success (200):** `{ "user_id": "u1", "videos": [...] }`
+**Success (200):**
+
+```json
+{
+  "user_id": "u1",
+  "videos": [
+    {
+      "video_id": "vid1",
+      "title": "Video One",
+      "channel_id": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+      "channel_name": "Google for Developers",
+      "thumbnail_url": "https://i.ytimg.com/vi/vid1/hqdefault.jpg",
+      "channel_logo_url": "https://yt3.ggpht.com/example1"
+    }
+  ]
+}
+```
 
 ---
 

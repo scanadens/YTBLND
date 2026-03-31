@@ -60,7 +60,11 @@ std::string buildWatchLaterJson(const std::list<Video>& videos) {
 
         videosJson << "{"
                    << "\"video_id\":" << ModelJson::quote(video.getVideoID()) << ","
-                   << "\"title\":" << ModelJson::quote(video.getTitle())
+                   << "\"title\":" << ModelJson::quote(video.getTitle()) << ","
+                   << "\"channel_id\":" << ModelJson::quote(video.getChannelID()) << ","
+                   << "\"channel_name\":" << ModelJson::quote(video.getChannelName()) << ","
+                   << "\"thumbnail_url\":" << ModelJson::quote(video.getThumbnailURL()) << ","
+                   << "\"channel_logo_url\":" << ModelJson::quote(video.getChannelLogoURL())
                    << "}";
     }
 

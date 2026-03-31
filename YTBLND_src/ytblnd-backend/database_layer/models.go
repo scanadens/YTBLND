@@ -39,8 +39,12 @@ type Video struct {
 	Title string
 	// ChannelID identifies the source channel/uploader.
 	ChannelID string
+	// ChannelName is the display name of the source channel/uploader.
+	ChannelName string
 	// ThumbnailURL points to a preview image when available.
 	ThumbnailURL string
+	// ChannelLogoURL points to the channel avatar image when available.
+	ChannelLogoURL string
 	// Duration is stored in seconds.
 	Duration int
 	// Tags are copied defensively to avoid accidental external mutation.
@@ -48,24 +52,28 @@ type Video struct {
 }
 
 // NewVideo clones tag input to keep model state isolated from caller slices.
-func NewVideo(videoID, title, channelID, thumbnailURL string, duration int, tags []string) Video {
+func NewVideo(videoID, title, channelID, channelName, thumbnailURL, channelLogoURL string, duration int, tags []string) Video {
 	t := append([]string(nil), tags...)
 	return Video{
-		VideoID:      videoID,
-		Title:        title,
-		ChannelID:    channelID,
-		ThumbnailURL: thumbnailURL,
-		Duration:     duration,
-		Tags:         t,
+		VideoID:        videoID,
+		Title:          title,
+		ChannelID:      channelID,
+		ChannelName:    channelName,
+		ThumbnailURL:   thumbnailURL,
+		ChannelLogoURL: channelLogoURL,
+		Duration:       duration,
+		Tags:           t,
 	}
 }
 
 // Getter helpers keep direct field usage optional in higher layers.
-func (v Video) GetVideoID() string      { return v.VideoID }
-func (v Video) GetTitle() string        { return v.Title }
-func (v Video) GetChannelID() string    { return v.ChannelID }
-func (v Video) GetThumbnailURL() string { return v.ThumbnailURL }
-func (v Video) GetDuration() int        { return v.Duration }
+func (v Video) GetVideoID() string        { return v.VideoID }
+func (v Video) GetTitle() string          { return v.Title }
+func (v Video) GetChannelID() string      { return v.ChannelID }
+func (v Video) GetChannelName() string    { return v.ChannelName }
+func (v Video) GetThumbnailURL() string   { return v.ThumbnailURL }
+func (v Video) GetChannelLogoURL() string { return v.ChannelLogoURL }
+func (v Video) GetDuration() int          { return v.Duration }
 
 // GetTags returns a copy so callers cannot mutate model internals by reference.
 func (v Video) GetTags() []string { return append([]string(nil), v.Tags...) }
