@@ -15,22 +15,24 @@ static const std::string kYouTubeAPIKey = "AIzaSyBDzH4_T9NSaAh_s59sFYrHtNnKvHmyA
 AppController::AppController(const std::string& dbPath): 
     appState(AppState::getInstance()),
     dataManager(std::make_unique<SqliteDataManager>(dbPath)),  
-    server_url("http://<137.220.58.22>:8080"), 
+    server_url("http://137.220.58.22:8080"),
     http(server_url),
     isConnected(false)
 {
     registerEvents();
-    // performing http health check to ensure connection was successull
-    std::string resp = http.get("/ping"); //grab the server response
-    if (resp.find("pong")) {
-        std::cout << "[AppState] Successful connection to the server" << std::endl;
-        isConnected = true;
-    } else {
-        std::cout << "[AppState] Was unable to connect to the server. Try checking internet connection and restart the app." << std::endl;
+    // TODO: HTTP server integration in progress — skip ping if unreachable
+    try {
+        std::string resp = http.get("/ping");
+        if (resp.find("pong") != std::string::npos) {
+            std::cout << "[AppState] Successful connection to the server" << std::endl;
+            isConnected = true;
+        } else {
+            std::cout << "[AppState] Server reachable but unexpected response." << std::endl;
+        }
+    } catch (const std::exception& e) {
+        std::cout << "[AppState] Server unavailable, running offline: " << e.what() << std::endl;
         isConnected = false;
     }
-
-    //TODO: add some sort of counter-measure or alternative behaviour if theres no connection
 }
 
 AppController::~AppController() {
