@@ -112,10 +112,22 @@ void AppController::handleLogin(const EventPayload& payload) {
         return;
     }
 
+    // creating the login json
     stringstream login_json; 
-    login_json << "{\"user_id\":" << // TODO: left off here
+    login_json << "{\"user_id\": \"" << idIt->second << "\", \"password\": \"" << pwIt->second << "\"}";
 
-    const string loginResponse = http.post(http.LOGIN, )
+    // posting to the server with the constructed json
+    const auto loginResponse = http.post(http.LOGIN, login_json.str());
+
+    // retrieve the status of the request 
+    const bool req_status = http.isRequestSuccessful(http.P, http.getLastStatusCode());
+
+    if (!req_status) {
+        std::cerr << "[AppController] handleLogin: invalid credentials or '"
+                  << idIt->second 
+                  << "' does not exist..."
+                  << endl;
+    }
 
     if (!dataManager->validatePassword(idIt->second, pwIt->second)) {
         std::cerr << "[AppController] handleLogin: invalid credentials for '"

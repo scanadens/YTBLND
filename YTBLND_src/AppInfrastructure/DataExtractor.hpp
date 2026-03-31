@@ -3,6 +3,7 @@
 #include "FileSource.hpp"
 #include "Parser.hpp"
 #include "File_ID.hpp"
+#include <memory>
 
 /**
  * \file DataExtractor.hpp
