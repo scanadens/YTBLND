@@ -2,6 +2,7 @@
 #include "../AppInfrastructure/YouTubeDataImporter.hpp"
 #include "../AlgorithmLayer/RandomBlendAlgorithm.hpp"
 #include "../ServiceLayer/YouTubeMetadataFetcher.hpp"
+#include "../ModelLayer/JsonUtils.hpp"
 #include <algorithm>
 #include <exception>
 #include <iostream>
@@ -85,7 +86,15 @@ void AppController::handleRegister(const EventPayload& payload) {
     // Attempt server registration when online; bail on definitive server errors.
     if (isConnected) {
         try {
-            const std::string registerResponse = http.post(http.REG_USER, newUser.toString());
+            // Build minimal payload matching the server's register contract:
+            // { "user_id", "username", "password", "email" }
+            // User::toString() omits password, so we build it manually here.
+            const std::string regJson =
+                "{\"user_id\":"  + ModelJson::quote(idIt->second) + ","
+                "\"username\":"  + ModelJson::quote(unIt->second) + ","
+                "\"password\":"  + ModelJson::quote(pwIt->second) + ","
+                "\"email\":"     + ModelJson::quote(emIt != payload.end() ? emIt->second : "") + "}";
+            const std::string registerResponse = http.post(http.REG_USER, regJson);
             if (!http.wasLastRequestSuccessful(http.P)) {
                 if (http.getLastStatusCode() == http.DUPLICATE) {
                     std::cerr << "[AppController] handleRegister: userID '"
