@@ -7,7 +7,6 @@
 #include <iostream>
 #include <list>
 #include <set>
-#include <sstream>
 
 static const std::string kYouTubeAPIKey = "AIzaSyBDzH4_T9NSaAh_s59sFYrHtNnKvHmyARM";
 
@@ -115,10 +114,10 @@ void AppController::handleLogin(const EventPayload& payload) {
         return;
     }
 
-    std::stringstream login_json;
-    login_json << "{\"user_id\":" << // TODO: left off here
-
-    const std::string loginResponse = http.post(http.LOGIN, )
+    // TODO: HTTP login integration incomplete — post credentials to server
+    // std::stringstream login_json;
+    // login_json << "{\"user_id\":\"" << idIt->second << "\",\"password\":\"" << pwIt->second << "\"}";
+    // const std::string loginResponse = http.post(http.LOGIN, login_json.str());
 
     if (!dataManager->validatePassword(idIt->second, pwIt->second)) {
         std::cerr << "[AppController] handleLogin: invalid credentials for '"

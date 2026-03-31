@@ -33,8 +33,8 @@ class AppController {
         AppState&    appState;     ///< Singleton session state.
         EventRouter  eventRouter;  ///< Messenger between UI and controller.
         std::unique_ptr<SqliteDataManager> dataManager;
-        HttpClient        http;        ///< HTTP client wrapper for server communications.
         std::string       server_url;  ///< URL and port of the backend server.
+        HttpClient        http;        ///< HTTP client wrapper for server communications.
         bool              isConnected; ///< True when the client has a live server connection.
 
         /// Owns the most recently generated Blend so AppState can hold a raw pointer.

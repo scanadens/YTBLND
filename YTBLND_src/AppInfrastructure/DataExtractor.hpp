@@ -1,5 +1,10 @@
 #pragma once
 
+#include <list>
+#include <memory>
+#include <string>
+#include <unordered_map>
+
 #include "FileSource.hpp"
 #include "Parser.hpp"
 #include "File_ID.hpp"
