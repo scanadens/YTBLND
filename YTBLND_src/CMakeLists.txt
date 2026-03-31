@@ -60,7 +60,13 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
     GIT_TAG v11.4.5
 )
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
+)
 FetchContent_MakeAvailable(ixwebsocket)
+FetchContent_MakeAvailable(nlohmann_json)
 
 if(YTBLND_HAS_WX)
     add_executable(ytblnd
@@ -82,6 +88,7 @@ if(YTBLND_HAS_WX)
         SQLite::SQLite3
         CURL::libcurl
         ixwebsocket::ixwebsocket
+        nlohmann_json::nlohmann_json
         ${wxWidgets_LIBRARIES}
     )
 endif()
@@ -139,6 +146,7 @@ if(YTBLND_BUILD_TESTS)
         SQLite::SQLite3
         CURL::libcurl
         ixwebsocket::ixwebsocket
+        nlohmann_json::nlohmann_json
     )
 
     if(YTBLND_BUILD_UI_TESTS AND YTBLND_HAS_WX)

@@ -73,15 +73,15 @@ bool containsAll(const std::string& value, const std::initializer_list<std::stri
     return true;
 }
 
-void skipUnlessLiveBackendEnabled() {
+bool isLiveBackendEnabled() {
     // This is an opt-in suite because it expects a real backend process
     // running at localhost:8080 with the documented API contract.
     const char* runLiveTests = std::getenv("YTBLND_RUN_LIVE_BACKEND_TESTS");
     if (!runLiveTests || std::string(runLiveTests) != "1") {
-        GTEST_SKIP() << "Set YTBLND_RUN_LIVE_BACKEND_TESTS=1 and run the backend to execute this test. "
-                     << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
-                     << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
+        return false;
     }
+
+    return true;
 }
 
 std::string waitForChatRoomDetails(HttpClient& client, const std::string& blendID, const std::string& userID) {
@@ -125,7 +125,11 @@ void createBlend(HttpClient& client, const std::string& blendID, const std::stri
 }  // namespace
 
 TEST(LiveBackendConnectivityTest, PingEndpointRespondsWithPong) {
-    skipUnlessLiveBackendEnabled();
+    if (!isLiveBackendEnabled()) {
+        GTEST_SKIP() << "Set YTBLND_RUN_LIVE_BACKEND_TESTS=1 and run the backend to execute this test. "
+                     << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
+                     << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
+    }
 
     // Fast health check that the live backend process is reachable.
     HttpClient client(getenvOrDefault("YTBLND_LIVE_BACKEND_HTTP_BASE_URL", "http://localhost:8080"));
@@ -134,7 +138,11 @@ TEST(LiveBackendConnectivityTest, PingEndpointRespondsWithPong) {
 }
 
 TEST(LiveBackendConnectivityTest, RegisterAndLoginRoundTripAgainstRunningServer) {
-    skipUnlessLiveBackendEnabled();
+    if (!isLiveBackendEnabled()) {
+        GTEST_SKIP() << "Set YTBLND_RUN_LIVE_BACKEND_TESTS=1 and run the backend to execute this test. "
+                     << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
+                     << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
+    }
 
     // Uses a per-test user ID so re-runs do not clash with prior DB state.
     HttpClient client(getenvOrDefault("YTBLND_LIVE_BACKEND_HTTP_BASE_URL", "http://localhost:8080"));
@@ -144,7 +152,11 @@ TEST(LiveBackendConnectivityTest, RegisterAndLoginRoundTripAgainstRunningServer)
 }
 
 TEST(LiveBackendConnectivityTest, CreateBlendReturnsExpectedChatRoomLink) {
-    skipUnlessLiveBackendEnabled();
+    if (!isLiveBackendEnabled()) {
+        GTEST_SKIP() << "Set YTBLND_RUN_LIVE_BACKEND_TESTS=1 and run the backend to execute this test. "
+                     << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
+                     << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
+    }
 
     // This test isolates persistence behavior before websocket concerns.
     HttpClient client(getenvOrDefault("YTBLND_LIVE_BACKEND_HTTP_BASE_URL", "http://localhost:8080"));
@@ -156,7 +168,11 @@ TEST(LiveBackendConnectivityTest, CreateBlendReturnsExpectedChatRoomLink) {
 }
 
 TEST(LiveBackendConnectivityTest, WebSocketRoundTripAgainstRunningServer) {
-    skipUnlessLiveBackendEnabled();
+    if (!isLiveBackendEnabled()) {
+        GTEST_SKIP() << "Set YTBLND_RUN_LIVE_BACKEND_TESTS=1 and run the backend to execute this test. "
+                     << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
+                     << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
+    }
 
     // Full integration path: auth -> blend creation -> chatroom lookup -> WS.
     const std::string httpBaseUrl = getenvOrDefault("YTBLND_LIVE_BACKEND_HTTP_BASE_URL", "http://localhost:8080");
