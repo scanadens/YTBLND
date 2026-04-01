@@ -25,6 +25,7 @@
 #include "AppState.hpp"
 #include "EventRouter.hpp"
 #include "../ModelLayer/Blend.hpp"
+#include "../ModelLayer/Message.hpp"
 #include "../ServiceLayer/HttpClient.hpp"
 
 class YouTubeDataParser;  ///< Stub for future use.
@@ -113,6 +114,13 @@ class AppController {
         std::list<User> loadParticipantsWithWatchLater(const std::vector<std::string>& participantIDs,
                                    std::vector<std::string>* missingData);
 
+        /**
+         * POSTs the given blend to POST /api/v1/blends so the server
+         * provisions its chat room.  No-op when offline.
+         * \return true if the server accepted the blend (2xx), false otherwise.
+         */
+        bool registerBlendOnServer(const Blend& blend, const std::string& creatorID);
+
     public:
         /**
          * Initialises AppState, EventRouter, and backend services.
@@ -200,7 +208,7 @@ class AppController {
          */
         void handleSendMessage(const EventPayload& payload);
 
-        // --- helpers for GUI to easily access user information such as their 
+        // --- helpers for GUI to easily access user information such as their
 
         /**
          * Retrieves the current user from the AppSate
@@ -219,6 +227,15 @@ class AppController {
          * \return \c string \c copy of users email. \c "" \c if \c User \c DNE or they provided no email on signup
          */
         std::string get_current_email();
+
+        /**
+         * Parses the JSON response from GET /chat-history into a list of Messages.
+         * Expected format: {"messages":[{"sender_id":"...","content":"...","sent_at":"..."},...]}
+         * Exposed as public static so it can be unit-tested without a live server.
+         * \param response Raw JSON string from the server.
+         * \return Ordered list of Messages with original server timestamps.
+         */
+        static std::list<Message> parseChatHistory(const std::string& response);
 };
 
 #endif

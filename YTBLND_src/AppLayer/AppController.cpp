@@ -1,9 +1,11 @@
 #include "AppController.hpp"
 #include "../AppInfrastructure/YouTubeDataImporter.hpp"
 #include "../AlgorithmLayer/RandomBlendAlgorithm.hpp"
+#include "../ModelLayer/JsonUtils.hpp"
 #include "../ServiceLayer/YouTubeMetadataFetcher.hpp"
 #include "../ServiceLayer/RequestJsonBuilder.hpp"
 #include <algorithm>
+#include <ctime>
 #include <exception>
 #include <iostream>
 #include <list>
@@ -549,6 +551,9 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
     appState.createChatRoom(*currentBlend);
     appState.setIsBlendGenerating(false);
 
+    // Register with server so the chat room is provisioned there too.
+    registerBlendOnServer(*currentBlend, creatorID);
+
     std::cout << "[AppController] Blend created with "
               << currentBlend->size() << " videos\n";
 }
@@ -563,6 +568,48 @@ bool AppController::lookupUser(const std::string& userID) {
 }
 
 // ── Private helpers ───────────────────────────────────────────────────────────
+
+bool AppController::registerBlendOnServer(const Blend& blend,
+                                          const std::string& creatorID) {
+    if (!isConnected) return false;
+
+    // Build participant array: ["id1","id2",...]
+    std::string participantsJson = "[";
+    bool first = true;
+    for (const User& p : blend.getParticipants()) {
+        if (!first) participantsJson += ",";
+        participantsJson += ModelJson::quote(p.getUserID());
+        first = false;
+    }
+    participantsJson += "]";
+
+    const std::string body =
+        "{\"blend_id\":"    + ModelJson::quote(blend.getBlendID())       + ","
+        "\"creator_id\":"   + ModelJson::quote(creatorID)                 + ","
+        "\"algorithm\":"    + ModelJson::quote(blend.getAlgorithmUsed())  + ","
+        "\"participants\":" + participantsJson + "}";
+
+    try {
+        http.post(http.BLEND, body);
+        if (http.wasLastRequestSuccessful(http.P)) {
+            std::cout << "[AppController] registerBlendOnServer: blend '"
+                      << blend.getBlendID() << "' registered\n";
+            return true;
+        }
+        // 409 Conflict means it already exists — treat as success.
+        if (http.getLastStatusCode() == http.DUPLICATE) {
+            std::cout << "[AppController] registerBlendOnServer: blend '"
+                      << blend.getBlendID() << "' already on server\n";
+            return true;
+        }
+        std::cerr << "[AppController] registerBlendOnServer: server returned "
+                  << http.getLastStatusCode() << "\n";
+    } catch (const std::exception& e) {
+        std::cerr << "[AppController] registerBlendOnServer: HTTP failed — "
+                  << e.what() << "\n";
+    }
+    return false;
+}
 
 void AppController::enrichIfMissingMetadata(const std::string& userID,
                                              std::list<Video>&  videos) {
@@ -672,18 +719,129 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
 }
 
 void AppController::handleOpenChat(const EventPayload& payload) {
-    // TODO: check appState.getActiveChatRoom() is not null
-    // TODO: instruct MainFrame to show ChatPanel
-    std::cout << "[AppController] handleOpenChat called (stub)\n";
+    auto blendIt = payload.find("blendID");
+    auto userIt  = payload.find("userID");
+    if (blendIt == payload.end() || userIt == payload.end()) {
+        std::cerr << "[AppController] handleOpenChat: missing 'blendID' or 'userID'\n";
+        return;
+    }
+
+    ChatRoom* room = appState.getActiveChatRoom();
+    if (!room) {
+        std::cerr << "[AppController] handleOpenChat: no active ChatRoom\n";
+        return;
+    }
+
+    if (!isConnected) {
+        std::cout << "[AppController] handleOpenChat: offline — skipping history fetch\n";
+        return;
+    }
+
+    try {
+        const std::string endpoint =
+            http.build_chat_history_endpoint(blendIt->second, userIt->second);
+        std::string response = http.get(endpoint);
+
+        if (http.getLastStatusCode() == http.MISS_RM_CNTXT) {
+            // Blend not registered on server yet — provision it now and retry.
+            Blend* blend = appState.getActiveBlend();
+            if (blend) {
+                User* creator = appState.getCurrentUser();
+                const std::string creatorID = creator ? creator->getUserID() : userIt->second;
+                if (registerBlendOnServer(*blend, creatorID)) {
+                    response = http.get(endpoint);
+                }
+            }
+        }
+
+        if (!http.wasLastRequestSuccessful(http.G)) {
+            std::cerr << "[AppController] handleOpenChat: server returned "
+                      << http.getLastStatusCode() << " — leaving ChatRoom empty\n";
+            return;
+        }
+
+        std::list<Message> history = parseChatHistory(response);
+        room->clearMessages();
+        for (const Message& msg : history) {
+            room->addMessage(msg);
+        }
+        std::cout << "[AppController] handleOpenChat: loaded "
+                  << history.size() << " messages for blend '"
+                  << blendIt->second << "'\n";
+
+    } catch (const std::exception& e) {
+        std::cerr << "[AppController] handleOpenChat: HTTP failed — "
+                  << e.what() << "\n";
+    }
+}
+
+std::list<Message> AppController::parseChatHistory(const std::string& response) {
+    // Extracts a JSON string value from a flat object: "key":"value"
+    auto extractStr = [](const std::string& obj, const std::string& key) -> std::string {
+        const std::string needle = "\"" + key + "\":\"";
+        auto pos = obj.find(needle);
+        if (pos == std::string::npos) return "";
+        pos += needle.size();
+        const auto end = obj.find('"', pos);
+        return (end == std::string::npos) ? "" : obj.substr(pos, end - pos);
+    };
+
+    std::list<Message> result;
+
+    const std::string arrayKey = "\"messages\":[";
+    auto start = response.find(arrayKey);
+    if (start == std::string::npos) return result;
+    start += arrayKey.size();
+
+    const auto arrEnd = response.find(']', start);
+    if (arrEnd == std::string::npos) return result;
+
+    const std::string arr = response.substr(start, arrEnd - start);
+    size_t pos = 0;
+    while (pos < arr.size()) {
+        const auto objStart = arr.find('{', pos);
+        if (objStart == std::string::npos) break;
+        const auto objEnd = arr.find('}', objStart);
+        if (objEnd == std::string::npos) break;
+
+        const std::string obj = arr.substr(objStart, objEnd - objStart + 1);
+
+        const std::string sender  = extractStr(obj, "sender_id");
+        const std::string content = extractStr(obj, "content");
+        const std::string sentAt  = extractStr(obj, "sent_at");
+
+        if (!sender.empty() && !content.empty()) {
+            std::time_t ts = std::time(nullptr);
+            if (!sentAt.empty()) {
+                std::tm tm{};
+                if (strptime(sentAt.c_str(), "%Y-%m-%dT%H:%M:%SZ", &tm) != nullptr) {
+                    ts = timegm(&tm);
+                }
+            }
+            result.emplace_back(sender, content, ts);
+        }
+
+        pos = objEnd + 1;
+    }
+
+    return result;
 }
 
 void AppController::handleSendMessage(const EventPayload& payload) {
-    // TODO: read "userID" and "text" from payload
-    // TODO: retrieve appState.getActiveChatRoom()
-    // TODO: verify userID is a participant via chatRoom->isParticipant()
-    // TODO: call chatRoom->addMessage(userID, text)
-    // TODO: notify ChatPanel to re-render the message list
-    std::cout << "[AppController] handleSendMessage called (stub)\n";
+    auto idIt   = payload.find("userID");
+    auto textIt = payload.find("text");
+    if (idIt == payload.end() || textIt == payload.end()) return;
+
+    ChatRoom* room = appState.getActiveChatRoom();
+    if (!room) return;
+
+    if (!room->isParticipant(idIt->second)) {
+        std::cerr << "[AppController] handleSendMessage: '"
+                  << idIt->second << "' is not a participant\n";
+        return;
+    }
+
+    room->addMessage(idIt->second, textIt->second);
 }
 
 const User* AppController::get_current_user() {
