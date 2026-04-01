@@ -31,7 +31,9 @@ static wxTextCtrl* MakeField(wxWindow* parent,
 
 static wxStaticText* MakeError(wxWindow* parent)
 {
-    auto* lbl = new wxStaticText(parent, wxID_ANY, "");
+    auto* lbl = new wxStaticText(parent, wxID_ANY, "",
+                                 wxDefaultPosition, wxDefaultSize,
+                                 wxALIGN_CENTER_HORIZONTAL);
     lbl->SetForegroundColour(UIColors::Danger);
     lbl->Hide();
     return lbl;
@@ -152,10 +154,10 @@ void LoginPanel::BuildSignInForm(wxWindow* parent, wxSizer* sizer)
     btn->SetBackgroundColour(UIColors::Accent);
     btn->SetForegroundColour(UIColors::TextPrimary);
 
-    sizer->Add(m_siUsername, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 20);
-    sizer->Add(m_siPassword, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 8);
-    sizer->Add(m_siError,    0, wxLEFT | wxTOP, 20);
-    sizer->Add(btn,          0, wxEXPAND | wxALL, 20);
+    sizer->Add(m_siUsername, 0, wxEXPAND | wxCENTRE | wxALL, 8);
+    sizer->Add(m_siPassword, 0, wxEXPAND | wxCENTRE | wxALL, 8);
+    sizer->Add(m_siError,    0, wxEXPAND | wxTOP | wxBOTTOM, 8);
+    sizer->Add(btn,          0, wxEXPAND | wxALL | wxCENTER, 20);
 
     btn->Bind(wxEVT_BUTTON, &LoginPanel::OnSignIn, this);
     // Also allow Enter in password field to submit
@@ -177,12 +179,12 @@ void LoginPanel::BuildRegisterForm(wxWindow* parent, wxSizer* sizer)
     btn->SetBackgroundColour(UIColors::Accent);
     btn->SetForegroundColour(UIColors::TextPrimary);
 
-    sizer->Add(m_regUsername, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 20);
-    sizer->Add(m_regEmail,    0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 8);
-    sizer->Add(m_regPassword, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 8);
-    sizer->Add(m_regConfirm,  0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 8);
-    sizer->Add(m_regError,    0, wxLEFT | wxTOP, 20);
-    sizer->Add(btn,           0, wxEXPAND | wxALL, 20);
+    sizer->Add(m_regUsername, 0, wxEXPAND | wxALL, 8);
+    sizer->Add(m_regEmail,    0, wxEXPAND | wxALL, 8);
+    sizer->Add(m_regPassword, 0, wxEXPAND | wxALL, 8);
+    sizer->Add(m_regConfirm,  0, wxEXPAND | wxALL, 8);
+    sizer->Add(m_regError,   0, wxEXPAND | wxTOP | wxBOTTOM, 8);
+    sizer->Add(btn,           0, wxEXPAND | wxALL | wxCENTER, 20);
 
     btn->Bind(wxEVT_BUTTON, &LoginPanel::OnRegister, this);
 }
@@ -221,6 +223,7 @@ void LoginPanel::OnSignIn(wxCommandEvent& /*evt*/)
     if (username.empty() || password.empty()) {
         m_siError->SetLabel("Please enter your username and password.");
         m_siError->Show();
+        m_siError->GetParent()->Layout();
         Layout();
         return;
     }
@@ -232,6 +235,7 @@ void LoginPanel::OnSignIn(wxCommandEvent& /*evt*/)
     if (AppState::getInstance().getCurrentUser() == nullptr) {
         m_siError->SetLabel("Incorrect username or password.");
         m_siError->Show();
+        m_siError->GetParent()->Layout();
         m_siPassword->Clear();
         Layout();
         return;
