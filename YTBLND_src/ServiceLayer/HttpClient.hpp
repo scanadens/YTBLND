@@ -149,6 +149,14 @@ class HttpClient {
 		 */
 		std::string build_chatroom_detail_endpoint(std::string blendID);
 
+		/**
+		 * Builds the endpoint for fetching a blend's chat message history.
+		 * \param blendID ID of the blend whose chat history is requested.
+		 * \param userID  ID of the requesting user (passed as query param).
+		 * \return the structured string endpoint
+		 */
+		std::string build_chat_history_endpoint(std::string blendID, std::string userID);
+
 	private:
 		// Holds the base url for server communication
 		std::string baseUrl;
