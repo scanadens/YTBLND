@@ -14,9 +14,7 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     SetBackgroundColour(UIColors::Surface);
 
     // ── Back button ──────────────────────────────────────────────────────────
-    wxButton* backBtn = new wxButton(this, wxID_ANY, wxT("< Back"),
-                                     wxDefaultPosition, wxDefaultSize,
-                                     wxBORDER_NONE);
+    wxButton* backBtn = new wxButton(this, wxID_ANY, wxT("< Back"));
     backBtn->SetBackgroundColour(UIColors::SurfaceRaised);
     backBtn->SetForegroundColour(UIColors::TextPrimary);
     backBtn->SetMinSize(wxSize(80, 30));

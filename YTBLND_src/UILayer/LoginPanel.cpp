@@ -76,10 +76,11 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     // Tab strip
     auto* tabRow = new wxBoxSizer(wxHORIZONTAL);
     m_signinTab   = new wxButton(card, wxID_ANY, "Sign In",
-                                  wxDefaultPosition, wxSize(-1, 36));
+                                  wxDefaultPosition, wxDefaultSize);
     m_registerTab = new wxButton(card, wxID_ANY, "Register",
-                                  wxDefaultPosition, wxSize(-1, 36));
+                                  wxDefaultPosition, wxDefaultSize);
     for (auto* btn : {m_signinTab, m_registerTab}) {
+        btn->SetMinSize(wxSize(120, 36));
         btn->SetBackgroundColour(UIColors::SurfaceRaised);
         btn->SetForegroundColour(UIColors::TextSecondary);
     }
@@ -145,7 +146,8 @@ void LoginPanel::BuildSignInForm(wxWindow* parent, wxSizer* sizer)
     m_siError    = MakeError(parent);
 
     auto* btn = new wxButton(parent, wxID_ANY, "Sign In",
-                              wxDefaultPosition, wxSize(-1, 40));
+                              wxDefaultPosition, wxDefaultSize);
+    btn->SetMinSize(wxSize(140, 40));
     btn->SetBackgroundColour(UIColors::Accent);
     btn->SetForegroundColour(UIColors::TextPrimary);
 
@@ -169,7 +171,8 @@ void LoginPanel::BuildRegisterForm(wxWindow* parent, wxSizer* sizer)
     m_regError    = MakeError(parent);
 
     auto* btn = new wxButton(parent, wxID_ANY, "Create Account",
-                              wxDefaultPosition, wxSize(-1, 40));
+                              wxDefaultPosition, wxDefaultSize);
+    btn->SetMinSize(wxSize(140, 40));
     btn->SetBackgroundColour(UIColors::Accent);
     btn->SetForegroundColour(UIColors::TextPrimary);
 

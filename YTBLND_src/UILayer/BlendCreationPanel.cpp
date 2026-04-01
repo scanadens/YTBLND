@@ -164,8 +164,7 @@ void BlendCreationPanel::RebuildUserList()
             nameLabel->SetForegroundColour(UIColors::TextPrimary);
 
             auto* removeBtn = new wxButton(row, wxID_ANY, wxT("\xc3\x97"),
-                                           wxDefaultPosition, wxSize(30, 30),
-                                           wxBORDER_NONE);
+                                           wxDefaultPosition, wxSize(30, 30));
             removeBtn->SetBackgroundColour(UIColors::SurfaceRaised);
             removeBtn->SetForegroundColour(UIColors::Danger);
 

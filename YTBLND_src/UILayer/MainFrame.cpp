@@ -87,7 +87,7 @@ private:
 // ── Construction ─────────────────────────────────────────────────────────────
 MainFrame::MainFrame(AppController& controller)
     : wxFrame(nullptr, wxID_ANY, "YTBLND",
-              wxDefaultPosition, wxDefaultSize,
+              wxDefaultPosition, wxSize(1280, 800),
               wxDEFAULT_FRAME_STYLE | wxMAXIMIZE),
       controller(controller)
 {
@@ -134,7 +134,13 @@ MainFrame::MainFrame(AppController& controller)
 
     auto* homePageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
     feedPanel = new BlendFeedPanel(homePageBg, controller);
-    book->AddPage(BuildHomePage(homePageBg), "Home");
+    {
+        auto* homePage = BuildHomePage(homePageBg);
+        auto* s = new wxBoxSizer(wxVERTICAL);
+        s->Add(homePage, 1, wxEXPAND);
+        homePageBg->SetSizer(s);
+    }
+    book->AddPage(homePageBg, "Home");
 
     auto* userPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
     userPanel = new UserPanel(userPageBg, controller, nav);
@@ -146,7 +152,13 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(userPageBg, "User");
 
     auto* settingsPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
-    book->AddPage(BuildSettingsPage(settingsPageBg), "Settings");
+    {
+        auto* settingsPage = BuildSettingsPage(settingsPageBg);
+        auto* s = new wxBoxSizer(wxVERTICAL);
+        s->Add(settingsPage, 1, wxEXPAND);
+        settingsPageBg->SetSizer(s);
+    }
+    book->AddPage(settingsPageBg, "Settings");
 
     auto* chatPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
     chatPanel = new BlendChatPanel(chatPageBg, controller, nav);
@@ -168,6 +180,8 @@ MainFrame::MainFrame(AppController& controller)
     SetSizer(frameSizer);
 
     Maximize(true);
+    book->SetSelection(static_cast<int>(Page::HOME));
+    Layout();
     book->SetSelection(static_cast<int>(Page::LOGIN));
 }
 
@@ -232,22 +246,18 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
 
     auto* refreshPanel = new wxPanel(page, wxID_ANY);
     auto* rbox = new wxBoxSizer(wxHORIZONTAL);
-    wxButton* refreshBtn = nullptr;
+    auto* refreshBtn = new wxButton(refreshPanel, wxID_ANY, "Refresh",
+                                    wxDefaultPosition, wxSize(110, 36));
+    refreshBtn->SetMinSize(wxSize(110, 36));
     const wxString refreshPath = ResolveResourcePath("refresh.png");
     if (!refreshPath.empty()) {
         wxBitmap refreshBmp(refreshPath, wxBITMAP_TYPE_PNG);
         if (refreshBmp.IsOk()) {
-            refreshBmp = wxBitmap(refreshBmp.ConvertToImage().Rescale(28, 28));
-            auto* bmpBtn = new wxBitmapButton(refreshPanel, wxID_ANY, refreshBmp,
-                                              wxDefaultPosition, wxSize(44, 44));
-            bmpBtn->SetMinSize(wxSize(44, 44));
-            refreshBtn = bmpBtn;
+            refreshBmp = wxBitmap(refreshBmp.ConvertToImage().Rescale(18, 18));
+            refreshBtn->SetBitmap(refreshBmp);
         }
-    }
-    if (!refreshBtn) {
-        wxLogWarning("Refresh icon not found; using text fallback button.");
-        refreshBtn = new wxButton(refreshPanel, wxID_ANY, "Refresh",
-                                  wxDefaultPosition, wxSize(96, 36));
+    } else {
+        wxLogWarning("Refresh icon not found; using text-only button.");
     }
     refreshBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ TriggerFeedRefresh(); });
     rbox->AddStretchSpacer(1);
