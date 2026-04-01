@@ -7,7 +7,6 @@
 #include <wx/statline.h>
 
 #include "UIColors.hpp"
-#include "ButtonsConfig.hpp"
 #include "UIPages.hpp"
 #include "TopBar.hpp"
 #include "ConfirmationDialog.hpp"
@@ -19,10 +18,12 @@
 // ── Construction ──────────────────────────────────────────────────────────────
 
 UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav)
-    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTRANSPARENT_WINDOW)
+    : wxPanel(parent, wxID_ANY)
     , m_controller(controller)
     , m_nav(std::move(nav))
 {
+    SetBackgroundColour(UIColors::Background);
+
     auto* root = new wxBoxSizer(wxVERTICAL);
 
     // ── TopBar ────────────────────────────────────────────────────────────────
@@ -57,11 +58,11 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     root->AddStretchSpacer(1);
 
     // ── Logout ────────────────────────────────────────────────────────────────
-    auto* logoutBtn = new wxButton(this, wxID_ANY, "Log Out");
-    UIButtons::ApplySizeBounds(logoutBtn, ButtonType::Medium);
+    auto* logoutBtn = new wxButton(this, wxID_ANY, "Log Out",
+                                   wxDefaultPosition, wxSize(-1, 40));
     logoutBtn->SetBackgroundColour(UIColors::Danger);
     logoutBtn->SetForegroundColour(UIColors::TextPrimary);
-    root->Add(logoutBtn, 0, wxEXPAND | wxCENTER | wxBOTTOM, 16);
+    root->Add(logoutBtn, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 16);
 
     SetSizer(root);
 

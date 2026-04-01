@@ -8,7 +8,6 @@
 #include <wx/statline.h>
 
 #include "UIColors.hpp"
-#include "ButtonsConfig.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
@@ -77,11 +76,10 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     // Tab strip
     auto* tabRow = new wxBoxSizer(wxHORIZONTAL);
     m_signinTab   = new wxButton(card, wxID_ANY, "Sign In",
-                                  wxDefaultPosition, wxDefaultSize);
+                                  wxDefaultPosition, wxSize(-1, 36));
     m_registerTab = new wxButton(card, wxID_ANY, "Register",
-                                  wxDefaultPosition, wxDefaultSize);
+                                  wxDefaultPosition, wxSize(-1, 36));
     for (auto* btn : {m_signinTab, m_registerTab}) {
-        UIButtons::ApplySizeBounds(btn, ButtonType::FormTab);
         btn->SetBackgroundColour(UIColors::SurfaceRaised);
         btn->SetForegroundColour(UIColors::TextSecondary);
     }
@@ -147,8 +145,7 @@ void LoginPanel::BuildSignInForm(wxWindow* parent, wxSizer* sizer)
     m_siError    = MakeError(parent);
 
     auto* btn = new wxButton(parent, wxID_ANY, "Sign In",
-                              wxDefaultPosition, wxDefaultSize);
-    UIButtons::ApplySizeBounds(btn, ButtonType::FormSubmit);
+                              wxDefaultPosition, wxSize(-1, 40));
     btn->SetBackgroundColour(UIColors::Accent);
     btn->SetForegroundColour(UIColors::TextPrimary);
 
@@ -172,8 +169,7 @@ void LoginPanel::BuildRegisterForm(wxWindow* parent, wxSizer* sizer)
     m_regError    = MakeError(parent);
 
     auto* btn = new wxButton(parent, wxID_ANY, "Create Account",
-                              wxDefaultPosition, wxDefaultSize);
-    UIButtons::ApplySizeBounds(btn, ButtonType::FormSubmit);
+                              wxDefaultPosition, wxSize(-1, 40));
     btn->SetBackgroundColour(UIColors::Accent);
     btn->SetForegroundColour(UIColors::TextPrimary);
 

@@ -18,6 +18,7 @@ file(GLOB_RECURSE YTBLND_CORE_SOURCES
 
 # UI sources only compiled into the main executable
 file(GLOB_RECURSE YTBLND_UI_SOURCES
+    CONFIGURE_DEPENDS
     UILayer/*.cpp
 )
 

@@ -6,6 +6,7 @@
 #include <wx/stdpaths.h>
 
 #include "UIColors.hpp"
+#include "ButtonsConfig.hpp"
 #include "LoginPanel.hpp"
 #include "DataInstructionsPanel.hpp"
 #include "BlendFeedPanel.hpp"
@@ -212,7 +213,7 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
 
     auto makeBtn = [&](wxPanel* parent, const wxString& label) {
         auto* btn = new wxButton(parent, wxID_ANY, label);
-        btn->SetMinSize(wxSize(96, 36));
+        UIButtons::ApplySizeBounds(btn, ButtonType::Nav);
         btn->SetBackgroundColour(UIColors::SurfaceRaised);
         btn->SetForegroundColour(UIColors::TextPrimary);
         return btn;
@@ -226,10 +227,10 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     userBtn    ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::USER); });
     blendBtn   ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::BLEND_CREATION); });
 
-    hbox->Add(settingsBtn, 0, wxALL|wxALIGN_CENTER_VERTICAL, 8);
+    hbox->Add(settingsBtn, 1, wxALL|wxEXPAND, 8);
     hbox->AddStretchSpacer(1);
-    hbox->Add(userBtn, 0, wxALL|wxALIGN_CENTER_VERTICAL, 8);
-    hbox->Add(blendBtn, 0, wxALL|wxALIGN_CENTER_VERTICAL, 8);
+    hbox->Add(userBtn, 1, wxALL|wxEXPAND, 8);
+    hbox->Add(blendBtn, 1, wxALL|wxEXPAND, 8);
     topBar->SetSizer(hbox);
 
     auto* titlePanel = new wxPanel(page, wxID_ANY);
@@ -249,9 +250,8 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
 
     auto* refreshPanel = new wxPanel(page, wxID_ANY);
     auto* rbox = new wxBoxSizer(wxHORIZONTAL);
-    auto* refreshBtn = new wxButton(refreshPanel, wxID_ANY, "Refresh",
-                                    wxDefaultPosition, wxSize(110, 36));
-    refreshBtn->SetMinSize(wxSize(110, 36));
+    auto* refreshBtn = new wxButton(refreshPanel, wxID_ANY, "Refresh");
+    UIButtons::ApplySizeBounds(refreshBtn, ButtonType::Nav);
     const wxString refreshPath = ResolveResourcePath("refresh.png");
     if (!refreshPath.empty()) {
         wxBitmap refreshBmp(refreshPath, wxBITMAP_TYPE_PNG);
@@ -283,6 +283,7 @@ wxPanel* MainFrame::BuildSettingsPage(wxWindow* parent) {
     auto* vbox = new wxBoxSizer(wxVERTICAL);
 
     auto* back = new wxButton(stub, wxID_ANY, "< Back");
+    UIButtons::ApplySizeBounds(back, ButtonType::TopBarBack);
     back->SetBackgroundColour(UIColors::Surface);
     back->SetForegroundColour(UIColors::TextPrimary);
     back->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::HOME); });

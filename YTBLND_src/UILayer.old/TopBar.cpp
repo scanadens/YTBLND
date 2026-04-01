@@ -4,7 +4,6 @@
 
 #include "TopBar.hpp"
 #include "UIColors.hpp"
-#include "ButtonsConfig.hpp"
 #include <wx/font.h>
 
 TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page backDest)
@@ -15,10 +14,12 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     SetBackgroundColour(UIColors::Surface);
 
     // ── Back button ──────────────────────────────────────────────────────────
-    wxButton* backBtn = new wxButton(this, wxID_ANY, wxT("< Back"));
+    wxButton* backBtn = new wxButton(this, wxID_ANY, wxT("< Back"),
+                                     wxDefaultPosition, wxDefaultSize,
+                                     wxBORDER_NONE);
     backBtn->SetBackgroundColour(UIColors::SurfaceRaised);
     backBtn->SetForegroundColour(UIColors::TextPrimary);
-    UIButtons::ApplySizeBounds(backBtn, ButtonType::TopBarBack);
+    backBtn->SetMinSize(wxSize(80, 30));
 
     backBtn->Bind(wxEVT_BUTTON, &TopBar::OnBack, this);
 
@@ -55,7 +56,7 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     sizer->Add(titleLabel, 0, wxALIGN_CENTER_VERTICAL);
     sizer->AddStretchSpacer(1);
     // Invisible right-side spacer equal to back-button width + left margin
-    sizer->Add(UIButtons::GetSize(ButtonType::TopBarBack).GetWidth() + 10, 0);
+    sizer->Add(80 + 10, 0);
 
     wxBoxSizer* outerSizer = new wxBoxSizer(wxVERTICAL);
     outerSizer->Add(sizer, 1, wxEXPAND | wxTOP | wxBOTTOM, 8);

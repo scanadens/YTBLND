@@ -8,7 +8,6 @@
 #include <wx/statline.h>
 
 #include "UIColors.hpp"
-#include "ButtonsConfig.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
@@ -72,13 +71,13 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
     auto* div = new wxStaticLine(card, wxID_ANY);
     div->SetBackgroundColour(UIColors::Separator);
 
-    auto* browseBtn = new wxButton(card, wxID_ANY, "Browse for CSV...");
-    UIButtons::ApplySizeBounds(browseBtn, ButtonType::FullWidthPrimary);
+    auto* browseBtn = new wxButton(card, wxID_ANY, "Browse for CSV...",
+                                   wxDefaultPosition, wxSize(-1, 40));
     browseBtn->SetBackgroundColour(UIColors::Accent);
     browseBtn->SetForegroundColour(UIColors::TextPrimary);
 
-    auto* skipBtn = new wxButton(card, wxID_ANY, "Skip for now");
-    UIButtons::ApplySizeBounds(skipBtn, ButtonType::FullWidthSecondary);
+    auto* skipBtn = new wxButton(card, wxID_ANY, "Skip for now",
+                                  wxDefaultPosition, wxSize(-1, 32));
     skipBtn->SetBackgroundColour(UIColors::SurfaceRaised);
     skipBtn->SetForegroundColour(UIColors::TextMuted);
 

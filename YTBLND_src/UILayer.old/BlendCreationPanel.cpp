@@ -9,7 +9,6 @@
 #include <wx/statline.h>
 
 #include "UIColors.hpp"
-#include "ButtonsConfig.hpp"
 #include "UIPages.hpp"
 #include "TopBar.hpp"
 #include "../AppLayer/AppController.hpp"
@@ -45,13 +44,13 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
     lf.SetPointSize(13);
     blendLabel->SetFont(lf);
 
-    auto* addBtn = new wxButton(actionPanel, wxID_ANY, "Add");
-    UIButtons::ApplySizeBounds(addBtn, ButtonType::Compact);
+    auto* addBtn = new wxButton(actionPanel, wxID_ANY, "Add",
+                                wxDefaultPosition, wxSize(80, 34));
     addBtn->SetBackgroundColour(UIColors::SurfaceRaised);
     addBtn->SetForegroundColour(UIColors::TextPrimary);
 
-    m_createBtn = new wxButton(actionPanel, wxID_ANY, "Create Blend");
-    UIButtons::ApplySizeBounds(m_createBtn, ButtonType::Medium);
+    m_createBtn = new wxButton(actionPanel, wxID_ANY, "Create Blend",
+                               wxDefaultPosition, wxSize(120, 34));
     m_createBtn->SetBackgroundColour(UIColors::Accent);
     m_createBtn->SetForegroundColour(UIColors::TextPrimary);
     m_createBtn->Disable();
@@ -164,8 +163,9 @@ void BlendCreationPanel::RebuildUserList()
                                                wxString::FromUTF8(username));
             nameLabel->SetForegroundColour(UIColors::TextPrimary);
 
-            auto* removeBtn = new wxButton(row, wxID_ANY, wxT("\xc3\x97"));
-            UIButtons::ApplySizeBounds(removeBtn, ButtonType::Icon);
+            auto* removeBtn = new wxButton(row, wxID_ANY, wxT("\xc3\x97"),
+                                           wxDefaultPosition, wxSize(30, 30),
+                                           wxBORDER_NONE);
             removeBtn->SetBackgroundColour(UIColors::SurfaceRaised);
             removeBtn->SetForegroundColour(UIColors::Danger);
 

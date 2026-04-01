@@ -11,7 +11,6 @@
 #include <sstream>
 
 #include "UIColors.hpp"
-#include "ButtonsConfig.hpp"
 #include "UIPages.hpp"
 #include "TopBar.hpp"
 #include "ConfirmationDialog.hpp"
@@ -89,8 +88,8 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
     m_inputCtrl->SetForegroundColour(UIColors::TextPrimary);
     m_inputCtrl->SetHint("Type a message...");
 
-    auto* sendBtn = new wxButton(m_inputPanel, wxID_ANY, "Send");
-    UIButtons::ApplySizeBounds(sendBtn, ButtonType::Nav);
+    auto* sendBtn = new wxButton(m_inputPanel, wxID_ANY, "Send",
+                                 wxDefaultPosition, wxSize(80, 36));
     sendBtn->SetBackgroundColour(UIColors::Accent);
     sendBtn->SetForegroundColour(UIColors::TextPrimary);
 

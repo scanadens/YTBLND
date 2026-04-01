@@ -25,45 +25,19 @@
 #pragma once
 #include <wx/colour.h>
 
-enum class ThemeType {
-    Dark = 0,
-    Light = 1,
-    Neon = 2
-};
-
-struct Palette {
-    wxColour Background;
-    wxColour Surface;
-    wxColour SurfaceRaised;
-
-    wxColour Accent;
-    wxColour AccentHover;
-
-    wxColour TextPrimary;
-    wxColour TextSecondary;
-    wxColour TextMuted;
-
-    wxColour Separator;
-    wxColour Danger;
-};
-
 /// Shared dark-theme colour constants for the YTBLND UI.
 namespace UIColors {
-    extern Palette DarkMode;
-    extern Palette LightMode;
-    extern Palette NeonMode;
-    extern Palette* Current;
+    inline const wxColour Background   (13,  13,  13);   ///< \#0D0D0D — window background.
+    inline const wxColour Surface      (25,  25,  25);   ///< \#191919 — panel / card background.
+    inline const wxColour SurfaceRaised(38,  38,  38);   ///< \#262626 — inputs, raised elements.
 
-    extern wxColour Background;
-    extern wxColour Surface;
-    extern wxColour SurfaceRaised;
-    extern wxColour Accent;
-    extern wxColour AccentHover;
-    extern wxColour TextPrimary;
-    extern wxColour TextSecondary;
-    extern wxColour TextMuted;
-    extern wxColour Separator;
-    extern wxColour Danger;
+    inline const wxColour Accent       (138,  0, 255);   ///< \#8A00FF — brand purple.
+    inline const wxColour AccentHover  (160, 40, 255);   ///< \#A028FF — lighter hover purple.
 
-    void SetTheme(ThemeType theme);
+    inline const wxColour TextPrimary  (255, 255, 255);  ///< White body text.
+    inline const wxColour TextSecondary(160, 160, 160);  ///< Grey secondary text.
+    inline const wxColour TextMuted    (100, 100, 100);  ///< Dark grey placeholder text.
+
+    inline const wxColour Separator    (50,  50,  50);   ///< Rule-line colour.
+    inline const wxColour Danger       (220,  50,  50);  ///< Red destructive-action colour.
 }

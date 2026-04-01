@@ -1,6 +1,5 @@
 #include "ConfirmationDialog.hpp"
 #include "UIColors.hpp"
-#include "ButtonsConfig.hpp"
 #include <wx/stattext.h>
 #include <wx/button.h>
 #include <wx/sizer.h>
@@ -34,9 +33,8 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
 
     // ── OK button (Accent colour) ─────────────────────────────────────────────
     wxButton* okBtn = new wxButton(this, wxID_OK, okLabel,
-                                   wxDefaultPosition, wxDefaultSize,
+                                   wxDefaultPosition, wxSize(100, 34),
                                    wxBORDER_NONE);
-    UIButtons::ApplySizeBounds(okBtn, ButtonType::Small);
     okBtn->SetBackgroundColour(UIColors::Accent);
     okBtn->SetForegroundColour(UIColors::TextPrimary);
 
@@ -53,9 +51,8 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
 
     // ── Cancel button (SurfaceRaised) ────────────────────────────────────────
     wxButton* cancelBtn = new wxButton(this, wxID_CANCEL, cancelLabel,
-                                       wxDefaultPosition, wxDefaultSize,
+                                       wxDefaultPosition, wxSize(100, 34),
                                        wxBORDER_NONE);
-    UIButtons::ApplySizeBounds(cancelBtn, ButtonType::Small);
     cancelBtn->SetBackgroundColour(UIColors::SurfaceRaised);
     cancelBtn->SetForegroundColour(UIColors::TextPrimary);
 
