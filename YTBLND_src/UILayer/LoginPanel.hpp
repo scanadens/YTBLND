@@ -48,7 +48,8 @@ class AppController;
 // DATA_INSTRUCTIONS or BLEND_CREATION accordingly.
 class LoginPanel : public wxPanel, public IRefreshablePanel {
 public:
-    LoginPanel(wxWindow* parent, AppController& controller, NavigateFn nav);
+    LoginPanel(wxWindow* parent, AppController& controller, NavigateFn nav,
+               const wxImage& bgImage = wxNullImage);
 
     void Refresh() override;
 
@@ -78,12 +79,15 @@ private:
     wxTextCtrl*   m_regConfirm;
     wxStaticText* m_regError;
 
+    wxImage m_bgImage;
+
     void BuildSignInForm  (wxWindow* parent, wxSizer* sizer);
     void BuildRegisterForm(wxWindow* parent, wxSizer* sizer);
     void ShowTab(int index);   // 0 = sign in, 1 = register
 
     void OnSignIn  (wxCommandEvent&);
     void OnRegister(wxCommandEvent&);
+    void OnPaint   (wxPaintEvent&);
 
     // After a successful login, decide which page comes next.
     void ProceedAfterLogin();

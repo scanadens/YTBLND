@@ -4,6 +4,7 @@
 
 #include "LoginPanel.hpp"
 
+#include <wx/dcbuffer.h>
 #include <wx/simplebook.h>
 #include <wx/statline.h>
 
@@ -41,12 +42,15 @@ static wxStaticText* MakeError(wxWindow* parent)
 
 // ── Construction ──────────────────────────────────────────────────────────────
 
-LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn nav)
+LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn nav,
+                       const wxImage& bgImage)
     : wxPanel(parent, wxID_ANY)
     , m_controller(controller)
     , m_nav(std::move(nav))
+    , m_bgImage(bgImage)
 {
-    SetBackgroundColour(UIColors::Background);
+    SetBackgroundStyle(wxBG_STYLE_PAINT);
+    Bind(wxEVT_PAINT, &LoginPanel::OnPaint, this);
 
     // ── Outer centering sizer ─────────────────────────────────────────────────
     auto* outer = new wxBoxSizer(wxVERTICAL);
@@ -327,4 +331,21 @@ void LoginPanel::Reset()
     m_siError ->Hide();
     m_regError->Hide();
     ShowTab(0);
+}
+
+// ── Background painting ───────────────────────────────────────────────────────
+
+void LoginPanel::OnPaint(wxPaintEvent&)
+{
+    wxBufferedPaintDC dc(this);
+    if (m_bgImage.IsOk()) {
+        wxSize sz = GetClientSize();
+        if (sz.x > 0 && sz.y > 0) {
+            wxBitmap scaled(m_bgImage.Scale(sz.x, sz.y, wxIMAGE_QUALITY_HIGH));
+            dc.DrawBitmap(scaled, 0, 0, false);
+            return;
+        }
+    }
+    dc.SetBackground(wxBrush(UIColors::Background));
+    dc.Clear();
 }

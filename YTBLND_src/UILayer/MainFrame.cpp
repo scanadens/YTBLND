@@ -98,8 +98,9 @@ MainFrame::MainFrame(AppController& controller)
         wxLogWarning("Background image not found. Checked ../resources and resources.");
     }
     
-    // create the panel acting as the background with the wxImage above
-    auto* bgPanel = new ImageBackgroundPanel(this, images, BG_MAIN);
+    // create the outer container panel with the app background colour
+    auto* bgPanel = new wxPanel(this);
+    bgPanel->SetBackgroundColour(UIColors::Background);
     
     // placing our new background panel in the book
     book = new wxSimplebook(bgPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
@@ -108,17 +109,12 @@ MainFrame::MainFrame(AppController& controller)
 
     // --- Initialize pages and wrap each in a panel that paints the background image --
 
-    // the login panel
-    auto* loginPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
-    loginPanel = new LoginPanel(loginPageBg, controller, nav);
-    { // ensure a sizer was added
-        auto* s = new wxBoxSizer(wxVERTICAL);
-        s->Add(loginPanel, 1, wxEXPAND);
-        loginPageBg->SetSizer(s);
-    } // add new page to the book
-    book->AddPage(loginPageBg, "Login");
+    // the login panel — paints its own background image
+    loginPanel = new LoginPanel(book, controller, nav, images[BG_MAIN]);
+    book->AddPage(loginPanel, "Login");
 
-    auto* dataPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    auto* dataPageBg = new wxPanel(book);
+    dataPageBg->SetBackgroundColour(UIColors::Background);
     dataInstrPanel = new DataInstructionsPanel(dataPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -127,7 +123,8 @@ MainFrame::MainFrame(AppController& controller)
     }
     book->AddPage(dataPageBg, "DataInstructions");
 
-    auto* creationPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    auto* creationPageBg = new wxPanel(book);
+    creationPageBg->SetBackgroundColour(UIColors::Background);
     creationPanel = new BlendCreationPanel(creationPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -136,7 +133,8 @@ MainFrame::MainFrame(AppController& controller)
     }
     book->AddPage(creationPageBg, "BlendCreation");
 
-    auto* homePageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    auto* homePageBg = new wxPanel(book);
+    homePageBg->SetBackgroundColour(UIColors::Background);
     feedPanel = new BlendFeedPanel(homePageBg, controller);
     {
         auto* homePage = BuildHomePage(homePageBg);
@@ -146,7 +144,8 @@ MainFrame::MainFrame(AppController& controller)
     }
     book->AddPage(homePageBg, "Home");
 
-    auto* userPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    auto* userPageBg = new wxPanel(book);
+    userPageBg->SetBackgroundColour(UIColors::Background);
     userPanel = new UserPanel(userPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -155,7 +154,8 @@ MainFrame::MainFrame(AppController& controller)
     }
     book->AddPage(userPageBg, "User");
 
-    auto* settingsPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    auto* settingsPageBg = new wxPanel(book);
+    settingsPageBg->SetBackgroundColour(UIColors::Background);
     {
         auto* settingsPage = BuildSettingsPage(settingsPageBg);
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -164,7 +164,8 @@ MainFrame::MainFrame(AppController& controller)
     }
     book->AddPage(settingsPageBg, "Settings");
 
-    auto* chatPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    auto* chatPageBg = new wxPanel(book);
+    chatPageBg->SetBackgroundColour(UIColors::Background);
     chatPanel = new BlendChatPanel(chatPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
