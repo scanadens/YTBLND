@@ -37,9 +37,17 @@
 #pragma once
 
 #include <wx/wx.h>
+#include <wx/timer.h>
+
+#include <memory>
+#include <mutex>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "IRefreshablePanel.hpp"
 #include "UIPages.hpp"
+#include "../ServiceLayer/ChatWebSocket.hpp"
 
 class AppController;
 class wxScrolledWindow;
@@ -69,11 +77,39 @@ private:
     // "No active blend." placeholder (shown when no blend is active)
     wxStaticText*     m_noBlendLabel;
 
+    // Purple toggle button that shows/hides the participants dropdown
+    wxButton*         m_participantsBtn;
+    // Dropdown panel containing the participant list (hidden by default)
+    wxPanel*          m_participantsDropdown;
+    wxBoxSizer*       m_participantsSizer;
+
     // Text input for typing messages
     wxTextCtrl*       m_inputCtrl;
 
     // Panel that wraps the input row (hidden when no blend active)
     wxPanel*          m_inputPanel;
+
+    // ── WebSocket / incoming message handling ─────────────────────────────────
+
+    // Timer that drains m_incoming on the main thread (~500 ms interval).
+    wxTimer*          m_pollTimer;
+
+    // Blend ID the WebSocket is currently connected to (empty = not connected).
+    std::string       m_wsBlendID;
+
+    // Mutex protecting m_incoming (written by WS background thread, read by timer).
+    std::mutex        m_incomingMx;
+
+    // Incoming messages from other participants waiting to be added to ChatRoom.
+    // Declared after m_incomingMx; m_ws declared last so it is destroyed first,
+    // stopping the background thread before the mutex/vector are torn down.
+    std::vector<std::pair<std::string, std::string>> m_incoming;
+
+    // Active WebSocket connection (null when no blend is open).
+    std::unique_ptr<ChatWebSocket> m_ws;
+
+    // Connects (or reconnects) the WebSocket for the given blend/user.
+    void ConnectWebSocket(const std::string& blendID, const std::string& userID);
 
     // Send logic (shared between button click and Enter key)
     void DoSend();
@@ -81,4 +117,6 @@ private:
     // Event handlers
     void OnSend(wxCommandEvent& evt);
     void OnInputEnter(wxCommandEvent& evt);
+    void OnPollTimer(wxTimerEvent& evt);
+    void OnParticipantsToggle(wxCommandEvent& evt);
 };
