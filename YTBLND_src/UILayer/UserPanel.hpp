@@ -38,14 +38,16 @@
 
 #include <wx/wx.h>
 
+#include "IRefreshablePanel.hpp"
 #include "UIPages.hpp"
 
 class AppController;
 class wxStaticText;
 
-class UserPanel : public wxPanel {
+class UserPanel : public wxPanel, public IRefreshablePanel {
 public:
     UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav);
+    void Refresh() override;
 
 private:
     AppController& m_controller;

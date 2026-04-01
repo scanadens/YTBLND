@@ -35,6 +35,12 @@ BlendFeedPanel::BlendFeedPanel(wxWindow* parent, AppController& controller)
     LoadFromBlend();
 }
 
+void BlendFeedPanel::Refresh()
+{
+    m_offset = 0;
+    LoadFromBlend();
+}
+
 // ---------------------------------------------------------------------------
 // NextPage
 // ---------------------------------------------------------------------------

@@ -23,10 +23,6 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     , m_controller(controller)
     , m_nav(std::move(nav))
 {
-
-    // pull user information from m_controller
-    //std::string username = m_controller
-
     auto* root = new wxBoxSizer(wxVERTICAL);
 
     // ── TopBar ────────────────────────────────────────────────────────────────
@@ -38,19 +34,17 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     infoPanel->SetBackgroundColour(UIColors::Surface);
     auto* infoSizer = new wxBoxSizer(wxVERTICAL);
 
-    m_usernameLabel = new wxStaticText(infoPanel, wxID_ANY, "Username: —");
+    m_usernameLabel = new wxStaticText(infoPanel, wxID_ANY, "Username: Not logged in");
     m_usernameLabel->SetForegroundColour(UIColors::TextPrimary);
-    wxFont uf = m_usernameLabel->GetFont();
-    uf.SetPointSize(12);
+    wxFont uf = m_usernameLabel->GetFont(); // grab a font
+    uf.SetPointSize(24);
     m_usernameLabel->SetFont(uf);
 
-    m_emailLabel = new wxStaticText(infoPanel, wxID_ANY, "Email: —");
+    m_emailLabel = new wxStaticText(infoPanel, wxID_ANY, "Email: ");
     m_emailLabel->SetForegroundColour(UIColors::TextSecondary);
-
-    infoSizer->Add(m_usernameLabel, 0, wxLEFT | wxTOP, 16);
-    infoSizer->Add(m_emailLabel,    0, wxLEFT | wxTOP | wxBOTTOM, 16);
-    infoPanel->SetSizer(infoSizer);
-    root->Add(infoPanel, 0, wxEXPAND);
+    uf = m_emailLabel->GetFont();
+    uf.SetPointSize(16);
+    m_emailLabel->SetFont(uf);
 
     // ── Divider ───────────────────────────────────────────────────────────────
     auto* divider = new wxStaticLine(this, wxID_ANY);
@@ -59,6 +53,13 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
 
     // ── Spacer pushes buttons to bottom ───────────────────────────────────────
     root->AddStretchSpacer(2);
+
+    infoSizer->Add(m_usernameLabel, 0, wxCENTER | wxTOP, 16);
+    infoSizer->Add(m_emailLabel,    0, wxCENTER | wxBOTTOM, 16);
+    infoPanel->SetSizer(infoSizer);
+    root->Add(infoPanel, 0, wxCENTER | wxBOTTOM);
+
+    root->AddStretchSpacer(1); // space out the buttons and the labels
 
     // Delete Account
     auto* del_acc = new wxButton(this, wxID_ANY, "Delete Account");
@@ -85,14 +86,26 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
 
 // ── Private helpers ───────────────────────────────────────────────────────────
 
+void UserPanel::Refresh()
+{
+    RefreshUserInfo();
+}
+
 void UserPanel::RefreshUserInfo()
 {
     User* user = AppState::getInstance().getCurrentUser();
     if (user) {
         m_usernameLabel->SetLabel("Username: " +
                                   wxString::FromUTF8(user->getUsername()));
+        
+        // verify email presence
+        std::string tmp = user->getEmail();
+        std::string email_str;
+        if (tmp == "") {email_str = "no provided email at registration...";}
+        else {email_str = tmp;}
+
         m_emailLabel->SetLabel("Email: " +
-                               wxString::FromUTF8(user->getEmail()));
+                               wxString::FromUTF8(email_str));
     } else {
         m_usernameLabel->SetLabel("Not logged in");
         m_emailLabel->SetLabel("");
@@ -105,7 +118,7 @@ void UserPanel::RefreshUserInfo()
 void UserPanel::OnShow(wxShowEvent& evt)
 {
     if (evt.IsShown())
-        RefreshUserInfo();
+        Refresh();
     evt.Skip();
 }
 

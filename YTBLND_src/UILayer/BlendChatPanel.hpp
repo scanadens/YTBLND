@@ -38,6 +38,7 @@
 
 #include <wx/wx.h>
 
+#include "IRefreshablePanel.hpp"
 #include "UIPages.hpp"
 
 class AppController;
@@ -45,9 +46,11 @@ class wxScrolledWindow;
 class wxTextCtrl;
 class wxStaticText;
 
-class BlendChatPanel : public wxPanel {
+class BlendChatPanel : public wxPanel, public IRefreshablePanel {
 public:
     BlendChatPanel(wxWindow* parent, AppController& controller, NavigateFn nav);
+
+    void Refresh() override;
 
     // Refreshes message list from AppState's active ChatRoom.
     void Reload();

@@ -191,10 +191,11 @@ MainFrame::MainFrame(AppController& controller)
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 void MainFrame::NavigateTo(Page page) {
-    if (page == Page::LOGIN)           loginPanel->Reset();
-    if (page == Page::BLEND_CREATION)  creationPanel->Reload();
-    if (page == Page::HOME)            feedPanel->LoadFromBlend();
-    if (page == Page::BLEND_CHAT)      chatPanel->Reload();
+    if (page == Page::LOGIN)           loginPanel->Refresh();
+    if (page == Page::BLEND_CREATION)  creationPanel->Refresh();
+    if (page == Page::HOME)            feedPanel->Refresh();
+    if (page == Page::USER)            userPanel->Refresh();
+    if (page == Page::BLEND_CHAT)      chatPanel->Refresh();
     book->SetSelection(static_cast<int>(page));
 }
 

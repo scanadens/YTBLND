@@ -307,6 +307,11 @@ void LoginPanel::ProceedAfterLogin()
 
 // ── Reset ─────────────────────────────────────────────────────────────────────
 
+void LoginPanel::Refresh()
+{
+    Reset();
+}
+
 void LoginPanel::Reset()
 {
     m_siUsername->Clear();

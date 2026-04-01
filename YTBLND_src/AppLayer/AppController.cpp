@@ -686,20 +686,18 @@ void AppController::handleSendMessage(const EventPayload& payload) {
     std::cout << "[AppController] handleSendMessage called (stub)\n";
 }
 
-std::shared_ptr<User> AppController::get_current_user() {
-    std::shared_ptr<User> u (appState.getCurrentUser());
-    
-    return u;
+const User* AppController::get_current_user() {
+    return appState.getCurrentUser();
 }
 
 std::string AppController::get_current_username() {
-    if (appState.getCurrentUser() == nullptr) return "";
+    if (get_current_user() == nullptr) return "";
 
     return appState.getCurrentUser()->getUsername();
 }
 
 std::string AppController::get_current_email() {
-    if (appState.getCurrentUser() == nullptr) return "";
+    if (get_current_user() == nullptr) return "";
 
     return appState.getCurrentUser()->getEmail();
 }

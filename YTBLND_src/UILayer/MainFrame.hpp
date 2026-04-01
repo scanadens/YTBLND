@@ -46,8 +46,8 @@ public:
     explicit MainFrame(AppController& controller);
 
     /**
-     * Switches to the specified page, calling Reset()/Reload() on the target
-     * panel where applicable so it always shows fresh data on arrival.
+        * Switches to the specified page and calls the target panel's Refresh()
+        * method where applicable so it always shows fresh data on arrival.
      * \param page Page to navigate to.
      */
     void NavigateTo(Page page);

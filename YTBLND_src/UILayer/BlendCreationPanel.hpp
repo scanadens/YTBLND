@@ -42,6 +42,7 @@
 #include <string>
 #include <vector>
 
+#include "IRefreshablePanel.hpp"
 #include "UIPages.hpp"
 
 class AppController;
@@ -49,9 +50,11 @@ class wxScrolledWindow;
 class wxStaticText;
 class wxButton;
 
-class BlendCreationPanel : public wxPanel {
+class BlendCreationPanel : public wxPanel, public IRefreshablePanel {
 public:
     BlendCreationPanel(wxWindow* parent, AppController& controller, NavigateFn nav);
+
+    void Refresh() override;
 
     // Clears user list and resets to empty state.
     void Reload();

@@ -109,6 +109,11 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
+void BlendChatPanel::Refresh()
+{
+    Reload();
+}
+
 void BlendChatPanel::Reload()
 {
     AppState& state  = AppState::getInstance();

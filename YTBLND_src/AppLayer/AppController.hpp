@@ -206,7 +206,7 @@ class AppController {
          * Retrieves the current user from the AppSate
          * \return \c User \c shared pointer. \c nullptr \c if \c User \c DNE
          */
-        std::shared_ptr<User> get_current_user();
+        const User* get_current_user();
 
         /**
          * Rretrieves the current users username

@@ -110,6 +110,11 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
+void BlendCreationPanel::Refresh()
+{
+    Reload();
+}
+
 void BlendCreationPanel::Reload()
 {
     m_addedUsers.clear();

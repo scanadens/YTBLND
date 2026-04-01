@@ -37,6 +37,7 @@
 #pragma once
 #include <wx/wx.h>
 #include <wx/simplebook.h>
+#include "IRefreshablePanel.hpp"
 #include "UIPages.hpp"
 
 class AppController;
@@ -45,9 +46,11 @@ class AppController;
 // Presents a Sign In / Register toggle with the appropriate form fields.
 // On success, checks whether the user has YouTube data and navigates to
 // DATA_INSTRUCTIONS or BLEND_CREATION accordingly.
-class LoginPanel : public wxPanel {
+class LoginPanel : public wxPanel, public IRefreshablePanel {
 public:
     LoginPanel(wxWindow* parent, AppController& controller, NavigateFn nav);
+
+    void Refresh() override;
 
     // Clear all fields and reset to Sign In tab. Called by MainFrame on logout.
     void Reset();

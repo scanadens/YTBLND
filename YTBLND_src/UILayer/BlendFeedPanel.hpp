@@ -28,11 +28,14 @@
 #include <wx/wx.h>
 
 #include "VideoCard.hpp"
+#include "IRefreshablePanel.hpp"
 #include "../AppLayer/AppController.hpp"
 
-class BlendFeedPanel : public wxPanel {
+class BlendFeedPanel : public wxPanel, public IRefreshablePanel {
 public:
     BlendFeedPanel(wxWindow* parent, AppController& controller);
+
+    void Refresh() override;
 
     // Advance to the next 6 videos, wrapping around the blend.
     void NextPage();
