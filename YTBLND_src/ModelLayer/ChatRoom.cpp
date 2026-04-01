@@ -28,6 +28,10 @@ void ChatRoom::addMessage(const std::string& userID, const std::string& text) {
     messages.emplace_back(userID, text);
 }
 
+void ChatRoom::addMessage(const Message& msg) {
+    messages.push_back(msg);
+}
+
 bool ChatRoom::isParticipant(const std::string& userID) const {
     return std::find(participantIDs.begin(), participantIDs.end(), userID)
            != participantIDs.end();
