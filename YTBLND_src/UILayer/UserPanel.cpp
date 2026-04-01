@@ -23,6 +23,10 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     , m_controller(controller)
     , m_nav(std::move(nav))
 {
+
+    // pull user information from m_controller
+    //std::string username = m_controller
+
     auto* root = new wxBoxSizer(wxVERTICAL);
 
     // ── TopBar ────────────────────────────────────────────────────────────────
@@ -53,15 +57,25 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     divider->SetBackgroundColour(UIColors::Separator);
     root->Add(divider, 0, wxEXPAND);
 
-    // ── Spacer pushes logout to bottom ────────────────────────────────────────
-    root->AddStretchSpacer(1);
+    // ── Spacer pushes buttons to bottom ───────────────────────────────────────
+    root->AddStretchSpacer(2);
+
+    // Delete Account
+    auto* del_acc = new wxButton(this, wxID_ANY, "Delete Account");
+    UIButtons::ApplySizeBounds(del_acc, ButtonType::Large);
+    del_acc->SetBackgroundColour(UIColors::Danger);
+    del_acc->SetForegroundColour(UIColors::TextPrimary);
+    root->Add(del_acc, 0, wxEXPAND | wxCENTER | wxBOTTOM, 16); // keep the button in the center
 
     // ── Logout ────────────────────────────────────────────────────────────────
     auto* logoutBtn = new wxButton(this, wxID_ANY, "Log Out");
-    UIButtons::ApplySizeBounds(logoutBtn, ButtonType::Medium);
+    UIButtons::ApplySizeBounds(logoutBtn, ButtonType::Large);
     logoutBtn->SetBackgroundColour(UIColors::Danger);
     logoutBtn->SetForegroundColour(UIColors::TextPrimary);
-    root->Add(logoutBtn, 0, wxEXPAND | wxCENTER | wxBOTTOM, 16);
+    root->Add(logoutBtn, 0, wxEXPAND | wxCENTER | wxBOTTOM, 16); // keep the button in the bottom center as well
+
+    // add some extra padding space beneath the buttons
+    root->AddStretchSpacer(1);
 
     SetSizer(root);
 

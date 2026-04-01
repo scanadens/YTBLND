@@ -35,6 +35,7 @@ enum class ButtonType {
 	Compact,           ///< Small utility action (e.g., Add button).
 	Small,             ///< Dialog action button size.
 	Medium,            ///< Medium action button size.
+	Large,
 	FormTab,           ///< Login/Register tab buttons.
 	FormSubmit,        ///< Form submit actions (Sign In / Create Account).
 	FullWidthPrimary,  ///< Full-width prominent action.

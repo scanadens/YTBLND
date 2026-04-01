@@ -16,6 +16,7 @@ constexpr BtnConfig kNav = {96, 36, 220, 44};
 constexpr BtnConfig kCompact = {80, 34, 160, 40};
 constexpr BtnConfig kSmall = {100, 34, 180, 40};
 constexpr BtnConfig kMedium = {120, 34, 260, 42};
+constexpr BtnConfig kLarge = {140, 34, 280, 42};
 constexpr BtnConfig kFormTab = {120, 36, 260, 44};
 constexpr BtnConfig kFormSubmit = {140, 40, 320, 48};
 constexpr BtnConfig kFullWidthPrimary = {160, 40, 560, 48};
@@ -34,6 +35,7 @@ const BtnConfig& GetConfig(ButtonType type)
     case ButtonType::Compact:            return kCompact;
     case ButtonType::Small:              return kSmall;
     case ButtonType::Medium:             return kMedium;
+	case ButtonType::Large: 			 return kLarge;
     case ButtonType::FormTab:            return kFormTab;
     case ButtonType::FormSubmit:         return kFormSubmit;
     case ButtonType::FullWidthPrimary:   return kFullWidthPrimary;

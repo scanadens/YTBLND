@@ -5,6 +5,7 @@
  * \file AppController.hpp
  * \brief Central application coordinator.
  * \author Jasmine Kumar 
+ * \author Shamar Pennant
  *
  * AppController is the only class that communicates with both the UI layer
  * and the backend (DataManager, parsers, algorithms).  UI panels dispatch
@@ -198,6 +199,26 @@ class AppController {
          * \param payload { "userID": "...", "text": "..." }
          */
         void handleSendMessage(const EventPayload& payload);
+
+        // --- helpers for GUI to easily access user information such as their 
+
+        /**
+         * Retrieves the current user from the AppSate
+         * \return \c User \c shared pointer. \c nullptr \c if \c User \c DNE
+         */
+        std::shared_ptr<User> get_current_user();
+
+        /**
+         * Rretrieves the current users username
+         * \return \c string \c copy of username. \c nullptr \c if \c User \c DNE
+         */
+        std::string get_current_username();
+
+        /**
+         * Retrievesthe current users email (if an email was used on signup)
+         * \return \c string \c copy of users email. \c nullptr \c if \c User \c DNE or they provided no email on signup
+         */
+        std::string get_current_email();
 };
 
 #endif
