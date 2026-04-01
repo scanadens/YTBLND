@@ -18,12 +18,10 @@
 // ── Construction ──────────────────────────────────────────────────────────────
 
 UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav)
-    : wxPanel(parent, wxID_ANY)
+    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTRANSPARENT_WINDOW)
     , m_controller(controller)
     , m_nav(std::move(nav))
 {
-    SetBackgroundStyle(wxBG_STYLE_TRANSPARENT);
-
     auto* root = new wxBoxSizer(wxVERTICAL);
 
     // ── TopBar ────────────────────────────────────────────────────────────────
