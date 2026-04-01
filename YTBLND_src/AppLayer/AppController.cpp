@@ -685,3 +685,21 @@ void AppController::handleSendMessage(const EventPayload& payload) {
     // TODO: notify ChatPanel to re-render the message list
     std::cout << "[AppController] handleSendMessage called (stub)\n";
 }
+
+std::shared_ptr<User> AppController::get_current_user() {
+    std::shared_ptr<User> u (appState.getCurrentUser());
+    
+    return u;
+}
+
+std::string AppController::get_current_username() {
+    if (appState.getCurrentUser() == nullptr) return "";
+
+    return appState.getCurrentUser()->getUsername();
+}
+
+std::string AppController::get_current_email() {
+    if (appState.getCurrentUser() == nullptr) return "";
+
+    return appState.getCurrentUser()->getEmail();
+}

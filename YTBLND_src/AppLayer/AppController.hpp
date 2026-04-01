@@ -210,13 +210,13 @@ class AppController {
 
         /**
          * Rretrieves the current users username
-         * \return \c string \c copy of username. \c nullptr \c if \c User \c DNE
+         * \return \c string \c copy of username. \c "" \c if \c User \c DNE
          */
         std::string get_current_username();
 
         /**
          * Retrievesthe current users email (if an email was used on signup)
-         * \return \c string \c copy of users email. \c nullptr \c if \c User \c DNE or they provided no email on signup
+         * \return \c string \c copy of users email. \c "" \c if \c User \c DNE or they provided no email on signup
          */
         std::string get_current_email();
 };
