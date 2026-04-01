@@ -22,7 +22,7 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     , m_controller(controller)
     , m_nav(std::move(nav))
 {
-    SetBackgroundColour(UIColors::Background);
+    SetBackgroundStyle(wxBG_STYLE_TRANSPARENT);
 
     auto* root = new wxBoxSizer(wxVERTICAL);
 

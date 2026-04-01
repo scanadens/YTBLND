@@ -2,6 +2,7 @@
  * \file MainFrame.hpp
  * \brief Root application window containing the full-window page switcher.
  * \author Jasmine Kumar
+ * \author Shamar Pennant
  *
  * MainFrame is the single top-level wxFrame.  It contains a wxSimplebook that
  * acts as a full-window page switcher (no visible tabs).  Every panel is
@@ -72,7 +73,7 @@ private:
     UserPanel*             userPanel;
     wxPanel*               settingsPanel;  ///< Stub — back button only.
     BlendChatPanel*        chatPanel;
-    std::unordered_map<int, wxImage> images;
+    std::unordered_map<int, wxImage> images; // images
 
     /**
      * Builds the home page composite (top bar + title + feed + refresh button).

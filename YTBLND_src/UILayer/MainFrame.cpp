@@ -91,27 +91,30 @@ MainFrame::MainFrame(AppController& controller)
               wxDEFAULT_FRAME_STYLE | wxMAXIMIZE),
       controller(controller)
 {
+    // resolve the path to the background image and load it as a wxImage
     const wxString bgPath = ResolveResourcePath("checkered_wave_background.jpg");
     if (bgPath.empty() || !LoadImage(BG_MAIN, bgPath)) {
         wxLogWarning("Background image not found. Checked ../resources and resources.");
     }
-
-    // 3. Create a frame-level background panel
+    
+    // create the panel acting as the background with the wxImage above
     auto* bgPanel = new ImageBackgroundPanel(this, images, BG_MAIN);
     
-    // 4. Create the Book as a child of the Background Panel
+    // placing our new background panel in the book
     book = new wxSimplebook(bgPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
 
     NavigateFn nav = [this](Page p) { NavigateTo(p); };
 
-    // 5. Initialize pages and wrap each in a panel that paints the background image
+    // --- Initialize pages and wrap each in a panel that paints the background image --
+
+    // the login panel
     auto* loginPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
     loginPanel = new LoginPanel(loginPageBg, controller, nav);
-    {
+    { // ensure a sizer was added
         auto* s = new wxBoxSizer(wxVERTICAL);
         s->Add(loginPanel, 1, wxEXPAND);
         loginPageBg->SetSizer(s);
-    }
+    } // add new page to the book
     book->AddPage(loginPageBg, "Login");
 
     auto* dataPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
