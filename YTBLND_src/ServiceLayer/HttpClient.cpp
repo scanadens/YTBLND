@@ -5,10 +5,19 @@
  */
 
 #include "HttpClient.hpp"
+#include "../ModelLayer/JsonUtils.hpp"
 
 #include <stdexcept>
 
 using namespace std;
+
+namespace {
+
+string sanitizePathSegment(const string& value) {
+	return ModelJson::escape(value);
+}
+
+}
 
 HttpClient::HttpClient(string base) {
 	baseUrl = move(base);
@@ -39,6 +48,22 @@ string HttpClient::get(const string& path) {
 
 string HttpClient::post(const string& path, const string& json) {
 	return request(P, path, json);
+}
+
+string HttpClient::build_watch_later_endpoint(string userID) {
+	return "/api/v1/users/" + sanitizePathSegment(userID) + "/watch-later";
+}
+
+string HttpClient::build_latest_blend_endpoint(string userID) {
+	return "/api/v1/users/" + sanitizePathSegment(userID) + "/blend";
+}
+
+string HttpClient::build_blend_participant_endpoint(string blendID) {
+	return "/api/v1/blends/" + sanitizePathSegment(blendID) + "/participants";
+}
+
+string HttpClient::build_chatroom_detail_endpoint(string blendID) {
+	return "/api/v1/blends/" + sanitizePathSegment(blendID) + "/chatroom";
 }
 
 string HttpClient::request(const string& method, const string& path, const string&body) {
@@ -110,8 +135,9 @@ string HttpClient::request(const string& method, const string& path, const strin
 	return response;
 }
 
-size_t HttpClient::write_callback (void* contents, size_t size, size_t nmemb, string* out) {
-	out->append((char*)contents, size * nmemb);
+size_t HttpClient::write_callback(void* contents, size_t size, size_t nmemb, void* out) {
+	auto* response = static_cast<string*>(out);
+	response->append(static_cast<char*>(contents), size * nmemb);
 
 	return size * nmemb;
 }

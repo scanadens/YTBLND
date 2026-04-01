@@ -2,6 +2,9 @@
 
 #include "../ServiceLayer/ChatWebSocket.hpp"
 #include "../ServiceLayer/HttpClient.hpp"
+#include "../ServiceLayer/RequestJsonBuilder.hpp"
+
+#include <nlohmann/json.hpp>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -229,6 +232,91 @@ TEST(HttpClientWrapperTest, LastStatusHelpersReflectMostRecentRequest) {
 
 TEST(HttpClientWrapperTest, StaticStatusHandlerRejectsUnsupportedMethods) {
     EXPECT_THROW(HttpClient::isRequestSuccessful("DELETE", 200), std::invalid_argument);
+}
+
+TEST(HttpClientWrapperTest, EndpointBuildersGenerateExpectedPaths) {
+    HttpClient client("http://127.0.0.1:1");
+
+    // Endpoint helpers are consumed by AppController and must match backend routes.
+    EXPECT_EQ(
+        client.build_watch_later_endpoint("user-123"),
+        "/api/v1/users/user-123/watch-later"
+    );
+    EXPECT_EQ(
+        client.build_latest_blend_endpoint("user-123"),
+        "/api/v1/users/user-123/blend"
+    );
+    EXPECT_EQ(
+        client.build_blend_participant_endpoint("blend-42"),
+        "/api/v1/blends/blend-42/participants"
+    );
+    EXPECT_EQ(
+        client.build_chatroom_detail_endpoint("blend-42"),
+        "/api/v1/blends/blend-42/chatroom"
+    );
+}
+
+TEST(RequestJsonBuilderTest, BuildLoginJsonProducesExpectedShape) {
+    // Login payload contract: backend expects user_id + password.
+    const std::string json = RequestJsonBuilder::buildLoginJson("user-1", "pw-1");
+    const auto parsed = nlohmann::json::parse(json);
+
+    EXPECT_EQ(parsed.at("user_id").get<std::string>(), "user-1");
+    EXPECT_EQ(parsed.at("password").get<std::string>(), "pw-1");
+}
+
+TEST(RequestJsonBuilderTest, BuildRegisterJsonProducesExpectedShape) {
+    // Register payload must include password to avoid server-side validation errors.
+    const std::string json = RequestJsonBuilder::buildRegisterJson(
+        "user-1",
+        "alice",
+        "alice@example.com",
+        "pw-1"
+    );
+    const auto parsed = nlohmann::json::parse(json);
+
+    EXPECT_EQ(parsed.at("user_id").get<std::string>(), "user-1");
+    EXPECT_EQ(parsed.at("username").get<std::string>(), "alice");
+    EXPECT_EQ(parsed.at("email").get<std::string>(), "alice@example.com");
+    EXPECT_EQ(parsed.at("password").get<std::string>(), "pw-1");
+}
+
+TEST(RequestJsonBuilderTest, BuildBlendJsonProducesExpectedShape) {
+    const std::vector<std::string> participants{"u1", "u2", "u3"};
+    const std::string json = RequestJsonBuilder::buildBlendJson(
+        "b1",
+        "creator-1",
+        "RandomBlendAlgorithm",
+        participants
+    );
+
+    // Blend payload shape drives both blend creation and participant loading paths.
+    const auto parsed = nlohmann::json::parse(json);
+    EXPECT_EQ(parsed.at("blend_id").get<std::string>(), "b1");
+    EXPECT_EQ(parsed.at("creator_id").get<std::string>(), "creator-1");
+    EXPECT_EQ(parsed.at("algorithm").get<std::string>(), "RandomBlendAlgorithm");
+    ASSERT_TRUE(parsed.at("participants").is_array());
+    EXPECT_EQ(parsed.at("participants").size(), 3u);
+    EXPECT_EQ(parsed.at("participants").at(0).get<std::string>(), "u1");
+    EXPECT_EQ(parsed.at("participants").at(1).get<std::string>(), "u2");
+    EXPECT_EQ(parsed.at("participants").at(2).get<std::string>(), "u3");
+}
+
+TEST(RequestJsonBuilderTest, BuildWatchLaterJsonProducesExpectedShape) {
+    std::list<Video> videos;
+    videos.emplace_back("vid-1", "title-1", "", "", 0, std::list<std::string>{});
+    videos.emplace_back("vid-2", "title-2", "", "", 0, std::list<std::string>{});
+
+    // Watch-later sync serializes the video list under a top-level "videos" array.
+    const std::string json = RequestJsonBuilder::buildWatchLaterJson(videos);
+    const auto parsed = nlohmann::json::parse(json);
+
+    ASSERT_TRUE(parsed.at("videos").is_array());
+    ASSERT_EQ(parsed.at("videos").size(), 2u);
+    EXPECT_EQ(parsed.at("videos").at(0).at("video_id").get<std::string>(), "vid-1");
+    EXPECT_EQ(parsed.at("videos").at(0).at("title").get<std::string>(), "title-1");
+    EXPECT_EQ(parsed.at("videos").at(1).at("video_id").get<std::string>(), "vid-2");
+    EXPECT_EQ(parsed.at("videos").at(1).at("title").get<std::string>(), "title-2");
 }
 
 TEST(ChatWebSocketWrapperTest, MissingIDsThrowsValidationError) {

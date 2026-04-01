@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -45,6 +46,10 @@ func (m *SqliteDatabaseManager) initSchema() error {
         user_id TEXT NOT NULL,
         video_id TEXT NOT NULL,
         title TEXT,
+			channel_id TEXT,
+			channel_name TEXT,
+			thumbnail_url TEXT,
+			channel_logo_url TEXT,
         position INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY (user_id, video_id)
     );
@@ -83,7 +88,63 @@ func (m *SqliteDatabaseManager) initSchema() error {
 	);
     `
 	_, err := m.db.Exec(schema)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Backfill schema for existing DBs that were created before metadata columns existed.
+	if err := m.ensureUserWatchLaterMetadataColumns(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *SqliteDatabaseManager) ensureUserWatchLaterMetadataColumns() error {
+	type columnDef struct {
+		name       string
+		sqlTypeDef string
+	}
+
+	columns := []columnDef{
+		{name: "channel_id", sqlTypeDef: "TEXT"},
+		{name: "channel_name", sqlTypeDef: "TEXT"},
+		{name: "thumbnail_url", sqlTypeDef: "TEXT"},
+		{name: "channel_logo_url", sqlTypeDef: "TEXT"},
+	}
+
+	existing := make(map[string]bool)
+	rows, err := m.db.Query("PRAGMA table_info(user_watch_later);")
+	if err != nil {
+		return fmt.Errorf("schema migration table_info(user_watch_later): %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cid int
+		var name, colType string
+		var notNull, pk int
+		var dflt sql.NullString
+		if err := rows.Scan(&cid, &name, &colType, &notNull, &dflt, &pk); err != nil {
+			return fmt.Errorf("schema migration scan table_info(user_watch_later): %w", err)
+		}
+		existing[strings.ToLower(name)] = true
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("schema migration rows table_info(user_watch_later): %w", err)
+	}
+
+	for _, col := range columns {
+		if existing[col.name] {
+			continue
+		}
+		stmt := fmt.Sprintf("ALTER TABLE user_watch_later ADD COLUMN %s %s;", col.name, col.sqlTypeDef)
+		if _, err := m.db.Exec(stmt); err != nil {
+			return fmt.Errorf("schema migration add column %s: %w", col.name, err)
+		}
+	}
+
+	return nil
 }
 
 // CreateUser inserts a new user row; SQLite returns a constraint error when
@@ -165,8 +226,10 @@ func (m *SqliteDatabaseManager) SaveWatchLater(userID string, videos []Video) er
 
 	// Keep insertion order via position so reads can reconstruct playlist order.
 	stmt, err := tx.Prepare(`
-        INSERT OR REPLACE INTO user_watch_later (user_id, video_id, title, position)
-        VALUES (?, ?, ?, ?);
+		INSERT OR REPLACE INTO user_watch_later (
+			user_id, video_id, title, channel_id, channel_name, thumbnail_url, channel_logo_url, position
+		)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     `)
 	if err != nil {
 		return fmt.Errorf("save watch later prepare insert: %w", err)
@@ -175,7 +238,16 @@ func (m *SqliteDatabaseManager) SaveWatchLater(userID string, videos []Video) er
 
 	// Reinsert each video at its current index.
 	for i, video := range videos {
-		if _, err := stmt.Exec(userID, video.GetVideoID(), video.GetTitle(), i); err != nil {
+		if _, err := stmt.Exec(
+			userID,
+			video.GetVideoID(),
+			video.GetTitle(),
+			video.GetChannelID(),
+			video.GetChannelName(),
+			video.GetThumbnailURL(),
+			video.GetChannelLogoURL(),
+			i,
+		); err != nil {
 			return fmt.Errorf("save watch later insert: %w", err)
 		}
 	}
@@ -196,7 +268,7 @@ func (m *SqliteDatabaseManager) LoadWatchLater(userID string) ([]Video, error) {
 	}
 
 	const query = `
-        SELECT video_id, title
+		SELECT video_id, title, channel_id, channel_name, thumbnail_url, channel_logo_url
         FROM user_watch_later
         WHERE user_id = ?
         ORDER BY position ASC;
@@ -212,11 +284,14 @@ func (m *SqliteDatabaseManager) LoadWatchLater(userID string) ([]Video, error) {
 	for rows.Next() {
 		var videoID string
 		var title sql.NullString
-		// title is nullable in schema, so scan through sql.NullString.
-		if err := rows.Scan(&videoID, &title); err != nil {
+		var channelID sql.NullString
+		var channelName sql.NullString
+		var thumbnailURL sql.NullString
+		var channelLogoURL sql.NullString
+		if err := rows.Scan(&videoID, &title, &channelID, &channelName, &thumbnailURL, &channelLogoURL); err != nil {
 			return nil, fmt.Errorf("load watch later scan: %w", err)
 		}
-		video := NewVideo(videoID, title.String, "", "", 0, nil)
+		video := NewVideo(videoID, title.String, channelID.String, channelName.String, thumbnailURL.String, channelLogoURL.String, 0, nil)
 		videos = append(videos, video)
 	}
 

@@ -110,30 +110,42 @@ class HttpClient {
 		std::string post(const std::string& path, const std::string& json);
 
 		/**
-		 * Builds save watch later endpoint given it's dependant on userID
-		 * \param userID string ID for user
-		 * \return the string endpoint built from the given ID
+		 * \brief Builds the watch-later endpoint for a specific user.
+		 *
+		 * Result format: \c /api/v1/users/{userID}/watch-later
+		 *
+		 * \param userID User identifier used in the endpoint path.
+		 * \return Endpoint path string for persisting or retrieving watch-later data.
 		 */
 		std::string build_watch_later_endpoint(std::string userID);
 
 		/**
-		 * Builds latest blend endpoint based on the user
-		 * \param userID userID to use for the endpoint
-		 * \return the built string for the endpoint in respect to userID
+		 * \brief Builds the endpoint used to fetch a user's latest blend.
+		 *
+		 * Result format: \c /api/v1/users/{userID}/blend
+		 *
+		 * \param userID User identifier used in the endpoint path.
+		 * \return Endpoint path string for latest blend lookup.
 		 */
 		std::string build_latest_blend_endpoint(std::string userID);
 
 		/**
-		 * Builds endpoint in regards to blend participants
-		 * \param blendID the ID needed to build the respective end 
-		 * \return the built string endpoint in respect to the blendID
+		 * \brief Builds the endpoint used to fetch participant IDs for a blend.
+		 *
+		 * Result format: \c /api/v1/blends/{blendID}/participants
+		 *
+		 * \param blendID Blend identifier used in the endpoint path.
+		 * \return Endpoint path string for participant lookup.
 		 */
 		std::string build_blend_participant_endpoint(std::string blendID);
 
 		/**
-		 * Builds the endpoint for the specific chatroom details
-		 * \param blendID use in paralell as the chatroomID for the endpoint
-		 * \return the structured string endpoint in respect to blendID
+		 * \brief Builds the endpoint used to fetch chat room details for a blend.
+		 *
+		 * Result format: \c /api/v1/blends/{blendID}/chatroom
+		 *
+		 * \param blendID Blend identifier used as the chatroom context.
+		 * \return Endpoint path string for chatroom details.
 		 */
 		std::string build_chatroom_detail_endpoint(std::string blendID);
 
@@ -166,5 +178,5 @@ class HttpClient {
 		 * \param out A pointer to a string we would like to append the chunks to (in this case)
 		 * \return (size * nmemb) as part of the libcurl pattern to verify data handling from callback
 		 */
-		static size_t write_callback (void* contents, size_t size, size_t nmemb, std::string* out);
+		static size_t write_callback(void* contents, size_t size, size_t nmemb, void* out);
 };

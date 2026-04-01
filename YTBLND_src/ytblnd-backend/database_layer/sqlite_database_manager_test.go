@@ -65,17 +65,17 @@ func TestSqliteDataManager_WatchLaterReplaceAndOrder(t *testing.T) {
 	mgr := newTestManager(t)
 
 	first := []Video{
-		{VideoID: "v-1", Title: "First"},
-		{VideoID: "v-2", Title: "Second"},
+		{VideoID: "v-1", Title: "First", ChannelID: "cid-1", ChannelName: "Chan One", ThumbnailURL: "thumb-1", ChannelLogoURL: "logo-1"},
+		{VideoID: "v-2", Title: "Second", ChannelID: "cid-2", ChannelName: "Chan Two", ThumbnailURL: "thumb-2", ChannelLogoURL: "logo-2"},
 	}
 	if err := mgr.SaveWatchLater("u-1", first); err != nil {
 		t.Fatalf("SaveWatchLater(first) error = %v", err)
 	}
 
 	replacement := []Video{
-		{VideoID: "v-3", Title: "Third"},
-		{VideoID: "v-4", Title: "Fourth"},
-		{VideoID: "v-5", Title: "Fifth"},
+		{VideoID: "v-3", Title: "Third", ChannelID: "cid-3", ChannelName: "Chan Three", ThumbnailURL: "thumb-3", ChannelLogoURL: "logo-3"},
+		{VideoID: "v-4", Title: "Fourth", ChannelID: "cid-4", ChannelName: "Chan Four", ThumbnailURL: "thumb-4", ChannelLogoURL: "logo-4"},
+		{VideoID: "v-5", Title: "Fifth", ChannelID: "cid-5", ChannelName: "Chan Five", ThumbnailURL: "thumb-5", ChannelLogoURL: "logo-5"},
 	}
 	if err := mgr.SaveWatchLater("u-1", replacement); err != nil {
 		t.Fatalf("SaveWatchLater(replacement) error = %v", err)
@@ -86,21 +86,45 @@ func TestSqliteDataManager_WatchLaterReplaceAndOrder(t *testing.T) {
 		t.Fatalf("LoadWatchLater() error = %v", err)
 	}
 
-	// Compare only persisted fields for this table: video_id and title.
+	// Verify all persisted watch-later metadata fields and ordering.
 	gotIDs := make([]string, 0, len(loaded))
 	gotTitles := make([]string, 0, len(loaded))
+	gotChannelIDs := make([]string, 0, len(loaded))
+	gotChannelNames := make([]string, 0, len(loaded))
+	gotThumbs := make([]string, 0, len(loaded))
+	gotLogos := make([]string, 0, len(loaded))
 	for _, v := range loaded {
 		gotIDs = append(gotIDs, v.VideoID)
 		gotTitles = append(gotTitles, v.Title)
+		gotChannelIDs = append(gotChannelIDs, v.ChannelID)
+		gotChannelNames = append(gotChannelNames, v.ChannelName)
+		gotThumbs = append(gotThumbs, v.ThumbnailURL)
+		gotLogos = append(gotLogos, v.ChannelLogoURL)
 	}
 
 	wantIDs := []string{"v-3", "v-4", "v-5"}
 	wantTitles := []string{"Third", "Fourth", "Fifth"}
+	wantChannelIDs := []string{"cid-3", "cid-4", "cid-5"}
+	wantChannelNames := []string{"Chan Three", "Chan Four", "Chan Five"}
+	wantThumbs := []string{"thumb-3", "thumb-4", "thumb-5"}
+	wantLogos := []string{"logo-3", "logo-4", "logo-5"}
 	if !reflect.DeepEqual(gotIDs, wantIDs) {
 		t.Fatalf("LoadWatchLater() ids = %v, want %v", gotIDs, wantIDs)
 	}
 	if !reflect.DeepEqual(gotTitles, wantTitles) {
 		t.Fatalf("LoadWatchLater() titles = %v, want %v", gotTitles, wantTitles)
+	}
+	if !reflect.DeepEqual(gotChannelIDs, wantChannelIDs) {
+		t.Fatalf("LoadWatchLater() channel ids = %v, want %v", gotChannelIDs, wantChannelIDs)
+	}
+	if !reflect.DeepEqual(gotChannelNames, wantChannelNames) {
+		t.Fatalf("LoadWatchLater() channel names = %v, want %v", gotChannelNames, wantChannelNames)
+	}
+	if !reflect.DeepEqual(gotThumbs, wantThumbs) {
+		t.Fatalf("LoadWatchLater() thumbnail urls = %v, want %v", gotThumbs, wantThumbs)
+	}
+	if !reflect.DeepEqual(gotLogos, wantLogos) {
+		t.Fatalf("LoadWatchLater() channel logo urls = %v, want %v", gotLogos, wantLogos)
 	}
 }
 
