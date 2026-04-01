@@ -34,16 +34,29 @@ if(NOT GUMBO_FOUND)
 endif()
 
 # ── wxWidgets ─────────────────────────────────────────────────────────────────
-find_package(wxWidgets QUIET COMPONENTS core base net)
-
+# Support both package-config exports (common with vcpkg/homebrew) and
+# CMake's FindwxWidgets module (common on many Linux distros).
 set(YTBLND_HAS_WX FALSE)
+set(YTBLND_WX_USE_FIND_MODULE FALSE)
+
+find_package(wxWidgets QUIET CONFIG COMPONENTS core base net)
 if(wxWidgets_FOUND)
-    include(${wxWidgets_USE_FILE})
     set(YTBLND_HAS_WX TRUE)
-elseif(YTBLND_REQUIRE_WX)
-    message(FATAL_ERROR "wxWidgets not found. Install wxWidgets or configure with -DYTBLND_REQUIRE_WX=OFF.")
 else()
-    message(STATUS "wxWidgets not found - skipping UI executable and wx-dependent tests")
+    find_package(wxWidgets QUIET COMPONENTS core base net)
+    if(wxWidgets_FOUND)
+        include(${wxWidgets_USE_FILE})
+        set(YTBLND_HAS_WX TRUE)
+        set(YTBLND_WX_USE_FIND_MODULE TRUE)
+    endif()
+endif()
+
+if(NOT YTBLND_HAS_WX)
+    if(YTBLND_REQUIRE_WX)
+        message(FATAL_ERROR "wxWidgets not found. Install wxWidgets and/or set CMAKE_PREFIX_PATH (or wxWidgets_ROOT) so CMake can discover it.")
+    else()
+        message(STATUS "wxWidgets not found - skipping UI executable and wx-dependent tests")
+    endif()
 endif()
 
 # ── Main executable ──────────────────────────────────────────────────────────
@@ -91,8 +104,15 @@ if(YTBLND_HAS_WX)
         CURL::libcurl
         ixwebsocket::ixwebsocket
         nlohmann_json::nlohmann_json
-        ${wxWidgets_LIBRARIES}
     )
+
+    if(YTBLND_WX_USE_FIND_MODULE)
+        target_include_directories(ytblnd PRIVATE ${wxWidgets_INCLUDE_DIRS})
+        target_compile_definitions(ytblnd PRIVATE ${wxWidgets_DEFINITIONS})
+        target_link_libraries(ytblnd PRIVATE ${wxWidgets_LIBRARIES})
+    else()
+        target_link_libraries(ytblnd PRIVATE wx::core wx::base wx::net)
+    endif()
 endif()
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
@@ -152,9 +172,13 @@ if(YTBLND_BUILD_TESTS)
     )
 
     if(YTBLND_BUILD_UI_TESTS AND YTBLND_HAS_WX)
-        target_link_libraries(ytblnd_tests PRIVATE
-            ${wxWidgets_LIBRARIES}
-        )
+        if(YTBLND_WX_USE_FIND_MODULE)
+            target_include_directories(ytblnd_tests PRIVATE ${wxWidgets_INCLUDE_DIRS})
+            target_compile_definitions(ytblnd_tests PRIVATE ${wxWidgets_DEFINITIONS})
+            target_link_libraries(ytblnd_tests PRIVATE ${wxWidgets_LIBRARIES})
+        else()
+            target_link_libraries(ytblnd_tests PRIVATE wx::core wx::base wx::net)
+        endif()
     endif()
 
     add_test(NAME ytblnd_tests COMMAND ytblnd_tests)

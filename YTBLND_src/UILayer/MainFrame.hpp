@@ -1,7 +1,7 @@
 /**
  * \file MainFrame.hpp
  * \brief Root application window containing the full-window page switcher.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
  *
  * MainFrame is the single top-level wxFrame.  It contains a wxSimplebook that
  * acts as a full-window page switcher (no visible tabs).  Every panel is
@@ -21,6 +21,7 @@
  */
 
 #pragma once
+#include <unordered_map>
 #include <wx/wx.h>
 #include <wx/simplebook.h>
 #include "UIPages.hpp"
@@ -57,6 +58,10 @@ public:
     void TriggerFeedRefresh();
 
 private:
+    enum ImageKey {
+        BG_MAIN = 0,
+    };
+
     AppController& controller;
 
     wxSimplebook*          book;
@@ -67,15 +72,19 @@ private:
     UserPanel*             userPanel;
     wxPanel*               settingsPanel;  ///< Stub — back button only.
     BlendChatPanel*        chatPanel;
+    std::unordered_map<int, wxImage> images;
 
     /**
      * Builds the home page composite (top bar + title + feed + refresh button).
      * \return Pointer to the constructed home page wxPanel.
      */
-    wxPanel* BuildHomePage();
+    wxPanel* BuildHomePage(wxWindow* parent);
+    wxPanel* BuildSettingsPage(wxWindow* parent);
 
     void OnSettings(wxCommandEvent&);  ///< Navigates to SETTINGS.
     void OnUser    (wxCommandEvent&);  ///< Navigates to USER.
     void OnBlend   (wxCommandEvent&);  ///< Navigates to BLEND_CHAT or BLEND_CREATION.
     void OnRefresh (wxCommandEvent&);  ///< Advances the feed by one page.
+
+    bool LoadImage(int key, const wxString& path);
 };

@@ -2,6 +2,8 @@
 #include <wx/wx.h>
 #include <wx/simplebook.h>
 #include <wx/dcbuffer.h>
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
 
 #include "UIColors.hpp"
 #include "LoginPanel.hpp"
@@ -13,31 +15,72 @@
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 
+namespace {
+wxString ResolveResourcePath(const wxString& fileName)
+{
+    const wxArrayString relativeCandidates = {
+        "YTBLND_src/resources/" + fileName,
+        "resources/" + fileName,
+        "../resources/" + fileName,
+    };
+
+    for (const auto& candidate : relativeCandidates) {
+        if (wxFileExists(candidate)) {
+            return candidate;
+        }
+    }
+
+    wxFileName exePath(wxStandardPaths::Get().GetExecutablePath());
+    const wxString exeDir = exePath.GetPath();
+    const wxArrayString exeRelativeCandidates = {
+        exeDir + "/../../YTBLND_src/resources/" + fileName,
+        exeDir + "/../resources/" + fileName,
+        exeDir + "/resources/" + fileName,
+    };
+
+    for (const auto& candidate : exeRelativeCandidates) {
+        if (wxFileExists(candidate)) {
+            return candidate;
+        }
+    }
+
+    return "";
+}
+}
+
 // ── Background Panel ─────────────────────────────────────────────────────────
-class BackgroundPanel : public wxPanel {
+class ImageBackgroundPanel : public wxPanel {
 public:
-    BackgroundPanel(wxWindow* parent, const wxBitmap& bg)
-        : wxPanel(parent), bgBmp(bg)
+    ImageBackgroundPanel(wxWindow* parent,
+                         const std::unordered_map<int, wxImage>& imageStore,
+                         int key)
+        : wxPanel(parent)
+        , m_imageStore(imageStore)
+        , m_key(key)
     {
         SetBackgroundStyle(wxBG_STYLE_PAINT);
-        Bind(wxEVT_PAINT, &BackgroundPanel::OnPaint, this);
+        Bind(wxEVT_PAINT, &ImageBackgroundPanel::OnPaint, this);
     }
 
 private:
-    wxBitmap bgBmp;
+    const std::unordered_map<int, wxImage>& m_imageStore;
+    int m_key;
 
     void OnPaint(wxPaintEvent&) {
         wxBufferedPaintDC dc(this);
         dc.Clear();
-        if (bgBmp.IsOk()) {
-            wxSize sz = GetClientSize();
-            wxImage img = bgBmp.ConvertToImage();
-            if (sz.x > 0 && sz.y > 0) {
-                // Scale image to fill the window
-                wxBitmap scaled(img.Scale(sz.x, sz.y, wxIMAGE_QUALITY_HIGH));
-                dc.DrawBitmap(scaled, 0, 0, true);
-            }
+        auto it = m_imageStore.find(m_key);
+        if (it == m_imageStore.end() || !it->second.IsOk()) {
+            return;
         }
+
+        wxSize sz = GetClientSize();
+        if (sz.x <= 0 || sz.y <= 0) {
+            return;
+        }
+
+        wxBitmap scaled(it->second.Scale(sz.x, sz.y, wxIMAGE_QUALITY_HIGH));
+        dc.DrawBitmap(scaled, 0, 0, true);
     }
 };
 
@@ -48,46 +91,71 @@ MainFrame::MainFrame(AppController& controller)
               wxDEFAULT_FRAME_STYLE | wxMAXIMIZE),
       controller(controller)
 {
-    // 1. Initialize Image Handlers for JPG/PNG support
-    wxInitAllImageHandlers();
-
-    // 2. Load the Background Image (Relative to the folder where you run the app)
-    if (!backgroundBmp.LoadFile("resources/checkered_wave_background.jpg", wxBITMAP_TYPE_ANY)) {
-        wxLogWarning("Background image not found! Expected: resources/checkered_wave_background.jpg");
+    const wxString bgPath = ResolveResourcePath("checkered_wave_background.jpg");
+    if (bgPath.empty() || !LoadImage(BG_MAIN, bgPath)) {
+        wxLogWarning("Background image not found. Checked ../resources and resources.");
     }
 
-    // 3. Create Background Panel first
-    auto* bgPanel = new BackgroundPanel(this, backgroundBmp);
+    // 3. Create a frame-level background panel
+    auto* bgPanel = new ImageBackgroundPanel(this, images, BG_MAIN);
     
     // 4. Create the Book as a child of the Background Panel
     book = new wxSimplebook(bgPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
-    book->SetBackgroundStyle(wxBG_STYLE_TRANSPARENT);
 
     NavigateFn nav = [this](Page p) { NavigateTo(p); };
 
-    // 5. Initialize Pages as children of 'book'
-    loginPanel       = new LoginPanel(book, controller, nav);
-    dataInstrPanel   = new DataInstructionsPanel(book, controller, nav);
-    creationPanel    = new BlendCreationPanel(book, controller, nav);
-    feedPanel        = new BlendFeedPanel(book, controller);
-    userPanel        = new UserPanel(book, controller, nav);
-    chatPanel        = new BlendChatPanel(book, controller, nav);
+    // 5. Initialize pages and wrap each in a panel that paints the background image
+    auto* loginPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    loginPanel = new LoginPanel(loginPageBg, controller, nav);
+    {
+        auto* s = new wxBoxSizer(wxVERTICAL);
+        s->Add(loginPanel, 1, wxEXPAND);
+        loginPageBg->SetSizer(s);
+    }
+    book->AddPage(loginPageBg, "Login");
 
-    // Apply transparency where supported
-    loginPanel->SetBackgroundStyle(wxBG_STYLE_TRANSPARENT);
-    dataInstrPanel->SetBackgroundStyle(wxBG_STYLE_TRANSPARENT);
-    creationPanel->SetBackgroundStyle(wxBG_STYLE_TRANSPARENT);
-    feedPanel->SetBackgroundStyle(wxBG_STYLE_TRANSPARENT);
-    userPanel->SetBackgroundStyle(wxBG_STYLE_TRANSPARENT);
-    chatPanel->SetBackgroundStyle(wxBG_STYLE_TRANSPARENT);
+    auto* dataPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    dataInstrPanel = new DataInstructionsPanel(dataPageBg, controller, nav);
+    {
+        auto* s = new wxBoxSizer(wxVERTICAL);
+        s->Add(dataInstrPanel, 1, wxEXPAND);
+        dataPageBg->SetSizer(s);
+    }
+    book->AddPage(dataPageBg, "DataInstructions");
 
-    book->AddPage(loginPanel, "Login");
-    book->AddPage(dataInstrPanel, "DataInstructions");
-    book->AddPage(creationPanel, "BlendCreation");
-    book->AddPage(BuildHomePage(), "Home");
-    book->AddPage(userPanel, "User");
-    book->AddPage(BuildSettingsPage(), "Settings");
-    book->AddPage(chatPanel, "BlendChat");
+    auto* creationPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    creationPanel = new BlendCreationPanel(creationPageBg, controller, nav);
+    {
+        auto* s = new wxBoxSizer(wxVERTICAL);
+        s->Add(creationPanel, 1, wxEXPAND);
+        creationPageBg->SetSizer(s);
+    }
+    book->AddPage(creationPageBg, "BlendCreation");
+
+    auto* homePageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    feedPanel = new BlendFeedPanel(homePageBg, controller);
+    book->AddPage(BuildHomePage(homePageBg), "Home");
+
+    auto* userPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    userPanel = new UserPanel(userPageBg, controller, nav);
+    {
+        auto* s = new wxBoxSizer(wxVERTICAL);
+        s->Add(userPanel, 1, wxEXPAND);
+        userPageBg->SetSizer(s);
+    }
+    book->AddPage(userPageBg, "User");
+
+    auto* settingsPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    book->AddPage(BuildSettingsPage(settingsPageBg), "Settings");
+
+    auto* chatPageBg = new ImageBackgroundPanel(book, images, BG_MAIN);
+    chatPanel = new BlendChatPanel(chatPageBg, controller, nav);
+    {
+        auto* s = new wxBoxSizer(wxVERTICAL);
+        s->Add(chatPanel, 1, wxEXPAND);
+        chatPageBg->SetSizer(s);
+    }
+    book->AddPage(chatPageBg, "BlendChat");
 
     // 6. Layout: Book expands inside BackgroundPanel
     auto* rootSizer = new wxBoxSizer(wxVERTICAL);
@@ -117,9 +185,8 @@ void MainFrame::TriggerFeedRefresh() {
 }
 
 // ── Build Home Page ──────────────────────────────────────────────────────────
-wxPanel* MainFrame::BuildHomePage() {
-    auto* page = new wxPanel(book, wxID_ANY);
-    page->SetBackgroundStyle(wxBG_STYLE_TRANSPARENT);
+wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
+    auto* page = new wxPanel(parent, wxID_ANY);
 
     auto* vbox = new wxBoxSizer(wxVERTICAL);
 
@@ -127,7 +194,8 @@ wxPanel* MainFrame::BuildHomePage() {
     auto* hbox = new wxBoxSizer(wxHORIZONTAL);
 
     auto makeBtn = [&](wxPanel* parent, const wxString& label) {
-        auto* btn = new wxButton(parent, wxID_ANY, label, wxDefaultPosition, wxSize(-1,36));
+        auto* btn = new wxButton(parent, wxID_ANY, label);
+        btn->SetMinSize(wxSize(96, 36));
         btn->SetBackgroundColour(UIColors::SurfaceRaised);
         btn->SetForegroundColour(UIColors::TextPrimary);
         return btn;
@@ -164,10 +232,23 @@ wxPanel* MainFrame::BuildHomePage() {
 
     auto* refreshPanel = new wxPanel(page, wxID_ANY);
     auto* rbox = new wxBoxSizer(wxHORIZONTAL);
-    wxBitmap refreshBmp("./resources/refresh.png", wxBITMAP_TYPE_PNG);
-    if (refreshBmp.IsOk())
-        refreshBmp = wxBitmap(refreshBmp.ConvertToImage().Rescale(36,36));
-    auto* refreshBtn = new wxBitmapButton(refreshPanel, wxID_ANY, refreshBmp, wxDefaultPosition, wxSize(36,36));
+    wxButton* refreshBtn = nullptr;
+    const wxString refreshPath = ResolveResourcePath("refresh.png");
+    if (!refreshPath.empty()) {
+        wxBitmap refreshBmp(refreshPath, wxBITMAP_TYPE_PNG);
+        if (refreshBmp.IsOk()) {
+            refreshBmp = wxBitmap(refreshBmp.ConvertToImage().Rescale(28, 28));
+            auto* bmpBtn = new wxBitmapButton(refreshPanel, wxID_ANY, refreshBmp,
+                                              wxDefaultPosition, wxSize(44, 44));
+            bmpBtn->SetMinSize(wxSize(44, 44));
+            refreshBtn = bmpBtn;
+        }
+    }
+    if (!refreshBtn) {
+        wxLogWarning("Refresh icon not found; using text fallback button.");
+        refreshBtn = new wxButton(refreshPanel, wxID_ANY, "Refresh",
+                                  wxDefaultPosition, wxSize(96, 36));
+    }
     refreshBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ TriggerFeedRefresh(); });
     rbox->AddStretchSpacer(1);
     rbox->Add(refreshBtn, 0, wxALL, 12);
@@ -184,9 +265,8 @@ wxPanel* MainFrame::BuildHomePage() {
 }
 
 // ── Settings page stub ───────────────────────────────────────────────────────
-wxPanel* MainFrame::BuildSettingsPage() {
-    auto* stub = new wxPanel(book, wxID_ANY);
-    stub->SetBackgroundStyle(wxBG_STYLE_TRANSPARENT);
+wxPanel* MainFrame::BuildSettingsPage(wxWindow* parent) {
+    auto* stub = new wxPanel(parent, wxID_ANY);
     auto* vbox = new wxBoxSizer(wxVERTICAL);
 
     auto* back = new wxButton(stub, wxID_ANY, "< Back");
@@ -199,4 +279,15 @@ wxPanel* MainFrame::BuildSettingsPage() {
               0, wxALL, 20);
     stub->SetSizer(vbox);
     return stub;
+}
+
+bool MainFrame::LoadImage(int key, const wxString& path)
+{
+    wxImage image;
+    if (!image.LoadFile(path, wxBITMAP_TYPE_ANY) || !image.IsOk()) {
+        return false;
+    }
+
+    images[key] = image;
+    return true;
 }
