@@ -37,7 +37,7 @@ bool UIColors::LoadThemesFromFile(const wxString& filepath) {
             if (std::getline(file, hex)) {
                 wxString wxHex = wxString::FromUTF8(hex.c_str());
                 
-                // REMOVE ALL WHITESPACE: This kills \r, \n, spaces, and tabs
+                // Remove whitespace
                 wxHex.Replace(" ", "");
                 wxHex.Replace("\r", "");
                 wxHex.Replace("\t", "");
@@ -155,8 +155,6 @@ void UIColors::UpdateUI(wxWindow* win) {
 
     win->Refresh();
     win->Update(); 
-
-
 
 
     // Recurse through children
