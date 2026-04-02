@@ -14,6 +14,7 @@
 #include "SettingsPanel.hpp"
 #include "BlendCreationPanel.hpp"
 #include "BlendChatPanel.hpp"
+#include "ActiveBlendsPanel.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 
@@ -175,6 +176,16 @@ MainFrame::MainFrame(AppController& controller)
     }
     book->AddPage(chatPageBg, "BlendChat");
 
+    auto* activeBlendsPageBg = new wxPanel(book);
+    activeBlendsPageBg->SetBackgroundColour(UIColors::Background);
+    activeBlendsPanel = new ActiveBlendsPanel(activeBlendsPageBg, controller, nav);
+    {
+        auto* s = new wxBoxSizer(wxVERTICAL);
+        s->Add(activeBlendsPanel, 1, wxEXPAND);
+        activeBlendsPageBg->SetSizer(s);
+    }
+    book->AddPage(activeBlendsPageBg, "ActiveBlends");
+
     // 6. Layout: Book expands inside BackgroundPanel
     auto* rootSizer = new wxBoxSizer(wxVERTICAL);
     rootSizer->Add(book, 1, wxEXPAND);
@@ -184,6 +195,19 @@ MainFrame::MainFrame(AppController& controller)
     auto* frameSizer = new wxBoxSizer(wxVERTICAL);
     frameSizer->Add(bgPanel, 1, wxEXPAND);
     SetSizer(frameSizer);
+
+    // ── Theme-change listener ──────────────────────────────────────────────────
+    controller.getEventRouter().registerListener("theme_updated",
+        [this](const EventPayload& payload) {
+            auto it = payload.find("old_theme_index");
+            if (it == payload.end()) return;
+
+            int oldIdx = std::stoi(it->second);
+            const Palette* palettes[] = { &UIColors::DarkMode, &UIColors::LightMode, &UIColors::NeonMode };
+            if (oldIdx < 0 || oldIdx > 2) return;
+
+            RecolorAll(*palettes[oldIdx]);
+        });
 
     Maximize(true);
     book->SetSelection(static_cast<int>(Page::HOME));
@@ -198,6 +222,7 @@ void MainFrame::NavigateTo(Page page) {
     if (page == Page::HOME)            feedPanel->Refresh();
     if (page == Page::USER)            userPanel->Refresh();
     if (page == Page::BLEND_CHAT)      chatPanel->Refresh();
+    if (page == Page::ACTIVE_BLENDS)  activeBlendsPanel->Refresh();
     book->SetSelection(static_cast<int>(page));
 }
 
@@ -222,23 +247,29 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
         return btn;
     };
 
-    auto* settingsBtn = makeBtn(topBar, "Settings");
-    auto* userBtn     = makeBtn(topBar, "User");
-    auto* blendBtn    = makeBtn(topBar, "Blend");
+    auto* settingsBtn    = makeBtn(topBar, "Settings");
+    auto* userBtn        = makeBtn(topBar, "User");
+    auto* activeBlendsBtn = makeBtn(topBar, "My Blends");
+    auto* chatBtn        = makeBtn(topBar, "Chat");
+    auto* newBlendBtn    = makeBtn(topBar, "New Blend");
 
     settingsBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::SETTINGS); });
     userBtn    ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::USER); });
-    blendBtn   ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){
+    activeBlendsBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::ACTIVE_BLENDS); });
+    chatBtn    ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){
         if (AppState::getInstance().getActiveBlend() != nullptr)
             NavigateTo(Page::BLEND_CHAT);
         else
             NavigateTo(Page::BLEND_CREATION);
     });
+    newBlendBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::BLEND_CREATION); });
 
     hbox->Add(settingsBtn, 1, wxALL|wxEXPAND, 8);
     hbox->AddStretchSpacer(1);
     hbox->Add(userBtn, 1, wxALL|wxEXPAND, 8);
-    hbox->Add(blendBtn, 1, wxALL|wxEXPAND, 8);
+    hbox->Add(activeBlendsBtn, 1, wxALL|wxEXPAND, 8);
+    hbox->Add(chatBtn, 1, wxALL|wxEXPAND, 8);
+    hbox->Add(newBlendBtn, 1, wxALL|wxEXPAND, 8);
     topBar->SetSizer(hbox);
 
     auto* titlePanel = new wxPanel(page, wxID_ANY);
@@ -283,6 +314,66 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     page->SetSizer(vbox);
 
     return page;
+}
+
+// ── Theme recoloring ─────────────────────────────────────────────────────────
+
+void MainFrame::RecolorAll(const Palette& oldPalette)
+{
+    RecolorWidget(this, oldPalette);
+    Refresh();
+    Update();
+}
+
+void MainFrame::RecolorWidget(wxWindow* w, const Palette& oldPalette)
+{
+    if (!w) return;
+
+    // Map old palette bg colours to new palette equivalents
+    struct ColourMapping {
+        wxColour old_col;
+        wxColour new_col;
+    };
+
+    const Palette& np = *UIColors::Current;
+    const ColourMapping bgMap[] = {
+        { oldPalette.Background,    np.Background },
+        { oldPalette.Surface,       np.Surface },
+        { oldPalette.SurfaceRaised, np.SurfaceRaised },
+        { oldPalette.Accent,        np.Accent },
+        { oldPalette.AccentHover,   np.AccentHover },
+        { oldPalette.Danger,        np.Danger },
+        { oldPalette.Separator,     np.Separator },
+    };
+
+    const ColourMapping fgMap[] = {
+        { oldPalette.TextPrimary,   np.TextPrimary },
+        { oldPalette.TextSecondary, np.TextSecondary },
+        { oldPalette.TextMuted,     np.TextMuted },
+        { oldPalette.Accent,        np.Accent },
+        { oldPalette.Danger,        np.Danger },
+    };
+
+    wxColour bg = w->GetBackgroundColour();
+    for (const auto& m : bgMap) {
+        if (bg == m.old_col) {
+            w->SetBackgroundColour(m.new_col);
+            break;
+        }
+    }
+
+    wxColour fg = w->GetForegroundColour();
+    for (const auto& m : fgMap) {
+        if (fg == m.old_col) {
+            w->SetForegroundColour(m.new_col);
+            break;
+        }
+    }
+
+    // Recurse into children
+    for (wxWindow* child : w->GetChildren()) {
+        RecolorWidget(child, oldPalette);
+    }
 }
 
 bool MainFrame::LoadImage(int key, const wxString& path)
