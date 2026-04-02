@@ -6,6 +6,7 @@
 
 #include <wx/statline.h>
 #include <wx/textctrl.h>
+#include <wx/filedlg.h>
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
@@ -62,6 +63,13 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
 
     root->AddStretchSpacer(1); // space out the buttons and the labels
 
+    // Re-upload CSV
+    auto* reuploadBtn = new wxButton(this, wxID_ANY, "Re-upload Watch Later CSV");
+    UIButtons::ApplySizeBounds(reuploadBtn, ButtonType::Large);
+    reuploadBtn->SetBackgroundColour(UIColors::Accent);
+    reuploadBtn->SetForegroundColour(UIColors::TextPrimary);
+    root->Add(reuploadBtn, 0, wxEXPAND | wxCENTER | wxBOTTOM, 16);
+
     // Delete Account
     auto* del_acc = new wxButton(this, wxID_ANY, "Delete Account");
     UIButtons::ApplySizeBounds(del_acc, ButtonType::Large);
@@ -98,6 +106,7 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
 
     SetSizer(root);
 
+    reuploadBtn->Bind(wxEVT_BUTTON, &UserPanel::OnReuploadCSV, this);
     del_acc->Bind(wxEVT_BUTTON, &UserPanel::OnDeleteRequest, this);
     m_confirmDeleteBtn->Bind(wxEVT_BUTTON, &UserPanel::OnConfirmDelete, this);
     m_deletePasswordField->Bind(wxEVT_TEXT_ENTER,
@@ -214,6 +223,29 @@ void UserPanel::OnConfirmDelete(wxCommandEvent& /*evt*/)
     m_deleteErrorLabel->SetLabel("Delete failed. Check password and try again.");
     m_deleteErrorLabel->Show();
     Layout();
+}
+
+void UserPanel::OnReuploadCSV(wxCommandEvent& /*evt*/)
+{
+    User* user = AppState::getInstance().getCurrentUser();
+    if (!user) {
+        wxMessageBox("No active user session.", "Error", wxOK | wxICON_ERROR, this);
+        return;
+    }
+
+    wxFileDialog dlg(this, "Select Watch Later CSV", "", "",
+                     "CSV files (*.csv)|*.csv|All files (*.*)|*.*",
+                     wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+    if (dlg.ShowModal() != wxID_OK) return;
+
+    std::string filePath = dlg.GetPath().ToStdString();
+
+    m_controller.getEventRouter().dispatch("uploadData",
+        {{"filePath", filePath}, {"userID", user->getUserID()}});
+
+    wxMessageBox("Your Watch Later data has been re-uploaded.\n"
+                 "Active blends will be updated with your new data.",
+                 "Data Updated", wxOK | wxICON_INFORMATION, this);
 }
 
 void UserPanel::OnLogout(wxCommandEvent& /*evt*/)

@@ -71,6 +71,7 @@ private:
     // Event handlers
     void OnDeleteRequest(wxCommandEvent& evt);
     void OnConfirmDelete(wxCommandEvent& evt);
+    void OnReuploadCSV(wxCommandEvent& evt);
     void OnLogout (wxCommandEvent& evt);
     void OnShow   (wxShowEvent&    evt);
 };
