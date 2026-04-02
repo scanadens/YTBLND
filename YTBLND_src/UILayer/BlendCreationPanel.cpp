@@ -272,7 +272,7 @@ void BlendCreationPanel::OnAdd(wxCommandEvent& /*evt*/)
         return;
     }
 
-    wxTextEntryDialog dlg(this, "Enter user ID:", "Add User");
+    wxTextEntryDialog dlg(this, "Enter username:", "Add User");
     dlg.SetBackgroundColour(UIColors::Surface);
     if (dlg.ShowModal() != wxID_OK) return;
 
