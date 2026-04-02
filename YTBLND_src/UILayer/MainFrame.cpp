@@ -228,7 +228,12 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
 
     settingsBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::SETTINGS); });
     userBtn    ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::USER); });
-    blendBtn   ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::BLEND_CREATION); });
+    blendBtn   ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){
+        if (AppState::getInstance().getActiveBlend() != nullptr)
+            NavigateTo(Page::BLEND_CHAT);
+        else
+            NavigateTo(Page::BLEND_CREATION);
+    });
 
     hbox->Add(settingsBtn, 1, wxALL|wxEXPAND, 8);
     hbox->AddStretchSpacer(1);
