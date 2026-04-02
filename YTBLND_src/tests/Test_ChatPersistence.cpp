@@ -5,7 +5,7 @@
 //   - parseChatHistory: valid / empty / malformed JSON
 //   - ChatRoom::addMessage(const Message&): timestamp preserved
 //
-// Integration tests (opt-in via YTBLND_RUN_LIVE_BACKEND_TESTS=1):
+// Integration tests (run by default; opt-out via YTBLND_SKIP_LIVE_BACKEND_TESTS=1):
 //   - Send a message over WebSocket, then retrieve it via /chat-history
 // ============================================================================
 
@@ -48,10 +48,9 @@ std::string getenvOrDefault(const char* key, const std::string& fallback) {
 }
 
 void skipUnlessLiveBackendEnabled() {
-    const char* flag = std::getenv("YTBLND_RUN_LIVE_BACKEND_TESTS");
-    if (!flag || std::string(flag) != "1") {
-        GTEST_SKIP() << "Set YTBLND_RUN_LIVE_BACKEND_TESTS=1 with the backend running "
-                     << "to execute this test.";
+    const char* flag = std::getenv("YTBLND_SKIP_LIVE_BACKEND_TESTS");
+    if (flag && std::string(flag) == "1") {
+        GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1.";
     }
 }
 

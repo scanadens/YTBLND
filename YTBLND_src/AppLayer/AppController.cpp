@@ -185,6 +185,7 @@ void AppController::registerEvents() {
     eventRouter.registerListener("register",    [this](const EventPayload& p){ handleRegister(p); });
     eventRouter.registerListener("login",       [this](const EventPayload& p){ handleLogin(p); });
     eventRouter.registerListener("logout",      [this](const EventPayload& p){ handleLogout(p); });
+    eventRouter.registerListener("deleteAccount", [this](const EventPayload& p){ handleDeleteAccount(p); });
     eventRouter.registerListener("uploadData",  [this](const EventPayload& p){ handleUploadData(p); });
     eventRouter.registerListener("createBlend", [this](const EventPayload& p){ handleCreateBlend(p); });
     eventRouter.registerListener("playVideo",   [this](const EventPayload& p){ handlePlayVideo(p); });
@@ -374,6 +375,46 @@ void AppController::handleLogout(const EventPayload& payload) {
     }
     appState.setCurrentUser(nullptr);
     appState.clearSession();
+}
+
+void AppController::handleDeleteAccount(const EventPayload& payload) {
+    auto userIt = payload.find("userID");
+    auto pwIt = payload.find("password");
+
+    if (userIt == payload.end() || pwIt == payload.end()) {
+        std::cerr << "[AppController] handleDeleteAccount: missing 'userID' or 'password'\n";
+        return;
+    }
+
+    if (!isConnected) {
+        std::cerr << "[AppController] handleDeleteAccount: server unavailable in offline mode\n";
+        return;
+    }
+
+    try {
+        const std::string response = http.del(
+            http.build_delete_user_endpoint(userIt->second),
+            RequestJsonBuilder::buildDeleteAccountJson(pwIt->second)
+        );
+
+        if (!http.wasLastRequestSuccessful(http.D)) {
+            std::cerr << "[AppController] handleDeleteAccount: delete failed, HTTP "
+                      << http.getLastStatusCode() << " response=" << response << "\n";
+            return;
+        }
+
+        User* currentUser = appState.getCurrentUser();
+        if (currentUser != nullptr && currentUser->getUserID() == userIt->second) {
+            handleLogout({});
+        }
+
+        std::cout << "[AppController] handleDeleteAccount: deleted user '"
+                  << userIt->second << "'\n";
+
+    } catch (const std::exception& e) {
+        std::cerr << "[AppController] handleDeleteAccount: HTTP failed - "
+                  << e.what() << "\n";
+    }
 }
 
 void AppController::handleUploadData(const EventPayload& payload) {

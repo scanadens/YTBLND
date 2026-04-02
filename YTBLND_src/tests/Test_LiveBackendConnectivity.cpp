@@ -74,10 +74,10 @@ bool containsAll(const std::string& value, const std::initializer_list<std::stri
 }
 
 bool isLiveBackendEnabled() {
-    // This is an opt-in suite because it expects a real backend process
-    // running at localhost:8080 with the documented API contract.
-    const char* runLiveTests = std::getenv("YTBLND_RUN_LIVE_BACKEND_TESTS");
-    if (!runLiveTests || std::string(runLiveTests) != "1") {
+    // Live backend suite runs by default for CI/dev environments where the
+    // server is expected to be available. Opt out explicitly when needed.
+    const char* skipLiveTests = std::getenv("YTBLND_SKIP_LIVE_BACKEND_TESTS");
+    if (skipLiveTests && std::string(skipLiveTests) == "1") {
         return false;
     }
 
@@ -122,11 +122,24 @@ void createBlend(HttpClient& client, const std::string& blendID, const std::stri
     ASSERT_TRUE(containsAll(blendResponse, {"blend_id", blendID, "chat_room_id"})) << blendResponse;
 }
 
+void deleteUser(HttpClient& client, const std::string& userID, const std::string& password) {
+    const std::string deleteBody =
+        "{\"password\":\"" + password + "\"}";
+    const std::string deleteResponse =
+        client.del("/api/v1/auth/users/" + userID, deleteBody);
+
+    ASSERT_TRUE(client.wasLastRequestSuccessful(client.D))
+        << "Expected successful account deletion, got HTTP "
+        << client.getLastStatusCode() << " response=" << deleteResponse;
+    EXPECT_TRUE(containsAll(deleteResponse, {"status", "deleted", "user_id", userID}))
+        << deleteResponse;
+}
+
 }  // namespace
 
 TEST(LiveBackendConnectivityTest, PingEndpointRespondsWithPong) {
     if (!isLiveBackendEnabled()) {
-        GTEST_SKIP() << "Set YTBLND_RUN_LIVE_BACKEND_TESTS=1 and run the backend to execute this test. "
+        GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1. "
                      << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
                      << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
     }
@@ -139,7 +152,7 @@ TEST(LiveBackendConnectivityTest, PingEndpointRespondsWithPong) {
 
 TEST(LiveBackendConnectivityTest, RegisterAndLoginRoundTripAgainstRunningServer) {
     if (!isLiveBackendEnabled()) {
-        GTEST_SKIP() << "Set YTBLND_RUN_LIVE_BACKEND_TESTS=1 and run the backend to execute this test. "
+        GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1. "
                      << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
                      << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
     }
@@ -151,9 +164,33 @@ TEST(LiveBackendConnectivityTest, RegisterAndLoginRoundTripAgainstRunningServer)
     registerAndLogin(client, userID);
 }
 
+TEST(LiveBackendConnectivityTest, DeleteAccountRemovesUserFromAuthLoginPath) {
+    if (!isLiveBackendEnabled()) {
+        GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1. "
+                     << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
+                     << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
+    }
+
+    HttpClient client(getenvOrDefault("YTBLND_LIVE_BACKEND_HTTP_BASE_URL", "http://localhost:8080"));
+    const std::string userID = makeUniqueID("live_delete_user");
+    const std::string password = "pw123";
+
+    registerAndLogin(client, userID);
+    deleteUser(client, userID, password);
+
+    // A deleted account must no longer authenticate through /auth/login.
+    const std::string loginBody =
+        "{\"user_id\":\"" + userID + "\",\"password\":\"" + password + "\"}";
+    const std::string loginAfterDelete = client.post("/api/v1/auth/login", loginBody);
+    EXPECT_FALSE(client.wasLastRequestSuccessful(client.P))
+        << "Deleted user unexpectedly logged in: " << loginAfterDelete;
+    EXPECT_EQ(client.getLastStatusCode(), client.INV_USR_LOG_ERR)
+        << "Expected 401 after deleting account; response=" << loginAfterDelete;
+}
+
 TEST(LiveBackendConnectivityTest, CreateBlendReturnsExpectedChatRoomLink) {
     if (!isLiveBackendEnabled()) {
-        GTEST_SKIP() << "Set YTBLND_RUN_LIVE_BACKEND_TESTS=1 and run the backend to execute this test. "
+        GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1. "
                      << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
                      << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
     }
@@ -169,7 +206,7 @@ TEST(LiveBackendConnectivityTest, CreateBlendReturnsExpectedChatRoomLink) {
 
 TEST(LiveBackendConnectivityTest, WebSocketRoundTripAgainstRunningServer) {
     if (!isLiveBackendEnabled()) {
-        GTEST_SKIP() << "Set YTBLND_RUN_LIVE_BACKEND_TESTS=1 and run the backend to execute this test. "
+        GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1. "
                      << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
                      << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
     }

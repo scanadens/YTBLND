@@ -21,6 +21,8 @@ class HttpClient {
 		const std::string P = "POST";
 		// Constant for getting to eleminate typing errors
 		const std::string G = "GET";
+		// Constant for deleting to eliminate typing errors
+		const std::string D = "DELETE";
 
 		// --- endpoint constants ---
 
@@ -28,6 +30,8 @@ class HttpClient {
 		const std::string REG_USER = "/api/v1/auth/register";
 		// user login endpoint
 		const std::string LOGIN = "/api/v1/auth/login";
+		// user delete endpoint prefix
+		const std::string DELETE_USER_PREFIX = "/api/v1/auth/users/";
 		// endpoint pertaining to creating a blend
 		const std::string BLEND = "/api/v1/blends";
 
@@ -110,6 +114,14 @@ class HttpClient {
 		std::string post(const std::string& path, const std::string& json);
 
 		/**
+		 * Public facing delete method. Fires HTTP DELETE message to the server.
+		 * \param path endpoint string pointer
+		 * \param json formatted json string pointer message to be sent
+		 * \return server response body
+		 */
+		std::string del(const std::string& path, const std::string& json);
+
+		/**
 		 * \brief Builds the watch-later endpoint for a specific user.
 		 *
 		 * Result format: \c /api/v1/users/{userID}/watch-later
@@ -148,6 +160,16 @@ class HttpClient {
 		 * \return Endpoint path string for chatroom details.
 		 */
 		std::string build_chatroom_detail_endpoint(std::string blendID);
+
+		/**
+		 * \brief Builds the account-delete endpoint for a specific user.
+		 *
+		 * Result format: \c /api/v1/auth/users/{userID}
+		 *
+		 * \param userID User identifier used in the endpoint path.
+		 * \return Endpoint path string for account deletion.
+		 */
+		std::string build_delete_user_endpoint(std::string userID);
 
 		/**
 		 * Builds the endpoint for fetching a blend's chat message history.

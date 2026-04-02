@@ -30,6 +30,9 @@ bool HttpClient::isRequestSuccessful(const string& method, long statusCode) {
 	if (method == "POST") {
 		return statusCode == 200 || statusCode == 201;
 	}
+	if (method == "DELETE") {
+		return statusCode == 200 || statusCode == 204;
+	}
 
 	throw invalid_argument("HttpClient::isRequestSuccessful received unsupported method: " + method);
 }
@@ -50,6 +53,10 @@ string HttpClient::post(const string& path, const string& json) {
 	return request(P, path, json);
 }
 
+string HttpClient::del(const string& path, const string& json) {
+	return request(D, path, json);
+}
+
 string HttpClient::build_watch_later_endpoint(string userID) {
 	return "/api/v1/users/" + sanitizePathSegment(userID) + "/watch-later";
 }
@@ -64,6 +71,10 @@ string HttpClient::build_blend_participant_endpoint(string blendID) {
 
 string HttpClient::build_chatroom_detail_endpoint(string blendID) {
 	return "/api/v1/blends/" + sanitizePathSegment(blendID) + "/chatroom";
+}
+
+string HttpClient::build_delete_user_endpoint(string userID) {
+	return DELETE_USER_PREFIX + sanitizePathSegment(userID);
 }
 
 string HttpClient::request(const string& method, const string& path, const string&body) {
@@ -112,6 +123,10 @@ string HttpClient::request(const string& method, const string& path, const strin
 		 */
 
 		curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+	} else if (method == D) { // DELETE
+		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, D.c_str());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(body.size()));
 	} else {
 		curl_easy_cleanup(curl);
 		curl_slist_free_all(headers);

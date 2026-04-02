@@ -53,12 +53,26 @@ func main() {
 	// Use an env override for DB path so local/dev/prod can vary storage.
 	dbPath := os.Getenv("YTBLND_DB_PATH")
 	if dbPath == "" {
-		dbPath = data_save_path + "dev.db"
+		dbPath = data_save_path + "ytblnd.db"
 	}
+	legacyDBPath := filepath.Join(filepath.Clean(data_save_path), "dev.db")
 
 	// Ensure DB parent directory exists before SQLite tries to open the file.
 	if err := os.MkdirAll(filepath.Dir(dbPath), 0o755); err != nil {
 		log.Fatalf("failed to create data directory: %v", err)
+	}
+
+	if err := MigrateLegacyDevDB(legacyDBPath, dbPath); err != nil {
+		log.Fatalf("failed to migrate legacy db: %v", err)
+	}
+
+	// Protect the whole runtime data directory with rolling snapshots.
+	dataDir := filepath.Clean(data_save_path)
+	backupManager := NewDataBackupManager(dataDir, 48*time.Hour)
+	// Only files rooted inside dataDir are treated as loss-sensitive.
+	requiredDataFiles := collectRequiredFilesForDataDir(dataDir, dbPath, requestLogPath, eventLogPath)
+	if err := backupManager.EnsureHealthyOrRestore(requiredDataFiles); err != nil {
+		log.Fatalf("failed data health check/restore: %v", err)
 	}
 
 	// Initialize persistence dependencies once at process startup.
@@ -71,6 +85,11 @@ func main() {
 	// Start the in-memory chat fanout loop used by websocket clients.
 	hub := routelayer.NewChatHub(dbManager, serverLoggers.Events)
 	go hub.Run()
+
+	// Run background snapshots until shutdown signal cancels this context.
+	backupCtx, backupCancel := context.WithCancel(context.Background())
+	defer backupCancel()
+	go backupManager.Run(backupCtx)
 
 	r := gin.Default()
 	r.Use(serverLoggers.Requests.RequestMiddleware())
@@ -110,5 +129,6 @@ func main() {
 		log.Printf("server shutdown error: %v", err)
 		serverLoggers.Events.LogEvent("server_shutdown_error", "signal=%s error=%v", receivedSignal.String(), err)
 	}
+	backupCancel()
 	serverLoggers.Events.LogEvent("server_shutdown", "signal=%s graceful_shutdown=true stopped_at=%s", receivedSignal.String(), time.Now().UTC().Format(time.RFC3339))
 }

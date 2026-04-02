@@ -43,6 +43,8 @@
 
 class AppController;
 class wxStaticText;
+class wxTextCtrl;
+class wxButton;
 
 class UserPanel : public wxPanel, public IRefreshablePanel {
 public:
@@ -56,11 +58,19 @@ private:
     // Labels that display the logged-in user's info
     wxStaticText* m_usernameLabel;
     wxStaticText* m_emailLabel;
+    wxTextCtrl*   m_deletePasswordField;
+    wxStaticText* m_deleteErrorLabel;
+    wxButton*     m_confirmDeleteBtn;
 
     // Refreshes user-info labels from AppState on each show.
     void RefreshUserInfo();
 
+    // Shows or hides the password re-auth controls for account deletion.
+    void SetDeleteReauthVisible(bool isVisible);
+
     // Event handlers
+    void OnDeleteRequest(wxCommandEvent& evt);
+    void OnConfirmDelete(wxCommandEvent& evt);
     void OnLogout (wxCommandEvent& evt);
     void OnShow   (wxShowEvent&    evt);
 };

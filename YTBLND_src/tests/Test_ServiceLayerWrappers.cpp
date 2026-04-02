@@ -210,6 +210,10 @@ TEST(HttpClientWrapperTest, StaticStatusHandlerMatchesFrontendContract) {
     EXPECT_TRUE(HttpClient::isRequestSuccessful("POST", 200));
     EXPECT_TRUE(HttpClient::isRequestSuccessful("POST", 201));
     EXPECT_FALSE(HttpClient::isRequestSuccessful("POST", 400));
+
+    EXPECT_TRUE(HttpClient::isRequestSuccessful("DELETE", 200));
+    EXPECT_TRUE(HttpClient::isRequestSuccessful("DELETE", 204));
+    EXPECT_FALSE(HttpClient::isRequestSuccessful("DELETE", 401));
 }
 
 TEST(HttpClientWrapperTest, LastStatusHelpersReflectMostRecentRequest) {
@@ -231,7 +235,7 @@ TEST(HttpClientWrapperTest, LastStatusHelpersReflectMostRecentRequest) {
 }
 
 TEST(HttpClientWrapperTest, StaticStatusHandlerRejectsUnsupportedMethods) {
-    EXPECT_THROW(HttpClient::isRequestSuccessful("DELETE", 200), std::invalid_argument);
+    EXPECT_THROW(HttpClient::isRequestSuccessful("PATCH", 200), std::invalid_argument);
 }
 
 TEST(HttpClientWrapperTest, EndpointBuildersGenerateExpectedPaths) {
@@ -253,6 +257,10 @@ TEST(HttpClientWrapperTest, EndpointBuildersGenerateExpectedPaths) {
     EXPECT_EQ(
         client.build_chatroom_detail_endpoint("blend-42"),
         "/api/v1/blends/blend-42/chatroom"
+    );
+    EXPECT_EQ(
+        client.build_delete_user_endpoint("user-123"),
+        "/api/v1/auth/users/user-123"
     );
 }
 
@@ -317,6 +325,13 @@ TEST(RequestJsonBuilderTest, BuildWatchLaterJsonProducesExpectedShape) {
     EXPECT_EQ(parsed.at("videos").at(0).at("title").get<std::string>(), "title-1");
     EXPECT_EQ(parsed.at("videos").at(1).at("video_id").get<std::string>(), "vid-2");
     EXPECT_EQ(parsed.at("videos").at(1).at("title").get<std::string>(), "title-2");
+}
+
+TEST(RequestJsonBuilderTest, BuildDeleteAccountJsonProducesExpectedShape) {
+    const std::string json = RequestJsonBuilder::buildDeleteAccountJson("pw-1");
+    const auto parsed = nlohmann::json::parse(json);
+
+    EXPECT_EQ(parsed.at("password").get<std::string>(), "pw-1");
 }
 
 TEST(ChatWebSocketWrapperTest, MissingIDsThrowsValidationError) {

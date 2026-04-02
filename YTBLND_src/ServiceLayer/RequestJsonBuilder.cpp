@@ -25,6 +25,12 @@ std::string buildLoginJson(const std::string& userID, const std::string& passwor
            + "}";
 }
 
+std::string buildDeleteAccountJson(const std::string& password) {
+    return "{"
+           "\"password\":" + ModelJson::quote(password)
+           + "}";
+}
+
 std::string buildBlendJson(const std::string& blendID,
                            const std::string& creatorID,
                            const std::string& algorithm,

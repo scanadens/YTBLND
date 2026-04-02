@@ -13,6 +13,7 @@
  * Payload conventions by event name:
  * - \c "login"       → { "userID": "...", "password": "..." }
  * - \c "logout"      → {}
+ * - \c "deleteAccount" → { "userID": "...", "password": "..." }
  * - \c "uploadData"  → { "filePath": "...", "userID": "..." }
  * - \c "createBlend" → { "userID_0": "...", "userID_1": "..." }
  * - \c "playVideo"   → { "videoID": "..." }

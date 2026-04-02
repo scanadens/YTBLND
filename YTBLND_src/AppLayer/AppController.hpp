@@ -161,6 +161,12 @@ class AppController {
         void handleLogout(const EventPayload& payload);
 
         /**
+         * Deletes the current account after password re-authentication.
+         * \\param payload { "userID": "...", "password": "..." }
+         */
+        void handleDeleteAccount(const EventPayload& payload);
+
+        /**
          * Imports the file at filePath, enriches metadata via YouTube API,
          * and persists the result to the database.
          * \param payload { "filePath": "...", "userID": "..." }

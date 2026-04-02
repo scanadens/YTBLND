@@ -5,6 +5,7 @@
 #include "UserPanel.hpp"
 
 #include <wx/statline.h>
+#include <wx/textctrl.h>
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
@@ -68,6 +69,23 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     del_acc->SetForegroundColour(UIColors::TextPrimary);
     root->Add(del_acc, 0, wxEXPAND | wxCENTER | wxBOTTOM, 16); // keep the button in the center
 
+    m_deletePasswordField = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition,
+                                           wxDefaultSize, wxTE_PASSWORD | wxTE_PROCESS_ENTER);
+    m_deletePasswordField->SetHint("Re-enter password to delete account");
+    m_deletePasswordField->SetBackgroundColour(UIColors::SurfaceRaised);
+    m_deletePasswordField->SetForegroundColour(UIColors::TextPrimary);
+    root->Add(m_deletePasswordField, 0, wxEXPAND | wxCENTER | wxBOTTOM, 8);
+
+    m_confirmDeleteBtn = new wxButton(this, wxID_ANY, "Confirm Delete");
+    UIButtons::ApplySizeBounds(m_confirmDeleteBtn, ButtonType::Large);
+    m_confirmDeleteBtn->SetBackgroundColour(UIColors::Danger);
+    m_confirmDeleteBtn->SetForegroundColour(UIColors::TextPrimary);
+    root->Add(m_confirmDeleteBtn, 0, wxEXPAND | wxCENTER | wxBOTTOM, 8);
+
+    m_deleteErrorLabel = new wxStaticText(this, wxID_ANY, "");
+    m_deleteErrorLabel->SetForegroundColour(UIColors::Danger);
+    root->Add(m_deleteErrorLabel, 0, wxEXPAND | wxCENTER | wxBOTTOM, 12);
+
     // ── Logout ────────────────────────────────────────────────────────────────
     auto* logoutBtn = new wxButton(this, wxID_ANY, "Log Out");
     UIButtons::ApplySizeBounds(logoutBtn, ButtonType::Large);
@@ -80,8 +98,14 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
 
     SetSizer(root);
 
+    del_acc->Bind(wxEVT_BUTTON, &UserPanel::OnDeleteRequest, this);
+    m_confirmDeleteBtn->Bind(wxEVT_BUTTON, &UserPanel::OnConfirmDelete, this);
+    m_deletePasswordField->Bind(wxEVT_TEXT_ENTER,
+                                &UserPanel::OnConfirmDelete, this);
     logoutBtn->Bind(wxEVT_BUTTON, &UserPanel::OnLogout, this);
     Bind(wxEVT_SHOW,              &UserPanel::OnShow,   this);
+
+    SetDeleteReauthVisible(false);
 }
 
 // ── Private helpers ───────────────────────────────────────────────────────────
@@ -93,6 +117,8 @@ void UserPanel::Refresh()
 
 void UserPanel::RefreshUserInfo()
 {
+    SetDeleteReauthVisible(false);
+
     User* user = AppState::getInstance().getCurrentUser();
     if (user) {
         m_usernameLabel->SetLabel("Username: " +
@@ -113,6 +139,19 @@ void UserPanel::RefreshUserInfo()
     Layout();
 }
 
+void UserPanel::SetDeleteReauthVisible(bool isVisible)
+{
+    if (!isVisible) {
+        m_deletePasswordField->Clear();
+        m_deleteErrorLabel->SetLabel("");
+    }
+
+    m_deletePasswordField->Show(isVisible);
+    m_confirmDeleteBtn->Show(isVisible);
+    m_deleteErrorLabel->Show(isVisible && !m_deleteErrorLabel->GetLabel().IsEmpty());
+    Layout();
+}
+
 // ── Event handlers ────────────────────────────────────────────────────────────
 
 void UserPanel::OnShow(wxShowEvent& evt)
@@ -120,6 +159,61 @@ void UserPanel::OnShow(wxShowEvent& evt)
     if (evt.IsShown())
         Refresh();
     evt.Skip();
+}
+
+void UserPanel::OnDeleteRequest(wxCommandEvent& /*evt*/)
+{
+    ConfirmationDialog dlg(this,
+                           "Delete Account",
+                           "Are you sure you want to delete your account? This cannot be undone.",
+                           "Yes",
+                           "Nevermind");
+    if (dlg.ShowModal() != wxID_OK) {
+        SetDeleteReauthVisible(false);
+        return;
+    }
+
+    SetDeleteReauthVisible(true);
+    m_deletePasswordField->SetFocus();
+}
+
+void UserPanel::OnConfirmDelete(wxCommandEvent& /*evt*/)
+{
+    User* user = AppState::getInstance().getCurrentUser();
+    if (user == nullptr) {
+        m_deleteErrorLabel->SetLabel("No active user session.");
+        m_deleteErrorLabel->Show();
+        Layout();
+        return;
+    }
+
+    const std::string password = m_deletePasswordField->GetValue().ToStdString();
+    if (password.empty()) {
+        m_deleteErrorLabel->SetLabel("Password is required to delete your account.");
+        m_deleteErrorLabel->Show();
+        Layout();
+        return;
+    }
+
+    m_controller.getEventRouter().dispatch(
+        "deleteAccount",
+        {{"userID", user->getUserID()}, {"password", password}}
+    );
+
+    if (AppState::getInstance().getCurrentUser() == nullptr) {
+        SetDeleteReauthVisible(false);
+        wxMessageBox("Your account has been deleted successfully.",
+                     "Account Deleted",
+                     wxOK | wxICON_INFORMATION,
+                     this);
+        m_nav(Page::LOGIN);
+        return;
+    }
+
+    m_deletePasswordField->Clear();
+    m_deleteErrorLabel->SetLabel("Delete failed. Check password and try again.");
+    m_deleteErrorLabel->Show();
+    Layout();
 }
 
 void UserPanel::OnLogout(wxCommandEvent& /*evt*/)

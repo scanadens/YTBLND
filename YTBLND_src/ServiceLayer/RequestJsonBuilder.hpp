@@ -47,6 +47,19 @@ std::string buildRegisterJson(const std::string& userID,
 std::string buildLoginJson(const std::string& userID, const std::string& password);
 
 /**
+ * \brief Builds the delete-account request body.
+ *
+ * Output format:
+ * \code{.json}
+ * { "password": "..." }
+ * \endcode
+ *
+ * \param password Plain-text password entered by the user for re-authentication.
+ * \return JSON string safe for HTTP DELETE to the user-delete endpoint.
+ */
+std::string buildDeleteAccountJson(const std::string& password);
+
+/**
  * \brief Builds the blend creation request body.
  *
  * Output format:
