@@ -3,9 +3,12 @@
 option(YTBLND_BUILD_TESTS "Build unit tests" ON)
 option(YTBLND_BUILD_UI_TESTS "Build wxWidgets/UI tests" OFF)
 option(YTBLND_REQUIRE_WX "Fail configure if wxWidgets is missing" OFF)
+option(YTBLND_FETCHCONTENT_UPDATES_DISCONNECTED "Skip remote FetchContent updates after initial clone" ON)
 
 # Pull ixwebsocket from source so builds remain portable across distros.
 include(FetchContent)
+set(FETCHCONTENT_UPDATES_DISCONNECTED ${YTBLND_FETCHCONTENT_UPDATES_DISCONNECTED})
+set(FETCHCONTENT_QUIET OFF)
 
 # Core sources shared between the main executable and tests (no UI, no main)
 file(GLOB_RECURSE YTBLND_CORE_SOURCES
@@ -73,14 +76,19 @@ FetchContent_Declare(
     ixwebsocket
     GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
     GIT_TAG v11.4.5
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
 )
 FetchContent_Declare(
     nlohmann_json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
     GIT_TAG v3.11.3
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
 )
-FetchContent_MakeAvailable(ixwebsocket)
-FetchContent_MakeAvailable(nlohmann_json)
+set(JSON_BuildTests OFF CACHE BOOL "Disable nlohmann/json tests" FORCE)
+
+FetchContent_MakeAvailable(ixwebsocket nlohmann_json)
 
 if(YTBLND_HAS_WX)
     add_executable(ytblnd
