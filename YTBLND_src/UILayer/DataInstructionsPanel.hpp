@@ -50,5 +50,4 @@ private:
     NavigateFn     m_nav;
 
     void OnBrowse(wxCommandEvent&);
-    void OnSkip  (wxCommandEvent&);
 };

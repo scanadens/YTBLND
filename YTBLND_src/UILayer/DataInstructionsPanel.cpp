@@ -77,15 +77,9 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
     browseBtn->SetBackgroundColour(UIColors::Accent);
     browseBtn->SetForegroundColour(UIColors::TextPrimary);
 
-    auto* skipBtn = new wxButton(card, wxID_ANY, "Skip for now");
-    UIButtons::ApplySizeBounds(skipBtn, ButtonType::FullWidthSecondary);
-    skipBtn->SetBackgroundColour(UIColors::SurfaceRaised);
-    skipBtn->SetForegroundColour(UIColors::TextMuted);
-
     cardSizer->Add(stepsLabel, 0, wxALL, 24);
     cardSizer->Add(div,        0, wxEXPAND | wxLEFT | wxRIGHT, 0);
-    cardSizer->Add(browseBtn,  0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 20);
-    cardSizer->Add(skipBtn,    0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 12);
+    cardSizer->Add(browseBtn,  0, wxEXPAND | wxALL, 20);
     card->SetSizer(cardSizer);
 
     auto* hCentre = new wxBoxSizer(wxHORIZONTAL);
@@ -98,7 +92,6 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
     SetSizer(outer);
 
     browseBtn->Bind(wxEVT_BUTTON, &DataInstructionsPanel::OnBrowse, this);
-    skipBtn  ->Bind(wxEVT_BUTTON, &DataInstructionsPanel::OnSkip,   this);
 }
 
 void DataInstructionsPanel::OnBrowse(wxCommandEvent& /*evt*/)
@@ -118,7 +111,3 @@ void DataInstructionsPanel::OnBrowse(wxCommandEvent& /*evt*/)
     m_nav(Page::BLEND_CREATION);
 }
 
-void DataInstructionsPanel::OnSkip(wxCommandEvent& /*evt*/)
-{
-    m_nav(Page::BLEND_CREATION);
-}
