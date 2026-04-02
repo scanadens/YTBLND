@@ -17,7 +17,7 @@
  * | 2     | BLEND_CREATION     | BlendCreationPanel     |
  * | 3     | HOME               | BlendFeedPanel wrapper |
  * | 4     | USER               | UserPanel              |
- * | 5     | SETTINGS           | Stub wxPanel           |
+ * | 5     | SETTINGS           | SettingsPanel          |
  * | 6     | BLEND_CHAT         | BlendChatPanel         |
  */
 
@@ -32,6 +32,7 @@ class LoginPanel;
 class DataInstructionsPanel;
 class BlendFeedPanel;
 class UserPanel;
+class SettingsPanel;
 class BlendCreationPanel;
 class BlendChatPanel;
 
@@ -71,7 +72,7 @@ private:
     BlendCreationPanel*    creationPanel;
     BlendFeedPanel*        feedPanel;
     UserPanel*             userPanel;
-    wxPanel*               settingsPanel;  ///< Stub — back button only.
+    SettingsPanel*         settingsPanel;
     BlendChatPanel*        chatPanel;
     std::unordered_map<int, wxImage> images; // images
 

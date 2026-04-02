@@ -5,6 +5,7 @@
 #include "SettingsPanel.hpp"
 
 #include <wx/statline.h>
+#include <wx/choice.h>
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
@@ -15,8 +16,6 @@
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
 #include "../ModelLayer/User.hpp"
-
-#include <wx/choice.h>
 
 // ── Construction ──────────────────────────────────────────────────────────────
 
@@ -99,13 +98,13 @@ void SettingsPanel::OnShow(wxShowEvent& evt)
 
 void SettingsPanel::OnThemeChanged(wxCommandEvent& /*evt*/) {
     int sel = m_themeChoice->GetSelection();
-    // Select the new
+    // Select the new theme
     ThemeType newTheme = static_cast<ThemeType>(sel);
 
-    // 1. Swap the global color palette
+    // Swap the global color palette
     UIColors::SetTheme(newTheme);
 
-    // 2. Notify the controller to handle any necessary global UI refreshes
+    // Notify the controller to handle any necessary global UI refreshes
     m_controller.getEventRouter().dispatch("theme_updated", 
         {{"theme_index", std::to_string(sel)}});
     

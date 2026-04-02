@@ -51,6 +51,13 @@ class ChatRoom {
         void addMessage(const std::string& userID, const std::string& text);
 
         /**
+         * Appends a pre-constructed Message (preserving its timestamp).
+         * Used when loading history from the server so original sent_at is kept.
+         * \param msg The Message to append.
+         */
+        void addMessage(const Message& msg);
+
+        /**
          * Returns true if the given userID is a participant in this room.
          * Used to validate that only blend participants can send messages.
          * \param userID ID to check.

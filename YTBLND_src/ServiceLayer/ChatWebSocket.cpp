@@ -4,25 +4,41 @@
 
 using namespace std;
 
+// Extracts the string value of a JSON key from a flat JSON object.
+// Expects the format: "key":"value" — sufficient for the server's chat messages.
+static std::string extractJsonStr(const std::string& json, const std::string& key) {
+	std::string needle = "\"" + key + "\":\"";
+	auto pos = json.find(needle);
+	if (pos == std::string::npos) return "";
+	pos += needle.size();
+	auto end = json.find('"', pos);
+	if (end == std::string::npos) return "";
+	return json.substr(pos, end - pos);
+}
+
 ChatWebSocket::ChatWebSocket(const string url) {
 	this->url = url;
 
 	// setting up specialized broadcasting and functions
-	ws.setOnMessageCallback([](const ix::WebSocketMessagePtr& msg) {
-        if (msg->type == ix::WebSocketMessageType::Message) { 
-			// upon reception
-            cout << "WS Received: " << msg->str << "\n";
+	ws.setOnMessageCallback([this](const ix::WebSocketMessagePtr& msg) {
+        if (msg->type == ix::WebSocketMessageType::Message) {
+            std::cout << "WS Received: " << msg->str << "\n";
+            // Parse sender_id and content and forward to the registered callback.
+            if (m_onMessage) {
+                std::string sender  = extractJsonStr(msg->str, "sender_id");
+                std::string content = extractJsonStr(msg->str, "content");
+                if (!sender.empty() && !content.empty()) {
+                    m_onMessage(sender, content);
+                }
+            }
         }
         else if (msg->type == ix::WebSocketMessageType::Open) {
-			// upon successful connection
-            cout << "WS Connected\n";
+            std::cout << "WS Connected\n";
         }
         else if (msg->type == ix::WebSocketMessageType::Error) {
-			// upon error
-            cerr << "WS Error: " << msg->errorInfo.reason << "\n";
+            std::cerr << "WS Error: " << msg->errorInfo.reason << "\n";
         }
 	});
-
 }
 
 ChatWebSocket::~ChatWebSocket() {
@@ -35,14 +51,21 @@ void ChatWebSocket::set_blendID(const string blendID) { this->blendID = blendID;
 void ChatWebSocket::set_userID(const string userID) { this->userID = userID; }
 string ChatWebSocket::get_fullUrl() { return fullUrl; }
 
-void ChatWebSocket::send_message(string msg) {
+void ChatWebSocket::connect() {
+	if (isStarted) return;
 	build_fullUrl();
-	if (!isStarted) {
-		ws.setUrl(fullUrl);
-		ws.start();
-		isStarted = true;
-	}
+	ws.setUrl(fullUrl);
+	ws.start();
+	isStarted = true;
+}
 
+void ChatWebSocket::setOnMessage(
+        std::function<void(const std::string&, const std::string&)> cb) {
+	m_onMessage = std::move(cb);
+}
+
+void ChatWebSocket::send_message(string msg) {
+	connect(); // no-op if already started
 	ws.send(content_formatter(msg));
 }
 

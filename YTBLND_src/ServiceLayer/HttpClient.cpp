@@ -135,6 +135,10 @@ string HttpClient::request(const string& method, const string& path, const strin
 	return response;
 }
 
+string HttpClient::build_chat_history_endpoint(string blendID, string userID) {
+	return "/api/v1/blends/" + sanitizePathSegment(blendID) + "/chat-history?user_id=" + sanitizePathSegment(userID);
+}
+
 size_t HttpClient::write_callback(void* contents, size_t size, size_t nmemb, void* out) {
 	auto* response = static_cast<string*>(out);
 	response->append(static_cast<char*>(contents), size * nmemb);

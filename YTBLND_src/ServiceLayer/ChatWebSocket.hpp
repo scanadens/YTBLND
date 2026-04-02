@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ixwebsocket/IXWebSocket.h>
+#include <functional>
 #include <iostream>
 #include <stdio.h>
 #include <sstream>
@@ -19,8 +20,8 @@
 class ChatWebSocket {
 	public:
 	/**
-	 * Sets up WebSocket to perform specialized actions upon successful 
-	 * connection, message recieving, and errors. Given the WebSocket 
+	 * Sets up WebSocket to perform specialized actions upon successful
+	 * connection, message recieving, and errors. Given the WebSocket
 	 * remains connected after starting up until its been told to stop
 	 * listening for responses
 	 * \param url Is assigned to this->url
@@ -28,9 +29,24 @@ class ChatWebSocket {
 	ChatWebSocket(const std::string url);
 
 	/**
-	 * Stops the WebSocket from listening for responses. 
+	 * Stops the WebSocket from listening for responses.
 	 */
 	~ChatWebSocket();
+
+	/**
+	 * Opens the WebSocket connection without sending a message.
+	 * Must be called after set_blendID() and set_userID() are set.
+	 * No-op if already connected.
+	 */
+	void connect();
+
+	/**
+	 * Registers a callback invoked (on the WebSocket background thread)
+	 * whenever a chat message is received from the server.
+	 * \param cb Called with (senderID, messageContent).
+	 */
+	void setOnMessage(std::function<void(const std::string& senderID,
+	                                     const std::string& content)> cb);
 
 	/**
 	 * Sets blendID
@@ -70,6 +86,8 @@ class ChatWebSocket {
 	std::string fullUrl;
 	// Tracks whether the socket loop has been started.
 	bool isStarted = false;
+	// Optional callback invoked on incoming chat messages.
+	std::function<void(const std::string&, const std::string&)> m_onMessage;
 
 	/**
 	 * Formats string into approapiate JSON structure as needed 
