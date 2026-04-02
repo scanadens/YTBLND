@@ -66,4 +66,9 @@ namespace UIColors {
     extern wxColour Danger;
 
     void SetTheme(ThemeType theme);
+
+    /**
+     * Returns the current ThemeType index.
+     */
+    ThemeType GetCurrentTheme();
 }

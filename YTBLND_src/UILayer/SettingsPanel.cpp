@@ -98,19 +98,17 @@ void SettingsPanel::OnShow(wxShowEvent& evt)
 
 void SettingsPanel::OnThemeChanged(wxCommandEvent& /*evt*/) {
     int sel = m_themeChoice->GetSelection();
-    // Select the new theme
     ThemeType newTheme = static_cast<ThemeType>(sel);
+
+    // Record the old theme index before switching
+    int oldIndex = static_cast<int>(UIColors::GetCurrentTheme());
 
     // Swap the global color palette
     UIColors::SetTheme(newTheme);
 
-    // Notify the controller to handle any necessary global UI refreshes
-    m_controller.getEventRouter().dispatch("theme_updated", 
-        {{"theme_index", std::to_string(sel)}});
-    
-    // Trigger a refresh of this panel's own colors
-    SetBackgroundColour(UIColors::Current->Background);
-    Refresh();
+    // Notify MainFrame to recolor all panels, passing the old theme index
+    m_controller.getEventRouter().dispatch("theme_updated",
+        {{"old_theme_index", std::to_string(oldIndex)}});
 }
 
 void SettingsPanel::OnLogout(wxCommandEvent& /*evt*/)
