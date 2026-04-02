@@ -8,7 +8,8 @@
 RandomBlendAlgorithm::RandomBlendAlgorithm(int videosPerUser)
     : videosPerUser(videosPerUser) {}
 
-Blend RandomBlendAlgorithm::generateBlend(const std::list<User>& participants) {
+Blend RandomBlendAlgorithm::generateBlend(const std::list<User>& participants,
+                                          const std::string& title) {
     std::list<Video> combined;
 
     // Seed RNG from the system clock so each blend is different
@@ -37,5 +38,5 @@ Blend RandomBlendAlgorithm::generateBlend(const std::list<User>& participants) {
     }
     blendID += "_random";
 
-    return Blend(blendID, "random", participants, combined);
+    return Blend(blendID, title, "random", participants, combined);
 }

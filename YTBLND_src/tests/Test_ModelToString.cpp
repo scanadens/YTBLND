@@ -52,10 +52,11 @@ TEST(ModelToStringJsonTest, MessageUsesInboundChatSchema) {
 
 TEST(ModelToStringJsonTest, BlendUsesBlendEndpointKeys) {
     User creator("u1", "alice", "alice@example.com", "pw");
-    Blend blend("b1", "round_robin", {creator}, {makeVideo()});
+    Blend blend("b1", "My Blend", "round_robin", {creator}, {makeVideo()});
 
     const std::string json = blend.toString();
     expectContains(json, "\"blend_id\":\"b1\"");
+    expectContains(json, "\"title\":\"My Blend\"");
     expectContains(json, "\"chat_room_id\":\"b1\"");
     expectContains(json, "\"algorithm\":\"round_robin\"");
     expectContains(json, "\"participants\":[\"u1\"]");

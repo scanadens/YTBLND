@@ -251,7 +251,7 @@ TEST(BlendTest, Constructor_StoresAllFields) {
     // construction.
     User alice = makeUser("u1", "alice", "", "pw");
     Video v    = makeVideo();
-    Blend b("blend1", "random", {alice}, {v});
+    Blend b("blend1", "Test Blend", "random", {alice}, {v});
 
     EXPECT_EQ("blend1", b.getBlendID());
     EXPECT_EQ("random", b.getAlgorithmUsed());
@@ -261,7 +261,7 @@ TEST(BlendTest, Constructor_StoresAllFields) {
 
 TEST(BlendTest, Size_ReflectsVideoListLength) {
     // size() should equal the number of videos in the blend.
-    Blend b("b1", "algo", {makeUser()}, {makeVideo("v1"), makeVideo("v2")});
+    Blend b("b1", "", "algo", {makeUser()}, {makeVideo("v1"), makeVideo("v2")});
     EXPECT_EQ(2, b.size());
 }
 
@@ -269,21 +269,21 @@ TEST(BlendTest, GetVideo_ValidIndex_ReturnsCorrectVideo) {
     // getVideo(i) should return the video at position i (0-based).
     Video v0 = makeVideo("v0");
     Video v1 = makeVideo("v1");
-    Blend b("b1", "algo", {makeUser()}, {v0, v1});
+    Blend b("b1", "", "algo", {makeUser()}, {v0, v1});
     EXPECT_EQ("v0", b.getVideo(0).getVideoID());
     EXPECT_EQ("v1", b.getVideo(1).getVideoID());
 }
 
 TEST(BlendTest, GetVideo_OutOfRange_Throws) {
     // getVideo() with an out-of-range index should throw std::out_of_range.
-    Blend b("b1", "algo", {makeUser()}, {makeVideo()});
+    Blend b("b1", "", "algo", {makeUser()}, {makeVideo()});
     EXPECT_THROW(b.getVideo(5),  std::out_of_range);
     EXPECT_THROW(b.getVideo(-1), std::out_of_range);
 }
 
 TEST(BlendTest, SetVideoList_ReplacesExistingList) {
     // setVideoList() should replace all previous videos.
-    Blend b("b1", "algo", {makeUser()}, {makeVideo("old")});
+    Blend b("b1", "", "algo", {makeUser()}, {makeVideo("old")});
     b.setVideoList({makeVideo("new1"), makeVideo("new2")});
     ASSERT_EQ(2, b.size());
     EXPECT_EQ("new1", b.getVideo(0).getVideoID());

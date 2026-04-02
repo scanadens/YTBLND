@@ -6,10 +6,12 @@
 #include <sstream>
 
 Blend::Blend(const std::string& blendID,
+             const std::string& title,
              const std::string& algorithmUsed,
              const std::list<User>& participants,
              const std::list<Video>& videoList)
     : blendID(blendID),
+      title(title),
       algorithmUsed(algorithmUsed),
       participants(participants),
       videoList(videoList) {}
@@ -18,6 +20,10 @@ Blend::Blend(const std::string& blendID,
 
 std::string Blend::getBlendID() const {
     return blendID;
+}
+
+std::string Blend::getTitle() const {
+    return title;
 }
 
 std::string Blend::getAlgorithmUsed() const {
@@ -81,6 +87,7 @@ std::string Blend::toString() const {
 
     return "{"
             "\"blend_id\":" + ModelJson::quote(blendID) + ","
+            "\"title\":" + ModelJson::quote(title) + ","
             "\"chat_room_id\":" + ModelJson::quote(blendID) + ","
             "\"algorithm\":" + ModelJson::quote(algorithmUsed) + ","
            "\"participants\":" + participantsJson.str() + ","

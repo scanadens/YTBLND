@@ -21,6 +21,7 @@
 class Blend {
     private:
         std::string blendID;
+        std::string title;
         std::string algorithmUsed;
         std::list<User> participants;
         std::list<Video> videoList;
@@ -29,17 +30,21 @@ class Blend {
         /**
          * Constructs a Blend with all required fields.
          * \param blendID       Unique identifier for this blend.
+         * \param title         User-facing name for this blend.
          * \param algorithmUsed Name of the IBlendAlgorithm that created it.
          * \param participants  Users whose Watch Later data was used as input.
          * \param videoList     Ordered list of videos selected by the algorithm.
          */
         Blend(const std::string& blendID,
+              const std::string& title,
               const std::string& algorithmUsed,
               const std::list<User>& participants,
               const std::list<Video>& videoList);
 
         /// \return Unique blend identifier.
         std::string      getBlendID()       const;
+        /// \return User-facing title of this blend.
+        std::string      getTitle()         const;
         /// \return Name of the algorithm used to generate this blend.
         std::string      getAlgorithmUsed() const;
         /// \return List of users who participated in this blend.
