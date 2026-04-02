@@ -192,6 +192,8 @@ void AppController::registerEvents() {
     eventRouter.registerListener("refresh",     [this](const EventPayload& p){ handleRefresh(p); });
     eventRouter.registerListener("openChat",    [this](const EventPayload& p){ handleOpenChat(p); });
     eventRouter.registerListener("sendMessage", [this](const EventPayload& p){ handleSendMessage(p); });
+    eventRouter.registerListener("leaveBlend",  [this](const EventPayload& p){ handleLeaveBlend(p); });
+    eventRouter.registerListener("selectBlend", [this](const EventPayload& p){ handleSelectBlend(p); });
 }
 
 // ── Getter ────────────────────────────────────────────────────────────────────
@@ -349,9 +351,26 @@ void AppController::handleLogin(const EventPayload& payload) {
 
     if (participants.empty()) return; // no one has data yet — nothing to show
 
+    // Try to recover the blend title from the server
+    std::string restoredTitle;
+    try {
+        const std::string blendsResp = http.get(http.build_user_blends_endpoint(idIt->second));
+        if (http.wasLastRequestSuccessful(http.G)) {
+            Json blendsParsed = Json::parse(blendsResp, nullptr, false);
+            if (!blendsParsed.is_discarded() && blendsParsed.contains("blends") && blendsParsed["blends"].is_array()) {
+                for (const auto& item : blendsParsed["blends"]) {
+                    if (item.value("blend_id", "") == *blendID) {
+                        restoredTitle = item.value("title", "");
+                        break;
+                    }
+                }
+            }
+        }
+    } catch (...) {}
+
     // Re-run the algorithm to produce a fresh blend from current persisted data
     currentBlend = std::make_unique<Blend>(
-        RandomBlendAlgorithm(5).generateBlend(participants)
+        RandomBlendAlgorithm(5).generateBlend(participants, restoredTitle)
     );
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
@@ -514,8 +533,13 @@ void AppController::handleUploadData(const EventPayload& payload) {
 
     if (participants.empty()) return;
 
+    // Preserve existing blend title if available
+    std::string existingTitle;
+    Blend* active = appState.getActiveBlend();
+    if (active) existingTitle = active->getTitle();
+
     currentBlend = std::make_unique<Blend>(
-        RandomBlendAlgorithm(5).generateBlend(participants)
+        RandomBlendAlgorithm(5).generateBlend(participants, existingTitle)
     );
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
@@ -525,6 +549,10 @@ void AppController::handleUploadData(const EventPayload& payload) {
 }
 
 void AppController::handleCreateBlend(const EventPayload& payload) {
+    // Extract blend title
+    auto titleIt = payload.find("blendTitle");
+    std::string blendTitle = (titleIt != payload.end()) ? titleIt->second : "";
+
     // Collect participant userIDs from the payload (userID_0, userID_1, ...)
     std::vector<std::string> allParticipantIDs;
     for (int i = 0; ; ++i) {
@@ -554,7 +582,7 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
     appState.setIsBlendGenerating(true);
 
     currentBlend = std::make_unique<Blend>(
-        RandomBlendAlgorithm(5).generateBlend(participants)
+        RandomBlendAlgorithm(5).generateBlend(participants, blendTitle)
     );
 
     // Persist the blend and all valid participants (existing users, even those
@@ -578,6 +606,7 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
     const std::string createBlendResponse =
         http.post(http.BLEND,
                   RequestJsonBuilder::buildBlendJson(currentBlend->getBlendID(),
+                                                     currentBlend->getTitle(),
                                                      creatorID,
                                                      currentBlend->getAlgorithmUsed(),
                                                      validParticipantIDs));
@@ -626,6 +655,7 @@ bool AppController::registerBlendOnServer(const Blend& blend,
 
     const std::string body =
         "{\"blend_id\":"    + ModelJson::quote(blend.getBlendID())       + ","
+        "\"title\":"        + ModelJson::quote(blend.getTitle())          + ","
         "\"creator_id\":"   + ModelJson::quote(creatorID)                 + ","
         "\"algorithm\":"    + ModelJson::quote(blend.getAlgorithmUsed())  + ","
         "\"participants\":" + participantsJson + "}";
@@ -739,8 +769,9 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
         return;
     }
 
+    std::string refreshTitle = existing->getTitle();
     currentBlend = std::make_unique<Blend>(
-        RandomBlendAlgorithm(5).generateBlend(participants)
+        RandomBlendAlgorithm(5).generateBlend(participants, refreshTitle)
     );
 
     // Prevent duplicate videos within the same refreshed blend payload.
@@ -899,4 +930,127 @@ std::string AppController::get_current_email() {
     if (get_current_user() == nullptr) return "";
 
     return appState.getCurrentUser()->getEmail();
+}
+
+std::vector<AppController::BlendSummary> AppController::fetchUserBlends() {
+    std::vector<BlendSummary> blends;
+    User* user = appState.getCurrentUser();
+    if (!user || !isConnected) return blends;
+
+    try {
+        // Try the new /users/:userID/blends endpoint first (returns all blends).
+        const std::string response = http.get(http.build_user_blends_endpoint(user->getUserID()));
+        if (http.wasLastRequestSuccessful(http.G)) {
+            Json parsed = Json::parse(response, nullptr, false);
+            if (!parsed.is_discarded() && parsed.contains("blends") && parsed["blends"].is_array()) {
+                for (const auto& item : parsed["blends"]) {
+                    if (!item.is_object()) continue;
+                    BlendSummary s;
+                    s.blendID = item.value("blend_id", "");
+                    s.title   = item.value("title", s.blendID);
+                    if (!s.blendID.empty())
+                        blends.push_back(std::move(s));
+                }
+                return blends;
+            }
+        }
+
+        // Fallback: old server only has GET /users/:userID/blend (single latest blend).
+        const std::string fallback = http.get(http.build_latest_blend_endpoint(user->getUserID()));
+        if (http.wasLastRequestSuccessful(http.G)) {
+            std::optional<std::string> blendID = parseBlendID(fallback);
+            if (blendID.has_value() && !blendID->empty()) {
+                BlendSummary s;
+                s.blendID = *blendID;
+                // Try to use the active blend's title if it matches
+                Blend* active = appState.getActiveBlend();
+                s.title = (active && active->getBlendID() == s.blendID)
+                          ? active->getTitle() : s.blendID;
+                if (s.title.empty()) s.title = s.blendID;
+                blends.push_back(std::move(s));
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "[AppController] fetchUserBlends: " << e.what() << "\n";
+    }
+    return blends;
+}
+
+void AppController::handleLeaveBlend(const EventPayload& payload) {
+    auto blendIt = payload.find("blendID");
+    auto titleIt = payload.find("blendTitle");
+    if (blendIt == payload.end()) return;
+
+    User* user = appState.getCurrentUser();
+    if (!user) return;
+
+    const std::string& blendID = blendIt->second;
+    const std::string blendTitle = (titleIt != payload.end()) ? titleIt->second : blendID;
+
+    // Send system message to chat before leaving
+    if (isConnected) {
+        try {
+            const std::string systemMsg = user->getUsername() + " has left " + blendTitle + ".";
+            // Post via the WebSocket-compatible chat message endpoint
+            ChatRoom* room = appState.getChatRoom(blendID);
+            if (room) {
+                room->addMessage("system", systemMsg);
+            }
+        } catch (...) {}
+    }
+
+    // Notify server
+    if (isConnected) {
+        try {
+            const std::string body =
+                "{\"user_id\":" + ModelJson::quote(user->getUserID()) + "}";
+            http.post(http.build_leave_blend_endpoint(blendID), body);
+        } catch (const std::exception& e) {
+            std::cerr << "[AppController] handleLeaveBlend: " << e.what() << "\n";
+        }
+    }
+
+    // Clear local state if this was the active blend
+    Blend* active = appState.getActiveBlend();
+    if (active && active->getBlendID() == blendID) {
+        currentBlend.reset();
+        appState.setActiveBlend(nullptr);
+    }
+
+    std::cout << "[AppController] Left blend '" << blendTitle << "'\n";
+}
+
+void AppController::handleSelectBlend(const EventPayload& payload) {
+    auto blendIt = payload.find("blendID");
+    if (blendIt == payload.end()) return;
+
+    const std::string& blendID = blendIt->second;
+
+    // Fetch participants for this blend
+    const std::string participantResponse = http.get(http.build_blend_participant_endpoint(blendID));
+    if (!http.wasLastRequestSuccessful(http.G)) {
+        std::cerr << "[AppController] handleSelectBlend: failed to fetch participants\n";
+        return;
+    }
+
+    const std::vector<std::string> participantIDs = parseParticipantIDs(participantResponse);
+    std::list<User> participants = loadParticipantsWithWatchLater(participantIDs, nullptr);
+
+    if (participants.empty()) {
+        std::cerr << "[AppController] handleSelectBlend: no participants have data\n";
+        return;
+    }
+
+    // Extract title from payload if available
+    auto titleIt = payload.find("blendTitle");
+    std::string title = (titleIt != payload.end()) ? titleIt->second : "";
+
+    currentBlend = std::make_unique<Blend>(
+        RandomBlendAlgorithm(5).generateBlend(participants, title)
+    );
+    appState.setActiveBlend(currentBlend.get());
+    appState.createChatRoom(*currentBlend);
+
+    std::cout << "[AppController] Switched to blend '" << blendID
+              << "' with " << currentBlend->size() << " videos\n";
 }
