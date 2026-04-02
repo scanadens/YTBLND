@@ -150,6 +150,14 @@ string HttpClient::request(const string& method, const string& path, const strin
 	return response;
 }
 
+string HttpClient::build_user_blends_endpoint(string userID) {
+	return "/api/v1/users/" + sanitizePathSegment(userID) + "/blends";
+}
+
+string HttpClient::build_leave_blend_endpoint(string blendID) {
+	return "/api/v1/blends/" + sanitizePathSegment(blendID) + "/leave";
+}
+
 string HttpClient::build_chat_history_endpoint(string blendID, string userID) {
 	return "/api/v1/blends/" + sanitizePathSegment(blendID) + "/chat-history?user_id=" + sanitizePathSegment(userID);
 }
