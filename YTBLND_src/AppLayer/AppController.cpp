@@ -841,11 +841,7 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, refreshTitle)
     );
-<<<<<<< HEAD
-    currentBlend->setBlendID(existing->getBlendID());
-=======
     currentBlend->setBlendID(refreshID);
->>>>>>> 04c71d1dfce42d24293a0ceafda30854b7968f5c
 
     // Prevent duplicate videos within the same refreshed blend payload.
     std::set<std::string> seenVideoIDs;
