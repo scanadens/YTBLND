@@ -59,6 +59,13 @@ class Blend {
         void setVideoList(const std::list<Video>& videoList);
 
         /**
+         * Overrides the blend identifier to match the server's stored ID.
+         * Needed because the algorithm generates IDs from participant names
+         * but the server uses its own ID from the original creation.
+         */
+        void setBlendID(const std::string& blendID);
+
+        /**
          * Returns the video at a given position, wrapping around the list.
          * \param index Zero-based index; behaviour is undefined for negative values.
          * \return Video at the requested position.

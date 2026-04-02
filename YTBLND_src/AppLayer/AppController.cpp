@@ -303,7 +303,7 @@ void AppController::handleRegister(const EventPayload& payload) {
 }
 
 void AppController::handleLogin(const EventPayload& payload) {
-    // verifing incorrect userID and password combination
+    // verifing incorrect userID and password
     auto idIt = payload.find("userID");
     auto pwIt = payload.find("password");
 
@@ -625,6 +625,15 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
     // (non-existent users are excluded — they should have been rejected at the UI level)
     appState.setUsersWithoutData(missingData);
 
+    // Enforce upload: if any participant is missing Watch Later data, refuse to create the blend.
+    if (!missingData.empty()) {
+        appState.setIsBlendGenerating(false);
+        std::cerr << "[AppController] handleCreateBlend: cannot create blend — the following participants have not uploaded Watch Later data:\n";
+        for (const auto& uid : missingData) std::cerr << "  " << uid << "\n";
+        // UI should show users without data via appState; do not proceed.
+        return;
+    }
+
     if (participants.empty()) {
         std::cerr << "[AppController] handleCreateBlend: no participants have data\n";
         return;
@@ -793,10 +802,14 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
         participantIDs.push_back(participant.getUserID());
     }
 
-    std::list<User> loadedParticipants = loadParticipantsWithWatchLater(participantIDs, nullptr);
+    // Lightweight load for refresh: fetch each participant's watch-later list
+    // but DO NOT call enrichIfMissingMetadata (that can trigger slow network calls).
     std::list<User> participants;
-    for (User p : loadedParticipants) {
-        std::list<Video> allVideos = p.getYouTubeData().getWatchLaterVideos();
+    for (const auto& uid : participantIDs) {
+        const std::string watchLaterResponse = http.get(http.build_watch_later_endpoint(uid));
+        if (!http.wasLastRequestSuccessful(http.G)) continue;
+
+        std::list<Video> allVideos = parseWatchLaterVideos(watchLaterResponse);
         if (allVideos.empty()) continue;
 
         // Build a fresh pool of videos not yet shown
@@ -813,6 +826,7 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
 
         YouTubeData pyd;
         pyd.setWatchLaterVideos(freshPool);
+        User p(uid, uid, "", "");
         p.setYouTubeData(pyd);
         participants.push_back(p);
     }
@@ -823,10 +837,15 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
     }
 
     std::string refreshTitle = existing->getTitle();
+    std::string refreshID = existing->getBlendID();
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, refreshTitle)
     );
+<<<<<<< HEAD
     currentBlend->setBlendID(existing->getBlendID());
+=======
+    currentBlend->setBlendID(refreshID);
+>>>>>>> 04c71d1dfce42d24293a0ceafda30854b7968f5c
 
     // Prevent duplicate videos within the same refreshed blend payload.
     std::set<std::string> seenVideoIDs;
