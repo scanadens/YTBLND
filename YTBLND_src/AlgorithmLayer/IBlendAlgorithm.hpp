@@ -10,6 +10,7 @@
  */
 
 #include <list>
+#include <string>
 #include "../ModelLayer/User.hpp"
 #include "../ModelLayer/Blend.hpp"
 
@@ -21,9 +22,11 @@ public:
     /**
      * Generates a Blend from a collection of participants.
      * \param participants List of users whose Watch Later data is used as input.
+     * \param title        User-facing name for the blend (default: empty).
      * \return A new Blend containing the algorithm's chosen video selection.
      */
-    virtual Blend generateBlend(const std::list<User>& participants) = 0;
+    virtual Blend generateBlend(const std::list<User>& participants,
+                                const std::string& title = "") = 0;
 };
 
 #endif

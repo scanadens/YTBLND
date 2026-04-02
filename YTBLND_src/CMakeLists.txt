@@ -130,6 +130,7 @@ if(YTBLND_BUILD_TESTS)
     file(GLOB_RECURSE TEST_SOURCES tests/*.cpp)
     set(YTBLND_UI_TEST_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/Test_BlendCreationPanel.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/Test_ThemeSwitching.cpp
     )
 
     if(NOT (YTBLND_BUILD_UI_TESTS AND YTBLND_HAS_WX))

@@ -32,6 +32,7 @@ std::string buildDeleteAccountJson(const std::string& password) {
 }
 
 std::string buildBlendJson(const std::string& blendID,
+                           const std::string& title,
                            const std::string& creatorID,
                            const std::string& algorithm,
                            const std::vector<std::string>& participants) {
@@ -47,6 +48,7 @@ std::string buildBlendJson(const std::string& blendID,
 
     return "{"
            "\"blend_id\":" + ModelJson::quote(blendID) + ","
+           "\"title\":" + ModelJson::quote(title) + ","
            "\"creator_id\":" + ModelJson::quote(creatorID) + ","
            "\"algorithm\":" + ModelJson::quote(algorithm) + ","
            "\"participants\":" + participantsJson.str()

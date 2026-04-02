@@ -16,7 +16,8 @@ public:
      */
     explicit RandomBlendAlgorithm(int videosPerUser = 5);
 
-    Blend generateBlend(const std::list<User>& participants) override;
+    Blend generateBlend(const std::list<User>& participants,
+                        const std::string& title = "") override;
 
 private:
     int videosPerUser;

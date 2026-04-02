@@ -79,7 +79,14 @@ wxColour UIColors::TextMuted = UIColors::DarkMode.TextMuted;
 wxColour UIColors::Separator = UIColors::DarkMode.Separator;
 wxColour UIColors::Danger = UIColors::DarkMode.Danger;
 
+static ThemeType sCurrentTheme = ThemeType::Dark;
+
+ThemeType UIColors::GetCurrentTheme() {
+    return sCurrentTheme;
+}
+
 void UIColors::SetTheme(ThemeType theme) {
+    sCurrentTheme = theme;
     switch (theme) {
         case ThemeType::Light:
             Current = &LightMode;

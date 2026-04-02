@@ -11,7 +11,6 @@
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
 #include "UIPages.hpp"
-#include "TopBar.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
@@ -29,16 +28,76 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     auto* root = new wxBoxSizer(wxVERTICAL);
 
-    // ── TopBar ────────────────────────────────────────────────────────────────
-    auto* topBar = new TopBar(this, "New Blend", m_nav, Page::LOGIN);
+    // ── TopBar (dynamic back: LOGIN if no blend yet, HOME otherwise) ─────────
+    auto* topBar = new wxPanel(this, wxID_ANY);
+    topBar->SetBackgroundColour(UIColors::Surface);
+    topBar->SetMinSize(wxSize(-1, 48));
+    {
+        auto* backBtn = new wxButton(topBar, wxID_ANY, wxT("< Back"));
+        backBtn->SetBackgroundColour(UIColors::SurfaceRaised);
+        backBtn->SetForegroundColour(UIColors::TextPrimary);
+        UIButtons::ApplySizeBounds(backBtn, ButtonType::TopBarBack);
+
+        backBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
+            if (AppState::getInstance().getActiveBlend() != nullptr)
+                m_nav(Page::HOME);
+            else
+                m_nav(Page::LOGIN);
+        });
+
+        auto* titleLabel = new wxStaticText(topBar, wxID_ANY, "New Blend",
+                                            wxDefaultPosition, wxDefaultSize,
+                                            wxALIGN_CENTER_HORIZONTAL);
+        titleLabel->SetForegroundColour(UIColors::TextPrimary);
+        wxFont tf = titleLabel->GetFont();
+        tf.SetPointSize(14);
+        tf.SetWeight(wxFONTWEIGHT_BOLD);
+        titleLabel->SetFont(tf);
+
+        auto* barSizer = new wxBoxSizer(wxHORIZONTAL);
+        barSizer->Add(backBtn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 10);
+        barSizer->AddStretchSpacer(1);
+        barSizer->Add(titleLabel, 0, wxALIGN_CENTER_VERTICAL);
+        barSizer->AddStretchSpacer(1);
+        barSizer->Add(UIButtons::GetSize(ButtonType::TopBarBack).GetWidth() + 10, 0);
+
+        auto* outerBar = new wxBoxSizer(wxVERTICAL);
+        outerBar->Add(barSizer, 1, wxEXPAND | wxTOP | wxBOTTOM, 8);
+        topBar->SetSizer(outerBar);
+    }
     root->Add(topBar, 0, wxEXPAND);
+
+    // ── Blend name row ──────────────────────────────────────────────────────────
+    auto* namePanel = new wxPanel(this, wxID_ANY);
+    namePanel->SetBackgroundColour(UIColors::Surface);
+    auto* nameSizer = new wxBoxSizer(wxHORIZONTAL);
+
+    auto* nameLabel = new wxStaticText(namePanel, wxID_ANY, "Blend Name:");
+    nameLabel->SetForegroundColour(UIColors::TextPrimary);
+    wxFont nlf = nameLabel->GetFont();
+    nlf.SetWeight(wxFONTWEIGHT_BOLD);
+    nlf.SetPointSize(11);
+    nameLabel->SetFont(nlf);
+
+    m_blendNameCtrl = new wxTextCtrl(namePanel, wxID_ANY, "",
+                                     wxDefaultPosition, wxSize(-1, 36),
+                                     wxTE_PROCESS_ENTER);
+    m_blendNameCtrl->SetHint("Enter a name for your blend...");
+    m_blendNameCtrl->SetBackgroundColour(UIColors::SurfaceRaised);
+    m_blendNameCtrl->SetForegroundColour(UIColors::TextPrimary);
+
+    nameSizer->Add(nameLabel,       0, wxALIGN_CENTER_VERTICAL | wxLEFT, 16);
+    nameSizer->Add(m_blendNameCtrl, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 12);
+    namePanel->SetSizer(nameSizer);
+    namePanel->SetMinSize(wxSize(-1, 48));
+    root->Add(namePanel, 0, wxEXPAND);
 
     // ── Action row ────────────────────────────────────────────────────────────
     auto* actionPanel = new wxPanel(this, wxID_ANY);
     actionPanel->SetBackgroundColour(UIColors::Surface);
     auto* actionSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    auto* blendLabel = new wxStaticText(actionPanel, wxID_ANY, "BLEND");
+    auto* blendLabel = new wxStaticText(actionPanel, wxID_ANY, "PARTICIPANTS");
     blendLabel->SetForegroundColour(UIColors::TextPrimary);
     wxFont lf = blendLabel->GetFont();
     lf.SetWeight(wxFONTWEIGHT_BOLD);
@@ -118,6 +177,7 @@ void BlendCreationPanel::Refresh()
 void BlendCreationPanel::Reload()
 {
     m_addedUsers.clear();
+    m_blendNameCtrl->Clear();
 
     // Pre-populate with the logged-in user so they don't have to add themselves
     User* current = AppState::getInstance().getCurrentUser();
@@ -250,8 +310,17 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
 {
     if (m_addedUsers.size() < 2) return;
 
-    // Build payload: {"userID_0": "alice", "userID_1": "bob", ...}
+    std::string blendName = m_blendNameCtrl->GetValue().ToStdString();
+    if (blendName.empty()) {
+        wxMessageBox("Please enter a name for your blend.",
+                     "Name Required", wxOK | wxICON_INFORMATION, this);
+        m_blendNameCtrl->SetFocus();
+        return;
+    }
+
+    // Build payload: {"blendTitle": "...", "userID_0": "alice", "userID_1": "bob", ...}
     EventPayload payload;
+    payload["blendTitle"] = blendName;
     for (std::size_t i = 0; i < m_addedUsers.size(); ++i)
         payload["userID_" + std::to_string(i)] = m_addedUsers[i];
 
@@ -268,7 +337,7 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
             // Blend was still created from whoever had data — warn and continue
             msg += "\nTheir videos were not included. The blend was created with the remaining users.";
             wxMessageBox(msg, "Some Users Missing Data", wxOK | wxICON_WARNING, this);
-            m_nav(Page::BLEND_CHAT);
+            m_nav(Page::HOME);
         } else {
             // No one had data — cannot create a blend at all
             msg += "\nNo blend could be created. Please ensure at least one user has uploaded their data.";
@@ -277,7 +346,7 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
         return;
     }
 
-    m_nav(Page::BLEND_CHAT);
+    m_nav(Page::HOME);
 }
 
 void BlendCreationPanel::OnRemoveUser(const std::string& username)

@@ -26,6 +26,7 @@
 #include <wx/wx.h>
 #include <wx/simplebook.h>
 #include "UIPages.hpp"
+#include "UIColors.hpp"
 
 class AppController;
 class LoginPanel;
@@ -35,6 +36,7 @@ class UserPanel;
 class SettingsPanel;
 class BlendCreationPanel;
 class BlendChatPanel;
+class ActiveBlendsPanel;
 
 /// Root application window containing the full-window page switcher.
 class MainFrame : public wxFrame {
@@ -74,6 +76,7 @@ private:
     UserPanel*             userPanel;
     SettingsPanel*         settingsPanel;
     BlendChatPanel*        chatPanel;
+    ActiveBlendsPanel*     activeBlendsPanel;
     std::unordered_map<int, wxImage> images; // images
 
     /**
@@ -87,6 +90,15 @@ private:
     void OnUser    (wxCommandEvent&);  ///< Navigates to USER.
     void OnBlend   (wxCommandEvent&);  ///< Navigates to BLEND_CHAT or BLEND_CREATION.
     void OnRefresh (wxCommandEvent&);  ///< Advances the feed by one page.
+
+    /**
+     * Recursively recolors every widget in the window tree by mapping
+     * old palette colours to the new palette after a theme switch.
+     */
+    void RecolorAll(const Palette& oldPalette);
+
+    /// Helper: recursively recolor a widget and its children.
+    void RecolorWidget(wxWindow* w, const Palette& oldPalette);
 
     bool LoadImage(int key, const wxString& path);
 };

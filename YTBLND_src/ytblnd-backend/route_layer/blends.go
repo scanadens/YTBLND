@@ -26,6 +26,7 @@ type SaveWatchLaterRequest struct {
 // CreateBlendRequest defines the payload required to create/update a blend.
 type CreateBlendRequest struct {
 	BlendID      string   `json:"blend_id" binding:"required"`
+	Title        string   `json:"title"`
 	CreatorID    string   `json:"creator_id" binding:"required"`
 	Algorithm    string   `json:"algorithm" binding:"required"`
 	Participants []string `json:"participants" binding:"required"`
@@ -56,6 +57,22 @@ type participantsResponse struct {
 	Participants []string `json:"participants"`
 }
 
+// LeaveBlendRequest captures the user who wants to leave.
+type LeaveBlendRequest struct {
+	UserID string `json:"user_id" binding:"required"`
+}
+
+// userBlendsResponse returns all blends a user participates in.
+type userBlendsResponse struct {
+	UserID string              `json:"user_id"`
+	Blends []blendListItem     `json:"blends"`
+}
+
+type blendListItem struct {
+	BlendID string `json:"blend_id"`
+	Title   string `json:"title"`
+}
+
 // blendChatRoomResponse returns the chat room attached to a blend plus members.
 type blendChatRoomResponse struct {
 	BlendID     string   `json:"blend_id"`
@@ -83,6 +100,8 @@ func RegisterBlendRoutes(api *gin.RouterGroup, dataManager database_layer.DataMa
 	api.GET("/users/:userID/blend", h.GetBlendForUser)
 	api.GET("/blends/:blendID/participants", h.GetBlendParticipants)
 	api.GET("/blends/:blendID/chatroom", h.GetBlendChatRoom)
+	api.GET("/users/:userID/blends", h.GetUserBlends)
+	api.POST("/blends/:blendID/leave", h.LeaveBlend)
 }
 
 // SaveWatchLater replaces a user's watch-later list.
@@ -176,7 +195,7 @@ func (h *BlendHandler) CreateBlend(c *gin.Context) {
 	}
 
 	// SaveBlend also ensures a blend-attached chat room exists and is synced.
-	if err := h.dataManager.SaveBlend(req.BlendID, req.CreatorID, req.Algorithm, req.Participants); err != nil {
+	if err := h.dataManager.SaveBlend(req.BlendID, req.Title, req.CreatorID, req.Algorithm, req.Participants); err != nil {
 		h.logger.LogEvent("blend_save_failed", "blend_id=%s creator_id=%s client_ip=%s error=%q", req.BlendID, req.CreatorID, c.ClientIP(), err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save blend"})
 		return
@@ -281,5 +300,63 @@ func (h *BlendHandler) GetBlendChatRoom(c *gin.Context) {
 		BlendID:     blendID,
 		ChatRoomID:  chatRoomID,
 		MemberUsers: members,
+	})
+}
+
+// GetUserBlends returns all blends a user participates in.
+func (h *BlendHandler) GetUserBlends(c *gin.Context) {
+	userID := c.Param("userID")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "userID path parameter is required"})
+		return
+	}
+
+	blends, err := h.dataManager.FindAllBlendsForUser(userID)
+	if err != nil {
+		h.logger.LogEvent("user_blends_failed", "user_id=%s error=%q", userID, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load user blends"})
+		return
+	}
+
+	items := make([]blendListItem, 0, len(blends))
+	for _, b := range blends {
+		items = append(items, blendListItem{
+			BlendID: b.GetBlendID(),
+			Title:   b.GetTitle(),
+		})
+	}
+	h.logger.LogEvent("user_blends_loaded", "user_id=%s count=%d", userID, len(items))
+
+	c.JSON(http.StatusOK, userBlendsResponse{
+		UserID: userID,
+		Blends: items,
+	})
+}
+
+// LeaveBlend removes a user from a blend and its chat room.
+func (h *BlendHandler) LeaveBlend(c *gin.Context) {
+	blendID := c.Param("blendID")
+	if blendID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "blendID path parameter is required"})
+		return
+	}
+
+	var req LeaveBlendRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.dataManager.RemoveParticipantFromBlend(blendID, req.UserID); err != nil {
+		h.logger.LogEvent("leave_blend_failed", "blend_id=%s user_id=%s error=%q", blendID, req.UserID, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to leave blend"})
+		return
+	}
+	h.logger.LogEvent("leave_blend_succeeded", "blend_id=%s user_id=%s", blendID, req.UserID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"blend_id": blendID,
+		"user_id":  req.UserID,
+		"status":   "left",
 	})
 }

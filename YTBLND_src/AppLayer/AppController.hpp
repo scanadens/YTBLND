@@ -235,6 +235,34 @@ class AppController {
         std::string get_current_email();
 
         /**
+         * Holds summary info about a blend for display in the active blends list.
+         */
+        struct BlendSummary {
+            std::string blendID;
+            std::string title;
+        };
+
+        /**
+         * Fetches the list of blends the current user participates in.
+         * \return Vector of BlendSummary with blend IDs and titles.
+         */
+        std::vector<BlendSummary> fetchUserBlends();
+
+        /**
+         * Leaves a blend: notifies server to remove the user, posts a system
+         * message to the chat, and clears the active blend if it was the one left.
+         * \param payload { "blendID": "...", "blendTitle": "..." }
+         */
+        void handleLeaveBlend(const EventPayload& payload);
+
+        /**
+         * Switches the active blend to the specified blend ID, loading participants
+         * and regenerating the video feed.
+         * \param payload { "blendID": "..." }
+         */
+        void handleSelectBlend(const EventPayload& payload);
+
+        /**
          * Parses the JSON response from GET /chat-history into a list of Messages.
          * Expected format: {"messages":[{"sender_id":"...","content":"...","sent_at":"..."},...]}
          * Exposed as public static so it can be unit-tested without a live server.

@@ -98,6 +98,9 @@ private:
     // "X / 8 users" count label
     wxStaticText*     m_countLabel;
 
+    // Blend name input
+    wxTextCtrl*       m_blendNameCtrl;
+
     // "Create Blend" button — enabled when >= 2 users added
     wxButton*         m_createBtn;
 

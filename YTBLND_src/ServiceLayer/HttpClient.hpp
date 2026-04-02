@@ -172,6 +172,22 @@ class HttpClient {
 		std::string build_delete_user_endpoint(std::string userID);
 
 		/**
+		 * Builds the endpoint for fetching all blends a user participates in.
+		 * Result format: \c /api/v1/users/{userID}/blends
+		 * \param userID User identifier.
+		 * \return Endpoint path string for listing user blends.
+		 */
+		std::string build_user_blends_endpoint(std::string userID);
+
+		/**
+		 * Builds the endpoint for leaving a blend.
+		 * Result format: \c /api/v1/blends/{blendID}/leave
+		 * \param blendID Blend identifier.
+		 * \return Endpoint path string for leaving a blend.
+		 */
+		std::string build_leave_blend_endpoint(std::string blendID);
+
+		/**
 		 * Builds the endpoint for fetching a blend's chat message history.
 		 * \param blendID ID of the blend whose chat history is requested.
 		 * \param userID  ID of the requesting user (passed as query param).

@@ -56,6 +56,7 @@ func (m *SqliteDatabaseManager) initSchema() error {
 
     CREATE TABLE IF NOT EXISTS blends (
         blend_id TEXT PRIMARY KEY,
+        title TEXT NOT NULL DEFAULT '',
         creator_id TEXT NOT NULL,
         algorithm TEXT NOT NULL,
         created_at TEXT NOT NULL
@@ -94,6 +95,11 @@ func (m *SqliteDatabaseManager) initSchema() error {
 
 	// Backfill schema for existing DBs that were created before metadata columns existed.
 	if err := m.ensureUserWatchLaterMetadataColumns(); err != nil {
+		return err
+	}
+
+	// Add title column to blends table for existing DBs.
+	if err := m.ensureBlendsTitleColumn(); err != nil {
 		return err
 	}
 
@@ -144,6 +150,38 @@ func (m *SqliteDatabaseManager) ensureUserWatchLaterMetadataColumns() error {
 		}
 	}
 
+	return nil
+}
+
+func (m *SqliteDatabaseManager) ensureBlendsTitleColumn() error {
+	rows, err := m.db.Query("PRAGMA table_info(blends);")
+	if err != nil {
+		return fmt.Errorf("schema migration table_info(blends): %w", err)
+	}
+	defer rows.Close()
+
+	hasTitle := false
+	for rows.Next() {
+		var cid int
+		var name, colType string
+		var notNull, pk int
+		var dflt sql.NullString
+		if err := rows.Scan(&cid, &name, &colType, &notNull, &dflt, &pk); err != nil {
+			return fmt.Errorf("schema migration scan table_info(blends): %w", err)
+		}
+		if strings.ToLower(name) == "title" {
+			hasTitle = true
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("schema migration rows table_info(blends): %w", err)
+	}
+
+	if !hasTitle {
+		if _, err := m.db.Exec("ALTER TABLE blends ADD COLUMN title TEXT NOT NULL DEFAULT '';"); err != nil {
+			return fmt.Errorf("schema migration add column title to blends: %w", err)
+		}
+	}
 	return nil
 }
 
@@ -302,9 +340,42 @@ func (m *SqliteDatabaseManager) LoadWatchLater(userID string) ([]Video, error) {
 	return videos, nil
 }
 
+// DeleteUser removes a user account and all associated data within a transaction.
+func (m *SqliteDatabaseManager) DeleteUser(userID, password string) error {
+	if m.db == nil {
+		return errors.New("database is not initialized")
+	}
+
+	if !m.ValidatePassword(userID, password) {
+		return errors.New("invalid credentials")
+	}
+
+	tx, err := m.db.Begin()
+	if err != nil {
+		return fmt.Errorf("delete user begin tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Remove from all blend participations and chat memberships
+	if _, err := tx.Exec(`DELETE FROM blend_participants WHERE user_id = ?;`, userID); err != nil {
+		return fmt.Errorf("delete user blend participants: %w", err)
+	}
+	if _, err := tx.Exec(`DELETE FROM chat_room_members WHERE user_id = ?;`, userID); err != nil {
+		return fmt.Errorf("delete user chat room members: %w", err)
+	}
+	if _, err := tx.Exec(`DELETE FROM user_watch_later WHERE user_id = ?;`, userID); err != nil {
+		return fmt.Errorf("delete user watch later: %w", err)
+	}
+	if _, err := tx.Exec(`DELETE FROM users WHERE user_id = ?;`, userID); err != nil {
+		return fmt.Errorf("delete user: %w", err)
+	}
+
+	return tx.Commit()
+}
+
 // SaveBlend upserts blend metadata and replaces participants in one
 // transaction to prevent stale membership rows.
-func (m *SqliteDatabaseManager) SaveBlend(blendID, creatorID, algorithm string, participants []string) error {
+func (m *SqliteDatabaseManager) SaveBlend(blendID, title, creatorID, algorithm string, participants []string) error {
 	if m.db == nil {
 		return errors.New("database is not initialized")
 	}
@@ -319,9 +390,9 @@ func (m *SqliteDatabaseManager) SaveBlend(blendID, creatorID, algorithm string, 
 	// Persist UTC timestamp in an ISO-like format for stable lexical ordering.
 	createdAt := time.Now().UTC().Format("2006-01-02T15:04:05")
 	if _, err := tx.Exec(`
-        INSERT OR REPLACE INTO blends (blend_id, creator_id, algorithm, created_at)
-        VALUES (?, ?, ?, ?);
-    `, blendID, creatorID, algorithm, createdAt); err != nil {
+        INSERT OR REPLACE INTO blends (blend_id, title, creator_id, algorithm, created_at)
+        VALUES (?, ?, ?, ?, ?);
+    `, blendID, title, creatorID, algorithm, createdAt); err != nil {
 		return fmt.Errorf("save blend upsert blend: %w", err)
 	}
 
@@ -392,6 +463,7 @@ func (m *SqliteDatabaseManager) SaveBlendFromModel(creatorID string, blend Blend
 
 	return m.SaveBlend(
 		blend.GetBlendID(),
+		"",
 		creatorID,
 		blend.GetAlgorithmUsed(),
 		participantIDs,
@@ -425,6 +497,59 @@ func (m *SqliteDatabaseManager) FindBlendForUser(userID string) (string, error) 
 	}
 
 	return blendID, nil
+}
+
+// FindAllBlendsForUser returns all blends a user participates in, newest first.
+func (m *SqliteDatabaseManager) FindAllBlendsForUser(userID string) ([]BlendSummary, error) {
+	if m.db == nil {
+		return nil, errors.New("database is not initialized")
+	}
+
+	const query = `
+        SELECT b.blend_id, b.title
+        FROM blend_participants bp
+        INNER JOIN blends b ON bp.blend_id = b.blend_id
+        WHERE bp.user_id = ?
+        ORDER BY b.created_at DESC;
+    `
+
+	rows, err := m.db.Query(query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("find all blends for user: %w", err)
+	}
+	defer rows.Close()
+
+	var blends []BlendSummary
+	for rows.Next() {
+		var s BlendSummary
+		if err := rows.Scan(&s.BlendID, &s.Title); err != nil {
+			return nil, fmt.Errorf("find all blends scan: %w", err)
+		}
+		blends = append(blends, s)
+	}
+	return blends, rows.Err()
+}
+
+// RemoveParticipantFromBlend removes a user from a blend and its chat room.
+func (m *SqliteDatabaseManager) RemoveParticipantFromBlend(blendID, userID string) error {
+	if m.db == nil {
+		return errors.New("database is not initialized")
+	}
+
+	tx, err := m.db.Begin()
+	if err != nil {
+		return fmt.Errorf("remove participant begin tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.Exec(`DELETE FROM blend_participants WHERE blend_id = ? AND user_id = ?;`, blendID, userID); err != nil {
+		return fmt.Errorf("remove blend participant: %w", err)
+	}
+	if _, err := tx.Exec(`DELETE FROM chat_room_members WHERE chat_room_id = ? AND user_id = ?;`, blendID, userID); err != nil {
+		return fmt.Errorf("remove chat room member: %w", err)
+	}
+
+	return tx.Commit()
 }
 
 // LoadBlendParticipants returns all user IDs linked to a blend.

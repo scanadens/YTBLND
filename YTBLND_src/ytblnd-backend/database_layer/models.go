@@ -136,6 +136,15 @@ func (b Blend) Size() int {
 	return len(b.VideoList)
 }
 
+// BlendSummary is a lightweight view of a blend for listing purposes.
+type BlendSummary struct {
+	BlendID string
+	Title   string
+}
+
+func (s BlendSummary) GetBlendID() string { return s.BlendID }
+func (s BlendSummary) GetTitle() string   { return s.Title }
+
 // ChatMessageRecord is the persisted representation of one chat message.
 type ChatMessageRecord struct {
 	RoomID   string

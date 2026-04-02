@@ -33,7 +33,8 @@ enum class Page {
     HOME              = 3,  ///< Blend feed (3×2 grid + refresh).
     USER              = 4,  ///< Account info and logout.
     SETTINGS          = 5,  ///< Settings (stub — back button only).
-    BLEND_CHAT        = 6   ///< Chat tied to the active blend.
+    BLEND_CHAT        = 6,  ///< Chat tied to the active blend.
+    ACTIVE_BLENDS     = 7   ///< List of blends the user participates in.
 };
 
 /**
