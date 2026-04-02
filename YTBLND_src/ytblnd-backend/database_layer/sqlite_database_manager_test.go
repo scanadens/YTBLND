@@ -11,7 +11,8 @@ import (
 // leak across test cases and each scenario is deterministic.
 func newTestManager(t *testing.T) *SqliteDatabaseManager {
 	t.Helper()
-	dbPath := filepath.Join(t.TempDir(), "test.db")
+	// Use dev.db naming to match runtime conventions while preserving per-test isolation.
+	dbPath := filepath.Join(t.TempDir(), "dev.db")
 	mgr, err := NewSqliteDataManager(dbPath)
 	if err != nil {
 		t.Fatalf("NewSqliteDataManager() error = %v", err)

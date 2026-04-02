@@ -44,6 +44,12 @@ class AppState {
          */
         std::string pendingBlendMessage;
 
+        /**
+         * One-time upload failure message set by handleUploadData when parsing,
+         * enrichment, or persistence fails. Cleared after being read by UI.
+         */
+        std::string pendingUploadError;
+
         AppState();
         AppState(const AppState&)            = delete;
         AppState& operator=(const AppState&) = delete;
@@ -124,6 +130,19 @@ class AppState {
          * \return The pending message string, then clears it.
          */
         std::string takePendingBlendMessage();
+
+        /**
+         * Sets a one-time message shown by DataInstructionsPanel when upload
+         * failed or produced no usable videos.
+         * \param msg Message to display.
+         */
+        void setPendingUploadError(const std::string& msg);
+
+        /**
+         * Returns and clears the pending upload error message.
+         * \return The pending upload error string, then clears it.
+         */
+        std::string takePendingUploadError();
 
         /**
          * Resets all session state: clears currentUser, activeBlend,

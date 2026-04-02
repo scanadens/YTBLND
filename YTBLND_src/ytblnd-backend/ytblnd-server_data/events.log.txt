@@ -1624,3 +1624,685 @@
 2026/04/02 19:07:57.365185 event=server_signal_received signal=terminated received_at=2026-04-02T19:07:57Z
 2026/04/02 19:07:57.369016 event=server_shutdown signal=terminated graceful_shutdown=true stopped_at=2026-04-02T19:07:57Z
 2026/04/02 19:08:42.588681 event=server_start db_path=/opt/ytblnd-backend/ytblnd-server_data/ytblnd.db request_log_path=/opt/ytblnd-backend/ytblnd-server_data/requests.log.txt event_log_path=/opt/ytblnd-backend/ytblnd-server_data/events.log.txt started_at=2026-04-02T19:08:42Z
+2026/04/02 19:12:44.623121 event=auth_login_succeeded user_id=slipnut44 client_ip=129.100.255.82
+2026/04/02 19:12:44.784694 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 19:12:44.850723 event=blend_lookup_succeeded user_id=slipnut44 blend_id=slipnut44_2_random client_ip=129.100.255.82
+2026/04/02 19:12:44.929758 event=participants_loaded blend_id=slipnut44_2_random count=2 client_ip=129.100.255.82
+2026/04/02 19:12:45.133359 event=watch_later_loaded user_id=2 count=6 client_ip=129.100.255.82
+2026/04/02 19:12:45.338006 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 19:12:45.544504 event=user_blends_loaded user_id=slipnut44 count=3
+2026/04/02 19:12:51.747297 event=user_blends_loaded user_id=slipnut44 count=3
+2026/04/02 19:12:58.648074 event=user_blends_loaded user_id=slipnut44 count=3
+2026/04/02 19:13:02.132462 event=chat_history_loaded blend_id=2_slipnut44_random room_id=2_slipnut44_random user_id=slipnut44 count=0 client_ip=129.100.255.82
+2026/04/02 19:13:02.233183 event=chat_connection_accepted blend_id=2_slipnut44_random room_id=2_slipnut44_random user_id=slipnut44 client_ip=129.100.255.82
+2026/04/02 19:13:02.233292 event=chat_room_activated room_id=2_slipnut44_random
+2026/04/02 19:13:02.233296 event=chat_client_connected room_id=2_slipnut44_random user_id=slipnut44 room_clients=1
+2026/04/02 19:13:05.599055 event=user_blends_loaded user_id=slipnut44 count=3
+2026/04/02 19:13:06.946320 event=participants_loaded blend_id=slipnut44_2_random count=2 client_ip=129.100.255.82
+2026/04/02 19:13:07.151094 event=watch_later_loaded user_id=2 count=6 client_ip=129.100.255.82
+2026/04/02 19:13:07.355870 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 19:13:09.556609 event=user_blends_loaded user_id=slipnut44 count=3
+2026/04/02 19:13:15.750035 event=chat_read_closed room_id=2_slipnut44_random user_id=slipnut44 error="websocket: close 1006 (abnormal closure): unexpected EOF"
+2026/04/02 19:13:15.750111 event=chat_client_disconnected room_id=2_slipnut44_random user_id=slipnut44 room_clients=0
+2026/04/02 19:13:15.750115 event=chat_room_deactivated room_id=2_slipnut44_random
+2026/04/02 19:29:56.474123 event=auth_register_succeeded user_id=wellsfargo username=wellsfargo client_ip=129.100.255.82
+2026/04/02 19:30:12.077813 event=watch_later_saved user_id=wellsfargo saved_count=0 client_ip=129.100.255.82
+2026/04/02 19:30:12.283058 event=blend_lookup_empty user_id=wellsfargo client_ip=129.100.255.82
+2026/04/02 19:30:21.308879 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 19:30:43.926258 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.82
+2026/04/02 19:30:46.999939 event=watch_later_loaded user_id=wellsfargo count=0 client_ip=129.100.255.82
+2026/04/02 19:30:47.124294 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 19:30:47.302451 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.82
+2026/04/02 19:30:47.608082 event=watch_later_loaded user_id=wellsfargo count=0 client_ip=129.100.255.82
+2026/04/02 19:30:47.816126 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 19:30:48.021882 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.82
+2026/04/02 19:30:48.331692 event=blend_saved blend_id=slipnut44_1_random creator_id=wellsfargo participants=3 chat_room_id=slipnut44_1_random client_ip=129.100.255.82
+2026/04/02 19:30:48.532703 event=blend_saved blend_id=slipnut44_1_random creator_id=wellsfargo participants=2 chat_room_id=slipnut44_1_random client_ip=129.100.255.82
+2026/04/02 19:30:57.848534 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 19:30:58.055705 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.82
+2026/04/02 19:31:03.477326 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 19:31:03.688640 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.82
+2026/04/02 19:31:06.488093 event=user_blends_loaded user_id=wellsfargo count=0
+2026/04/02 19:31:14.619803 event=user_blends_loaded user_id=wellsfargo count=0
+2026/04/02 19:31:47.354346 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 19:31:49.140599 event=watch_later_loaded user_id=wellsfargo count=0 client_ip=129.100.255.82
+2026/04/02 19:31:49.355350 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 19:31:49.562703 event=watch_later_loaded user_id=wellsfargo count=0 client_ip=129.100.255.82
+2026/04/02 19:31:49.768143 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 19:31:49.871016 event=blend_saved blend_id=slipnut44_random creator_id=wellsfargo participants=2 chat_room_id=slipnut44_random client_ip=129.100.255.82
+2026/04/02 19:31:50.076857 event=blend_saved blend_id=slipnut44_random creator_id=wellsfargo participants=1 chat_room_id=slipnut44_random client_ip=129.100.255.82
+2026/04/02 19:47:29.092388 event=auth_login_succeeded user_id=slipnut44 client_ip=::1
+2026/04/02 19:47:29.498910 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=::1
+2026/04/02 19:47:29.846507 event=blend_lookup_succeeded user_id=slipnut44 blend_id=slipnut44_random client_ip=::1
+2026/04/02 19:47:30.214009 event=participants_loaded blend_id=slipnut44_random count=1 client_ip=::1
+2026/04/02 19:47:30.624335 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=::1
+2026/04/02 19:47:30.931955 event=user_blends_loaded user_id=slipnut44 count=4
+2026/04/02 19:47:32.823746 event=user_blends_loaded user_id=slipnut44 count=4
+2026/04/02 19:47:36.461402 event=participants_loaded blend_id=slipnut44_1_random count=2 client_ip=::1
+2026/04/02 19:47:36.794826 event=watch_later_loaded user_id=1 count=88 client_ip=::1
+2026/04/02 19:47:37.177046 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=::1
+2026/04/02 19:48:26.535506 event=user_blends_loaded user_id=slipnut44 count=4
+2026/04/02 19:48:31.758913 event=leave_blend_succeeded blend_id=slipnut44_2_random user_id=slipnut44
+2026/04/02 19:48:32.063298 event=user_blends_loaded user_id=slipnut44 count=3
+2026/04/02 19:48:37.287260 event=leave_blend_succeeded blend_id=2_slipnut44_random user_id=slipnut44
+2026/04/02 19:48:37.695627 event=user_blends_loaded user_id=slipnut44 count=2
+2026/04/02 19:48:39.506299 event=participants_loaded blend_id=slipnut44_random count=1 client_ip=::1
+2026/04/02 19:48:39.762545 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=::1
+2026/04/02 19:48:44.996317 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=::1
+2026/04/02 19:49:01.760022 event=auth_login_succeeded user_id=wellsfargo client_ip=::1
+2026/04/02 19:49:02.169603 event=watch_later_loaded user_id=wellsfargo count=0 client_ip=::1
+2026/04/02 19:49:02.578322 event=blend_lookup_empty user_id=wellsfargo client_ip=::1
+2026/04/02 19:50:04.284159 event=watch_later_saved user_id=wellsfargo saved_count=0 client_ip=::1
+2026/04/02 19:50:04.633689 event=blend_lookup_empty user_id=wellsfargo client_ip=::1
+2026/04/02 19:50:20.198954 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=::1
+2026/04/02 19:50:22.278341 event=watch_later_loaded user_id=wellsfargo count=0 client_ip=::1
+2026/04/02 19:50:22.370513 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=::1
+2026/04/02 19:50:22.460474 event=watch_later_loaded user_id=wellsfargo count=0 client_ip=::1
+2026/04/02 19:50:22.547088 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=::1
+2026/04/02 19:50:22.637648 event=blend_saved blend_id=slipnut44_random creator_id=wellsfargo participants=2 chat_room_id=slipnut44_random client_ip=::1
+2026/04/02 19:50:22.767544 event=blend_saved blend_id=slipnut44_random creator_id=wellsfargo participants=1 chat_room_id=slipnut44_random client_ip=::1
+2026/04/02 19:50:31.360226 event=user_blends_loaded user_id=wellsfargo count=0
+2026/04/02 19:50:59.624351 event=watch_later_saved user_id=wellsfargo saved_count=0 client_ip=::1
+2026/04/02 19:50:59.808253 event=blend_lookup_empty user_id=wellsfargo client_ip=::1
+2026/04/02 19:51:37.548243 event=watch_later_loaded user_id=1 count=88 client_ip=::1
+2026/04/02 19:51:39.663364 event=watch_later_loaded user_id=wellsfargo count=0 client_ip=::1
+2026/04/02 19:51:39.847307 event=watch_later_loaded user_id=1 count=88 client_ip=::1
+2026/04/02 19:51:40.275884 event=watch_later_loaded user_id=wellsfargo count=0 client_ip=::1
+2026/04/02 19:51:40.688758 event=watch_later_loaded user_id=1 count=88 client_ip=::1
+2026/04/02 19:51:41.114546 event=blend_saved blend_id=1_random creator_id=wellsfargo participants=2 chat_room_id=1_random client_ip=::1
+2026/04/02 19:51:41.430543 event=blend_saved blend_id=1_random creator_id=wellsfargo participants=1 chat_room_id=1_random client_ip=::1
+2026/04/02 19:51:46.516879 event=user_blends_loaded user_id=wellsfargo count=0
+2026/04/02 19:53:31.770170 event=auth_login_succeeded user_id=2 client_ip=::1
+2026/04/02 19:53:32.097899 event=watch_later_loaded user_id=2 count=6 client_ip=::1
+2026/04/02 19:53:32.404507 event=blend_lookup_succeeded user_id=2 blend_id=slipnut44_2_random client_ip=::1
+2026/04/02 19:53:32.782326 event=participants_loaded blend_id=slipnut44_2_random count=1 client_ip=::1
+2026/04/02 19:53:33.121811 event=watch_later_loaded user_id=2 count=6 client_ip=::1
+2026/04/02 19:53:33.531675 event=user_blends_loaded user_id=2 count=4
+2026/04/02 19:53:34.658791 event=auth_login_succeeded user_id=1 client_ip=::1
+2026/04/02 19:53:34.993554 event=watch_later_loaded user_id=1 count=88 client_ip=::1
+2026/04/02 19:53:35.295803 event=blend_lookup_succeeded user_id=1 blend_id=1_random client_ip=::1
+2026/04/02 19:53:35.681686 event=participants_loaded blend_id=1_random count=1 client_ip=::1
+2026/04/02 19:53:35.988296 event=watch_later_loaded user_id=1 count=88 client_ip=::1
+2026/04/02 19:53:36.398852 event=user_blends_loaded user_id=1 count=4
+2026/04/02 19:53:37.422536 event=auth_login_succeeded user_id=1 client_ip=::1
+2026/04/02 19:53:37.525229 event=watch_later_loaded user_id=1 count=88 client_ip=::1
+2026/04/02 19:53:37.832964 event=blend_lookup_succeeded user_id=1 blend_id=1_random client_ip=::1
+2026/04/02 19:53:38.242527 event=participants_loaded blend_id=1_random count=1 client_ip=::1
+2026/04/02 19:53:38.652294 event=watch_later_loaded user_id=1 count=88 client_ip=::1
+2026/04/02 19:53:38.855951 event=user_blends_loaded user_id=1 count=4
+2026/04/02 19:53:39.267004 event=auth_login_failed user_id=1 client_ip=::1 reason=invalid_credentials
+2026/04/02 19:53:39.982321 event=auth_login_succeeded user_id=2 client_ip=::1
+2026/04/02 19:53:40.392223 event=watch_later_loaded user_id=2 count=6 client_ip=::1
+2026/04/02 19:53:40.783434 event=blend_lookup_succeeded user_id=2 blend_id=slipnut44_2_random client_ip=::1
+2026/04/02 19:53:41.105871 event=participants_loaded blend_id=slipnut44_2_random count=1 client_ip=::1
+2026/04/02 19:53:41.382893 event=watch_later_loaded user_id=2 count=6 client_ip=::1
+2026/04/02 19:53:41.620451 event=user_blends_loaded user_id=2 count=4
+2026/04/02 19:53:41.931457 event=auth_register_succeeded user_id=title_test_1775159621813237420 username=title_test_1775159621813237420 client_ip=129.100.255.82
+2026/04/02 19:53:42.134200 event=auth_login_succeeded user_id=title_test_1775159621813237420 client_ip=129.100.255.82
+2026/04/02 19:53:42.340963 event=blend_saved blend_id=blend_titled_1775159622219898553 creator_id=title_test_1775159621813237420 participants=1 chat_room_id=blend_titled_1775159622219898553 client_ip=129.100.255.82
+2026/04/02 19:53:42.544955 event=auth_delete_succeeded user_id=title_test_1775159621813237420
+2026/04/02 19:53:42.828935 event=auth_register_succeeded user_id=list_blends_1775159622731670927 username=list_blends_1775159622731670927 client_ip=129.100.255.82
+2026/04/02 19:53:42.875590 event=auth_login_succeeded user_id=list_blends_1775159622731670927 client_ip=129.100.255.82
+2026/04/02 19:53:42.921897 event=blend_saved blend_id=blend_list_1775159622886404456 creator_id=list_blends_1775159622731670927 participants=1 chat_room_id=blend_list_1775159622886404456 client_ip=129.100.255.82
+2026/04/02 19:53:42.967932 event=user_blends_loaded user_id=list_blends_1775159622731670927 count=1
+2026/04/02 19:53:43.015120 event=auth_delete_succeeded user_id=list_blends_1775159622731670927
+2026/04/02 19:53:43.105634 event=auth_register_succeeded user_id=leave_blend_1775159623070648616 username=leave_blend_1775159623070648616 client_ip=129.100.255.82
+2026/04/02 19:53:43.154227 event=auth_login_succeeded user_id=leave_blend_1775159623070648616 client_ip=129.100.255.82
+2026/04/02 19:53:43.200392 event=blend_saved blend_id=blend_leave_1775159623164615173 creator_id=leave_blend_1775159623070648616 participants=1 chat_room_id=blend_leave_1775159623164615173 client_ip=129.100.255.82
+2026/04/02 19:53:43.248135 event=leave_blend_succeeded blend_id=blend_leave_1775159623164615173 user_id=leave_blend_1775159623070648616
+2026/04/02 19:53:43.292513 event=auth_delete_succeeded user_id=leave_blend_1775159623070648616
+2026/04/02 19:53:43.385597 event=auth_register_succeeded user_id=reupload_1775159623350801968 username=reupload_1775159623350801968 client_ip=129.100.255.82
+2026/04/02 19:53:43.429562 event=auth_login_succeeded user_id=reupload_1775159623350801968 client_ip=129.100.255.82
+2026/04/02 19:53:43.476304 event=watch_later_saved user_id=reupload_1775159623350801968 saved_count=2 client_ip=129.100.255.82
+2026/04/02 19:53:43.523814 event=watch_later_saved user_id=reupload_1775159623350801968 saved_count=3 client_ip=129.100.255.82
+2026/04/02 19:53:43.575694 event=watch_later_loaded user_id=reupload_1775159623350801968 count=3 client_ip=129.100.255.82
+2026/04/02 19:53:43.622859 event=auth_delete_succeeded user_id=reupload_1775159623350801968
+2026/04/02 19:53:43.717506 event=auth_register_succeeded user_id=part_a_1775159623681267172 username=part_a_1775159623681267172 client_ip=129.100.255.82
+2026/04/02 19:53:43.766179 event=auth_login_succeeded user_id=part_a_1775159623681267172 client_ip=129.100.255.82
+2026/04/02 19:53:43.814415 event=auth_register_succeeded user_id=part_b_1775159623681273753 username=part_b_1775159623681273753 client_ip=129.100.255.82
+2026/04/02 19:53:43.862103 event=auth_login_succeeded user_id=part_b_1775159623681273753 client_ip=129.100.255.82
+2026/04/02 19:53:43.908401 event=blend_saved blend_id=blend_parts_1775159623872138369 creator_id=part_a_1775159623681267172 participants=2 chat_room_id=blend_parts_1775159623872138369 client_ip=129.100.255.82
+2026/04/02 19:53:43.962028 event=participants_loaded blend_id=blend_parts_1775159623872138369 count=2 client_ip=129.100.255.82
+2026/04/02 19:53:44.017169 event=auth_delete_succeeded user_id=part_a_1775159623681267172
+2026/04/02 19:53:44.063416 event=auth_delete_succeeded user_id=part_b_1775159623681273753
+2026/04/02 19:53:44.161776 event=auth_register_succeeded user_id=hist_user_1775159624078748141 username=hist tester client_ip=::1
+2026/04/02 19:53:44.253330 event=blend_saved blend_id=hist_blend_1775159624078750771 creator_id=hist_user_1775159624078748141 participants=1 chat_room_id=hist_blend_1775159624078750771 client_ip=::1
+2026/04/02 19:53:44.339160 event=chat_connection_accepted blend_id=hist_blend_1775159624078750771 room_id=hist_blend_1775159624078750771 user_id=hist_user_1775159624078748141 client_ip=::1
+2026/04/02 19:53:44.340068 event=chat_room_activated room_id=hist_blend_1775159624078750771
+2026/04/02 19:53:44.340076 event=chat_client_connected room_id=hist_blend_1775159624078750771 user_id=hist_user_1775159624078748141 room_clients=1
+2026/04/02 19:53:44.361102 event=chat_message_persisted room_id=hist_blend_1775159624078750771 user_id=hist_user_1775159624078748141 sent_at=2026-04-02T19:53:44Z
+2026/04/02 19:53:44.361122 event=chat_message_broadcast room_id=hist_blend_1775159624078750771 recipients=1 sender_id=hist_user_1775159624078748141 content_length=46
+2026/04/02 19:53:44.660231 event=chat_read_closed room_id=hist_blend_1775159624078750771 user_id=hist_user_1775159624078748141 error="websocket: close 1000 (normal): Normal closure"
+2026/04/02 19:53:44.660295 event=chat_client_disconnected room_id=hist_blend_1775159624078750771 user_id=hist_user_1775159624078748141 room_clients=0
+2026/04/02 19:53:44.660299 event=chat_room_deactivated room_id=hist_blend_1775159624078750771
+2026/04/02 19:53:44.761662 event=chat_history_loaded blend_id=hist_blend_1775159624078750771 room_id=hist_blend_1775159624078750771 user_id=hist_user_1775159624078748141 count=1 client_ip=::1
+2026/04/02 19:53:44.971946 event=auth_register_succeeded user_id=live_ws_user_1775159624897316261 username=live tester client_ip=::1
+2026/04/02 19:53:45.061634 event=auth_login_succeeded user_id=live_ws_user_1775159624897316261 client_ip=::1
+2026/04/02 19:53:45.145513 event=auth_register_succeeded user_id=live_delete_user_1775159625070999956 username=live tester client_ip=::1
+2026/04/02 19:53:45.229544 event=auth_login_succeeded user_id=live_delete_user_1775159625070999956 client_ip=::1
+2026/04/02 19:53:45.320910 event=auth_delete_succeeded user_id=live_delete_user_1775159625070999956
+2026/04/02 19:53:45.407879 event=auth_login_failed user_id=live_delete_user_1775159625070999956 client_ip=::1 reason=invalid_credentials
+2026/04/02 19:53:45.492783 event=auth_register_succeeded user_id=live_ws_user_1775159625417739743 username=live tester client_ip=::1
+2026/04/02 19:53:45.581782 event=auth_login_succeeded user_id=live_ws_user_1775159625417739743 client_ip=::1
+2026/04/02 19:53:45.666677 event=blend_saved blend_id=live_ws_blend_1775159625417742596 creator_id=live_ws_user_1775159625417739743 participants=1 chat_room_id=live_ws_blend_1775159625417742596 client_ip=::1
+2026/04/02 19:53:45.754843 event=auth_register_succeeded user_id=live_ws_user_1775159625677023961 username=live tester client_ip=::1
+2026/04/02 19:53:45.839950 event=auth_login_succeeded user_id=live_ws_user_1775159625677023961 client_ip=::1
+2026/04/02 19:53:45.927683 event=blend_saved blend_id=live_ws_blend_1775159625677026187 creator_id=live_ws_user_1775159625677023961 participants=1 chat_room_id=live_ws_blend_1775159625677026187 client_ip=::1
+2026/04/02 19:53:46.009939 event=chatroom_loaded blend_id=live_ws_blend_1775159625677026187 chat_room_id=live_ws_blend_1775159625677026187 members=1 client_ip=::1
+2026/04/02 19:53:46.093729 event=chat_connection_accepted blend_id=live_ws_blend_1775159625677026187 room_id=live_ws_blend_1775159625677026187 user_id=live_ws_user_1775159625677023961 client_ip=::1
+2026/04/02 19:53:46.094621 event=chat_room_activated room_id=live_ws_blend_1775159625677026187
+2026/04/02 19:53:46.094632 event=chat_client_connected room_id=live_ws_blend_1775159625677026187 user_id=live_ws_user_1775159625677023961 room_clients=1
+2026/04/02 19:53:46.114527 event=chat_message_persisted room_id=live_ws_blend_1775159625677026187 user_id=live_ws_user_1775159625677023961 sent_at=2026-04-02T19:53:46Z
+2026/04/02 19:53:46.114546 event=chat_message_broadcast room_id=live_ws_blend_1775159625677026187 recipients=1 sender_id=live_ws_user_1775159625677023961 content_length=33
+2026/04/02 19:53:46.137768 event=chat_read_closed room_id=live_ws_blend_1775159625677026187 user_id=live_ws_user_1775159625677023961 error="websocket: close 1000 (normal): Normal closure"
+2026/04/02 19:53:46.137977 event=chat_client_disconnected room_id=live_ws_blend_1775159625677026187 user_id=live_ws_user_1775159625677023961 room_clients=0
+2026/04/02 19:53:46.137998 event=chat_room_deactivated room_id=live_ws_blend_1775159625677026187
+2026/04/02 19:59:56.334524 event=auth_login_failed user_id=ssmithst client_ip=129.100.255.82 reason=invalid_credentials
+2026/04/02 20:00:03.391648 event=auth_register_succeeded user_id=ssmithst username=ssmithst client_ip=129.100.255.82
+2026/04/02 20:00:09.623716 event=watch_later_saved user_id=ssmithst saved_count=6 client_ip=129.100.255.82
+2026/04/02 20:00:09.676153 event=blend_lookup_succeeded user_id=ssmithst blend_id=43289_random client_ip=129.100.255.82
+2026/04/02 20:00:09.724855 event=participants_loaded blend_id=43289_random count=2 client_ip=129.100.255.82
+2026/04/02 20:00:09.775238 event=watch_later_loaded user_id=43289 count=6 client_ip=129.100.255.82
+2026/04/02 20:00:10.188943 event=watch_later_saved user_id=43289 saved_count=6 client_ip=129.100.255.82
+2026/04/02 20:00:10.239707 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:00:15.320688 event=watch_later_loaded user_id=ssmithst4 count=0 client_ip=129.100.255.82
+2026/04/02 20:00:23.341590 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:00:23.392330 event=watch_later_loaded user_id=ssmithst4 count=0 client_ip=129.100.255.82
+2026/04/02 20:00:23.441001 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:00:23.490181 event=watch_later_loaded user_id=ssmithst4 count=0 client_ip=129.100.255.82
+2026/04/02 20:00:23.540888 event=blend_saved blend_id=ssmithst_random creator_id=ssmithst participants=2 chat_room_id=ssmithst_random client_ip=129.100.255.82
+2026/04/02 20:00:23.592755 event=blend_saved blend_id=ssmithst_random creator_id=ssmithst participants=1 chat_room_id=ssmithst_random client_ip=129.100.255.82
+2026/04/02 20:00:55.163692 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:00.374961 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:00.431001 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:00.484566 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:00.534917 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:00.593636 event=blend_saved blend_id=ssmithst_slipnut44_random creator_id=ssmithst participants=2 chat_room_id=ssmithst_slipnut44_random client_ip=129.100.255.82
+2026/04/02 20:01:00.648417 event=blend_saved blend_id=ssmithst_slipnut44_random creator_id=ssmithst participants=2 chat_room_id=ssmithst_slipnut44_random client_ip=129.100.255.82
+2026/04/02 20:01:05.189673 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:05.243220 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:07.046712 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:07.099320 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:10.065855 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:10.117269 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:12.055802 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:12.108592 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:12.982701 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:13.034981 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:32.716734 event=watch_later_saved user_id=ssmithst saved_count=6 client_ip=129.100.255.82
+2026/04/02 20:01:32.853708 event=blend_lookup_succeeded user_id=ssmithst blend_id=ssmithst_slipnut44_random client_ip=129.100.255.82
+2026/04/02 20:01:32.904945 event=participants_loaded blend_id=ssmithst_slipnut44_random count=2 client_ip=129.100.255.82
+2026/04/02 20:01:32.957230 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:33.009850 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:39.464766 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:39.525915 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:40.322498 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:40.378293 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:41.139615 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:41.189154 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:42.155281 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:42.207247 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:43.222925 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:43.273597 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:44.136493 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:44.189787 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:45.773554 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:45.823784 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:46.593370 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:46.647262 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:47.398405 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:47.450933 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:47.947930 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:47.997196 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:48.669789 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:48.722329 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:49.063213 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:49.114111 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:49.838253 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:49.892036 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:50.856219 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:51.057647 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:51.333856 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:51.386847 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:52.247940 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:52.301776 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:53.008352 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:53.063905 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:56.448860 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:56.500019 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:01:57.984222 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:01:58.035488 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:43.273902 event=auth_login_succeeded user_id=ssmithst client_ip=129.100.255.82
+2026/04/02 20:06:43.325226 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:43.379722 event=blend_lookup_succeeded user_id=ssmithst blend_id=ssmithst_slipnut44_random client_ip=129.100.255.82
+2026/04/02 20:06:43.429564 event=participants_loaded blend_id=ssmithst_slipnut44_random count=2 client_ip=129.100.255.82
+2026/04/02 20:06:43.481188 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:43.533335 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:43.585267 event=user_blends_loaded user_id=ssmithst count=4
+2026/04/02 20:06:47.049729 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:47.101621 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:47.825054 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:47.876930 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:48.565322 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:48.625094 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:49.938694 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:49.994592 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:50.848916 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:50.901748 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:51.417196 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:51.468530 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:51.921514 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:51.974054 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:55.310521 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:55.361708 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:56.138656 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:56.191038 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:56.941774 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:56.997455 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:57.468277 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:57.520516 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:58.293919 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:58.344929 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:58.750961 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:58.801955 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:06:59.910129 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:06:59.967985 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:00.386511 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:00.440161 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:01.255008 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:01.312527 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:01.764689 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:01.815776 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:01.983462 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:02.034724 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:02.223307 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:02.283265 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:05.186782 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:05.236733 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:06.621760 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:06.673137 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:08.926585 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:08.982739 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:14.564804 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:14.617239 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:15.724415 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:15.779166 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:16.379102 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:16.428773 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:17.066327 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:17.120562 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:20.047609 event=watch_later_loaded user_id=slipnut44 count=6 client_ip=129.100.255.82
+2026/04/02 20:07:20.099556 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:07:21.413563 event=user_blends_loaded user_id=ssmithst count=4
+2026/04/02 20:07:24.902715 event=leave_blend_succeeded blend_id=ssmithst55_random user_id=ssmithst
+2026/04/02 20:07:24.960917 event=user_blends_loaded user_id=ssmithst count=3
+2026/04/02 20:07:26.454345 event=leave_blend_succeeded blend_id=43289_random user_id=ssmithst
+2026/04/02 20:07:26.505198 event=user_blends_loaded user_id=ssmithst count=2
+2026/04/02 20:07:28.020674 event=leave_blend_succeeded blend_id=ssmithst_random user_id=ssmithst
+2026/04/02 20:07:28.079502 event=user_blends_loaded user_id=ssmithst count=1
+2026/04/02 20:07:29.643649 event=leave_blend_succeeded blend_id=ssmithst_slipnut44_random user_id=ssmithst
+2026/04/02 20:07:29.696699 event=user_blends_loaded user_id=ssmithst count=0
+2026/04/02 20:09:14.499189 event=auth_login_succeeded user_id=ssmithst client_ip=129.100.255.82
+2026/04/02 20:09:14.548723 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:09:14.596495 event=blend_lookup_empty user_id=ssmithst client_ip=129.100.255.82
+2026/04/02 20:09:21.834807 event=watch_later_loaded user_id=ssmst count=0 client_ip=129.100.255.82
+2026/04/02 20:09:31.104331 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:09:31.155796 event=watch_later_loaded user_id=ssmst count=0 client_ip=129.100.255.82
+2026/04/02 20:09:31.208042 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:09:31.256391 event=watch_later_loaded user_id=ssmst count=0 client_ip=129.100.255.82
+2026/04/02 20:09:31.315498 event=blend_saved blend_id=ssmithst_random creator_id=ssmithst participants=2 chat_room_id=ssmithst_random client_ip=129.100.255.82
+2026/04/02 20:09:31.365851 event=blend_saved blend_id=ssmithst_random creator_id=ssmithst participants=1 chat_room_id=ssmithst_random client_ip=129.100.255.82
+2026/04/02 20:09:34.427278 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:09:36.394549 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:09:37.255354 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:09:37.970609 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:09:38.568108 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:09:39.360723 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:15:57.109845 event=auth_login_succeeded user_id=ssmithst client_ip=129.100.255.82
+2026/04/02 20:15:57.187163 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:15:57.248934 event=blend_lookup_succeeded user_id=ssmithst blend_id=ssmithst_random client_ip=129.100.255.82
+2026/04/02 20:15:57.305070 event=participants_loaded blend_id=ssmithst_random count=1 client_ip=129.100.255.82
+2026/04/02 20:15:57.359148 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:15:57.411317 event=user_blends_loaded user_id=ssmithst count=1
+2026/04/02 20:15:59.398647 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:25:16.701548 event=auth_login_succeeded user_id=2 client_ip=129.100.255.84
+2026/04/02 20:25:16.748437 event=watch_later_loaded user_id=2 count=6 client_ip=129.100.255.84
+2026/04/02 20:25:16.796846 event=blend_lookup_succeeded user_id=2 blend_id=slipnut44_2_random client_ip=129.100.255.84
+2026/04/02 20:25:16.841284 event=participants_loaded blend_id=slipnut44_2_random count=1 client_ip=129.100.255.84
+2026/04/02 20:25:16.887270 event=watch_later_loaded user_id=2 count=6 client_ip=129.100.255.84
+2026/04/02 20:25:16.931281 event=user_blends_loaded user_id=2 count=4
+2026/04/02 20:25:17.065885 event=auth_login_succeeded user_id=1 client_ip=129.100.255.84
+2026/04/02 20:25:17.117625 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.84
+2026/04/02 20:25:17.204015 event=blend_lookup_succeeded user_id=1 blend_id=1_random client_ip=129.100.255.84
+2026/04/02 20:25:17.247909 event=participants_loaded blend_id=1_random count=1 client_ip=129.100.255.84
+2026/04/02 20:25:17.294413 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.84
+2026/04/02 20:25:17.377483 event=user_blends_loaded user_id=1 count=4
+2026/04/02 20:25:17.518239 event=auth_login_succeeded user_id=1 client_ip=129.100.255.84
+2026/04/02 20:25:17.572301 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.84
+2026/04/02 20:25:17.657752 event=blend_lookup_succeeded user_id=1 blend_id=1_random client_ip=129.100.255.84
+2026/04/02 20:25:17.704977 event=participants_loaded blend_id=1_random count=1 client_ip=129.100.255.84
+2026/04/02 20:25:17.751163 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.84
+2026/04/02 20:25:17.833751 event=user_blends_loaded user_id=1 count=4
+2026/04/02 20:25:17.879731 event=auth_login_failed user_id=1 client_ip=129.100.255.84 reason=invalid_credentials
+2026/04/02 20:25:18.014516 event=auth_login_succeeded user_id=2 client_ip=129.100.255.84
+2026/04/02 20:25:18.059248 event=watch_later_loaded user_id=2 count=6 client_ip=129.100.255.84
+2026/04/02 20:25:18.106104 event=blend_lookup_succeeded user_id=2 blend_id=slipnut44_2_random client_ip=129.100.255.84
+2026/04/02 20:25:18.153546 event=participants_loaded blend_id=slipnut44_2_random count=1 client_ip=129.100.255.84
+2026/04/02 20:25:18.202976 event=watch_later_loaded user_id=2 count=6 client_ip=129.100.255.84
+2026/04/02 20:25:18.248910 event=user_blends_loaded user_id=2 count=4
+2026/04/02 20:25:18.343739 event=auth_register_succeeded user_id=title_test_1775161517601445023 username=title_test_1775161517601445023 client_ip=129.100.255.84
+2026/04/02 20:25:18.390046 event=auth_login_succeeded user_id=title_test_1775161517601445023 client_ip=129.100.255.84
+2026/04/02 20:25:18.443549 event=blend_saved blend_id=blend_titled_1775161517694618669 creator_id=title_test_1775161517601445023 participants=1 chat_room_id=blend_titled_1775161517694618669 client_ip=129.100.255.84
+2026/04/02 20:25:18.493460 event=auth_delete_succeeded user_id=title_test_1775161517601445023
+2026/04/02 20:25:18.585286 event=auth_register_succeeded user_id=list_blends_1775161517842449634 username=list_blends_1775161517842449634 client_ip=129.100.255.84
+2026/04/02 20:25:18.630029 event=auth_login_succeeded user_id=list_blends_1775161517842449634 client_ip=129.100.255.84
+2026/04/02 20:25:18.677677 event=blend_saved blend_id=blend_list_1775161517935327709 creator_id=list_blends_1775161517842449634 participants=1 chat_room_id=blend_list_1775161517935327709 client_ip=129.100.255.84
+2026/04/02 20:25:18.723509 event=user_blends_loaded user_id=list_blends_1775161517842449634 count=1
+2026/04/02 20:25:18.770410 event=auth_delete_succeeded user_id=list_blends_1775161517842449634
+2026/04/02 20:25:18.862261 event=auth_register_succeeded user_id=leave_blend_1775161518121076388 username=leave_blend_1775161518121076388 client_ip=129.100.255.84
+2026/04/02 20:25:18.908704 event=auth_login_succeeded user_id=leave_blend_1775161518121076388 client_ip=129.100.255.84
+2026/04/02 20:25:18.955994 event=blend_saved blend_id=blend_leave_1775161518213228095 creator_id=leave_blend_1775161518121076388 participants=1 chat_room_id=blend_leave_1775161518213228095 client_ip=129.100.255.84
+2026/04/02 20:25:19.005795 event=leave_blend_succeeded blend_id=blend_leave_1775161518213228095 user_id=leave_blend_1775161518121076388
+2026/04/02 20:25:19.054611 event=auth_delete_succeeded user_id=leave_blend_1775161518121076388
+2026/04/02 20:25:19.161389 event=auth_register_succeeded user_id=reupload_1775161518410335675 username=reupload_1775161518410335675 client_ip=129.100.255.84
+2026/04/02 20:25:19.208468 event=auth_login_succeeded user_id=reupload_1775161518410335675 client_ip=129.100.255.84
+2026/04/02 20:25:19.262359 event=watch_later_saved user_id=reupload_1775161518410335675 saved_count=2 client_ip=129.100.255.84
+2026/04/02 20:25:19.316485 event=watch_later_saved user_id=reupload_1775161518410335675 saved_count=3 client_ip=129.100.255.84
+2026/04/02 20:25:19.361417 event=watch_later_loaded user_id=reupload_1775161518410335675 count=3 client_ip=129.100.255.84
+2026/04/02 20:25:19.407050 event=auth_delete_succeeded user_id=reupload_1775161518410335675
+2026/04/02 20:25:19.497788 event=auth_register_succeeded user_id=part_a_1775161518755673280 username=part_a_1775161518755673280 client_ip=129.100.255.84
+2026/04/02 20:25:19.542399 event=auth_login_succeeded user_id=part_a_1775161518755673280 client_ip=129.100.255.84
+2026/04/02 20:25:19.587744 event=auth_register_succeeded user_id=part_b_1775161518755692731 username=part_b_1775161518755692731 client_ip=129.100.255.84
+2026/04/02 20:25:19.635264 event=auth_login_succeeded user_id=part_b_1775161518755692731 client_ip=129.100.255.84
+2026/04/02 20:25:19.682027 event=blend_saved blend_id=blend_parts_1775161518939875170 creator_id=part_a_1775161518755673280 participants=2 chat_room_id=blend_parts_1775161518939875170 client_ip=129.100.255.84
+2026/04/02 20:25:19.725190 event=participants_loaded blend_id=blend_parts_1775161518939875170 count=2 client_ip=129.100.255.84
+2026/04/02 20:25:19.770883 event=auth_delete_succeeded user_id=part_a_1775161518755673280
+2026/04/02 20:25:19.833944 event=auth_delete_succeeded user_id=part_b_1775161518755692731
+2026/04/02 20:28:02.822147 event=auth_login_succeeded user_id=jasmine1 client_ip=129.100.255.84
+2026/04/02 20:28:02.872486 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:02.920359 event=blend_lookup_succeeded user_id=jasmine1 blend_id=jasmine1_jasmine2_random client_ip=129.100.255.84
+2026/04/02 20:28:02.966016 event=participants_loaded blend_id=jasmine1_jasmine2_random count=2 client_ip=129.100.255.84
+2026/04/02 20:28:03.011462 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:03.062053 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:03.112833 event=user_blends_loaded user_id=jasmine1 count=5
+2026/04/02 20:28:04.838057 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:04.884337 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:05.959682 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:06.005331 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:07.012058 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:07.065743 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:08.247225 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:08.517748 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:10.588931 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:10.636635 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:13.301187 event=user_blends_loaded user_id=jasmine1 count=5
+2026/04/02 20:28:18.978571 event=participants_loaded blend_id=jasmine1_jasmine2_random count=2 client_ip=129.100.255.84
+2026/04/02 20:28:19.026328 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:19.080561 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:21.089915 event=user_blends_loaded user_id=jasmine1 count=5
+2026/04/02 20:28:24.580272 event=chat_history_loaded blend_id=jasmine1_jasmine2_random room_id=jasmine1_jasmine2_random user_id=jasmine1 count=2 client_ip=129.100.255.84
+2026/04/02 20:28:24.627806 event=chat_connection_accepted blend_id=jasmine1_jasmine2_random room_id=jasmine1_jasmine2_random user_id=jasmine1 client_ip=129.100.255.84
+2026/04/02 20:28:24.628160 event=chat_room_activated room_id=jasmine1_jasmine2_random
+2026/04/02 20:28:24.628166 event=chat_client_connected room_id=jasmine1_jasmine2_random user_id=jasmine1 room_clients=1
+2026/04/02 20:28:29.893065 event=user_blends_loaded user_id=jasmine1 count=5
+2026/04/02 20:28:31.210686 event=participants_loaded blend_id=jas_jasmine1_random count=2 client_ip=129.100.255.84
+2026/04/02 20:28:31.256118 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:28:31.301067 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:28:33.717905 event=chat_history_loaded blend_id=jas_jasmine1_random room_id=jas_jasmine1_random user_id=jasmine1 count=1 client_ip=129.100.255.84
+2026/04/02 20:28:33.739759 event=chat_read_closed room_id=jasmine1_jasmine2_random user_id=jasmine1 error="websocket: close 1000 (normal): Normal closure"
+2026/04/02 20:28:33.739813 event=chat_client_disconnected room_id=jasmine1_jasmine2_random user_id=jasmine1 room_clients=0
+2026/04/02 20:28:33.739818 event=chat_room_deactivated room_id=jasmine1_jasmine2_random
+2026/04/02 20:28:33.787438 event=chat_connection_accepted blend_id=jas_jasmine1_random room_id=jas_jasmine1_random user_id=jasmine1 client_ip=129.100.255.84
+2026/04/02 20:28:33.787497 event=chat_room_activated room_id=jas_jasmine1_random
+2026/04/02 20:28:33.787501 event=chat_client_connected room_id=jas_jasmine1_random user_id=jasmine1 room_clients=1
+2026/04/02 20:28:38.723165 event=user_blends_loaded user_id=jasmine1 count=5
+2026/04/02 20:29:38.101783 event=auth_login_failed user_id=ssmithst client_ip=129.100.255.82 reason=invalid_credentials
+2026/04/02 20:29:39.713652 event=auth_login_succeeded user_id=ssmithst client_ip=129.100.255.82
+2026/04/02 20:29:40.788810 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:29:40.998734 event=blend_lookup_succeeded user_id=ssmithst blend_id=ssmithst_random client_ip=129.100.255.82
+2026/04/02 20:29:41.052515 event=participants_loaded blend_id=ssmithst_random count=1 client_ip=129.100.255.82
+2026/04/02 20:29:41.110049 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:29:41.162889 event=user_blends_loaded user_id=ssmithst count=1
+2026/04/02 20:29:52.425713 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:29:53.198302 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:29:53.958788 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:29:54.518814 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:00.429702 event=user_blends_loaded user_id=ssmithst count=1
+2026/04/02 20:30:02.315617 event=participants_loaded blend_id=ssmithst_random count=1 client_ip=129.100.255.82
+2026/04/02 20:30:02.367963 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:12.084110 event=watch_later_loaded user_id=ssmst count=0 client_ip=129.100.255.82
+2026/04/02 20:30:19.346467 event=watch_later_loaded user_id=slipnut46 count=0 client_ip=129.100.255.82
+2026/04/02 20:30:20.751335 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:20.806803 event=watch_later_loaded user_id=ssmst count=0 client_ip=129.100.255.82
+2026/04/02 20:30:20.865357 event=watch_later_loaded user_id=slipnut46 count=0 client_ip=129.100.255.82
+2026/04/02 20:30:20.917282 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:20.971756 event=watch_later_loaded user_id=ssmst count=0 client_ip=129.100.255.82
+2026/04/02 20:30:21.022941 event=watch_later_loaded user_id=slipnut46 count=0 client_ip=129.100.255.82
+2026/04/02 20:30:21.078486 event=blend_saved blend_id=ssmithst_random creator_id=ssmithst participants=3 chat_room_id=ssmithst_random client_ip=129.100.255.82
+2026/04/02 20:30:21.153667 event=blend_saved blend_id=ssmithst_random creator_id=ssmithst participants=1 chat_room_id=ssmithst_random client_ip=129.100.255.82
+2026/04/02 20:30:26.284102 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:26.868654 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:27.363461 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:27.728759 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:27.945230 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:28.158940 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:28.359541 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:28.539420 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:28.720491 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:28.893042 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:29.079280 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:29.239274 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:29.426144 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:29.620603 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:30.660979 event=watch_later_loaded user_id=ssmithst count=6 client_ip=129.100.255.82
+2026/04/02 20:30:31.736832 event=user_blends_loaded user_id=jasmine count=0
+2026/04/02 20:30:39.119247 event=blend_lookup_empty user_id=jasmine client_ip=129.100.255.84
+2026/04/02 20:30:50.350641 event=user_blends_loaded user_id=Jasmine_Kumar count=0
+2026/04/02 20:30:50.405034 event=blend_lookup_empty user_id=Jasmine_Kumar client_ip=129.100.255.84
+2026/04/02 20:31:02.788510 event=participants_loaded blend_id=test_blend_check count=0 client_ip=129.100.255.84
+2026/04/02 20:35:41.175276 event=auth_login_succeeded user_id=2 client_ip=129.100.255.84
+2026/04/02 20:35:41.222326 event=watch_later_loaded user_id=2 count=6 client_ip=129.100.255.84
+2026/04/02 20:35:41.273825 event=blend_lookup_succeeded user_id=2 blend_id=slipnut44_2_random client_ip=129.100.255.84
+2026/04/02 20:35:41.318424 event=participants_loaded blend_id=slipnut44_2_random count=1 client_ip=129.100.255.84
+2026/04/02 20:35:41.362793 event=watch_later_loaded user_id=2 count=6 client_ip=129.100.255.84
+2026/04/02 20:35:41.408908 event=user_blends_loaded user_id=2 count=4
+2026/04/02 20:35:41.548402 event=auth_login_succeeded user_id=1 client_ip=129.100.255.84
+2026/04/02 20:35:41.599675 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.84
+2026/04/02 20:35:41.704146 event=blend_lookup_succeeded user_id=1 blend_id=1_random client_ip=129.100.255.84
+2026/04/02 20:35:41.751586 event=participants_loaded blend_id=1_random count=1 client_ip=129.100.255.84
+2026/04/02 20:35:41.799431 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.84
+2026/04/02 20:35:41.897929 event=user_blends_loaded user_id=1 count=4
+2026/04/02 20:35:42.040951 event=auth_login_succeeded user_id=1 client_ip=129.100.255.84
+2026/04/02 20:35:42.088306 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.84
+2026/04/02 20:35:42.181004 event=blend_lookup_succeeded user_id=1 blend_id=1_random client_ip=129.100.255.84
+2026/04/02 20:35:42.227561 event=participants_loaded blend_id=1_random count=1 client_ip=129.100.255.84
+2026/04/02 20:35:42.273461 event=watch_later_loaded user_id=1 count=88 client_ip=129.100.255.84
+2026/04/02 20:35:42.607998 event=user_blends_loaded user_id=1 count=4
+2026/04/02 20:35:42.655391 event=auth_login_failed user_id=1 client_ip=129.100.255.84 reason=invalid_credentials
+2026/04/02 20:35:42.807065 event=auth_login_succeeded user_id=2 client_ip=129.100.255.84
+2026/04/02 20:35:42.851802 event=watch_later_loaded user_id=2 count=6 client_ip=129.100.255.84
+2026/04/02 20:35:42.898405 event=blend_lookup_succeeded user_id=2 blend_id=slipnut44_2_random client_ip=129.100.255.84
+2026/04/02 20:35:42.943087 event=participants_loaded blend_id=slipnut44_2_random count=1 client_ip=129.100.255.84
+2026/04/02 20:35:42.989057 event=watch_later_loaded user_id=2 count=6 client_ip=129.100.255.84
+2026/04/02 20:35:43.037719 event=user_blends_loaded user_id=2 count=4
+2026/04/02 20:35:43.354891 event=auth_register_succeeded user_id=title_test_1775162142386366651 username=title_test_1775162142386366651 client_ip=129.100.255.84
+2026/04/02 20:35:43.400450 event=auth_login_succeeded user_id=title_test_1775162142386366651 client_ip=129.100.255.84
+2026/04/02 20:35:43.449400 event=blend_saved blend_id=blend_titled_1775162142703519440 creator_id=title_test_1775162142386366651 participants=1 chat_room_id=blend_titled_1775162142703519440 client_ip=129.100.255.84
+2026/04/02 20:35:43.495225 event=auth_delete_succeeded user_id=title_test_1775162142386366651
+2026/04/02 20:35:43.592147 event=auth_register_succeeded user_id=list_blends_1775162142846528407 username=list_blends_1775162142846528407 client_ip=129.100.255.84
+2026/04/02 20:35:43.640986 event=auth_login_succeeded user_id=list_blends_1775162142846528407 client_ip=129.100.255.84
+2026/04/02 20:35:43.697855 event=blend_saved blend_id=blend_list_1775162142949386916 creator_id=list_blends_1775162142846528407 participants=1 chat_room_id=blend_list_1775162142949386916 client_ip=129.100.255.84
+2026/04/02 20:35:43.755775 event=user_blends_loaded user_id=list_blends_1775162142846528407 count=1
+2026/04/02 20:35:43.806608 event=auth_delete_succeeded user_id=list_blends_1775162142846528407
+2026/04/02 20:35:43.905521 event=auth_register_succeeded user_id=leave_blend_1775162143153446084 username=leave_blend_1775162143153446084 client_ip=129.100.255.84
+2026/04/02 20:35:43.958229 event=auth_login_succeeded user_id=leave_blend_1775162143153446084 client_ip=129.100.255.84
+2026/04/02 20:35:44.008332 event=blend_saved blend_id=blend_leave_1775162143261819997 creator_id=leave_blend_1775162143153446084 participants=1 chat_room_id=blend_leave_1775162143261819997 client_ip=129.100.255.84
+2026/04/02 20:35:44.057631 event=leave_blend_succeeded blend_id=blend_leave_1775162143261819997 user_id=leave_blend_1775162143153446084
+2026/04/02 20:35:44.103919 event=auth_delete_succeeded user_id=leave_blend_1775162143153446084
+2026/04/02 20:35:44.200586 event=auth_register_succeeded user_id=reupload_1775162143452433696 username=reupload_1775162143452433696 client_ip=129.100.255.84
+2026/04/02 20:35:44.248912 event=auth_login_succeeded user_id=reupload_1775162143452433696 client_ip=129.100.255.84
+2026/04/02 20:35:44.299638 event=watch_later_saved user_id=reupload_1775162143452433696 saved_count=2 client_ip=129.100.255.84
+2026/04/02 20:35:44.357939 event=watch_later_saved user_id=reupload_1775162143452433696 saved_count=3 client_ip=129.100.255.84
+2026/04/02 20:35:44.411240 event=watch_later_loaded user_id=reupload_1775162143452433696 count=3 client_ip=129.100.255.84
+2026/04/02 20:35:44.460381 event=auth_delete_succeeded user_id=reupload_1775162143452433696
+2026/04/02 20:35:44.557999 event=auth_register_succeeded user_id=part_a_1775162143812165067 username=part_a_1775162143812165067 client_ip=129.100.255.84
+2026/04/02 20:35:45.683936 event=auth_login_succeeded user_id=part_a_1775162143812165067 client_ip=129.100.255.84
+2026/04/02 20:35:45.735924 event=auth_register_succeeded user_id=part_b_1775162143812175258 username=part_b_1775162143812175258 client_ip=129.100.255.84
+2026/04/02 20:35:45.784109 event=auth_login_succeeded user_id=part_b_1775162143812175258 client_ip=129.100.255.84
+2026/04/02 20:35:45.846733 event=blend_saved blend_id=blend_parts_1775162145087549310 creator_id=part_a_1775162143812165067 participants=2 chat_room_id=blend_parts_1775162145087549310 client_ip=129.100.255.84
+2026/04/02 20:35:45.899660 event=participants_loaded blend_id=blend_parts_1775162145087549310 count=2 client_ip=129.100.255.84
+2026/04/02 20:35:45.950052 event=auth_delete_succeeded user_id=part_a_1775162143812165067
+2026/04/02 20:35:46.013064 event=auth_delete_succeeded user_id=part_b_1775162143812175258
+2026/04/02 20:36:03.546127 event=chat_read_closed room_id=jas_jasmine1_random user_id=jasmine1 error="websocket: close 1000 (normal): Normal closure"
+2026/04/02 20:36:03.557305 event=chat_client_disconnected room_id=jas_jasmine1_random user_id=jasmine1 room_clients=0
+2026/04/02 20:36:03.557339 event=chat_room_deactivated room_id=jas_jasmine1_random
+2026/04/02 20:36:18.789900 event=auth_login_succeeded user_id=jasmine1 client_ip=129.100.255.84
+2026/04/02 20:36:18.838814 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:18.888702 event=blend_lookup_succeeded user_id=jasmine1 blend_id=jasmine1_jasmine2_random client_ip=129.100.255.84
+2026/04/02 20:36:18.934052 event=participants_loaded blend_id=jasmine1_jasmine2_random count=2 client_ip=129.100.255.84
+2026/04/02 20:36:18.980100 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:19.029087 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:19.081112 event=user_blends_loaded user_id=jasmine1 count=5
+2026/04/02 20:36:20.981543 event=user_blends_loaded user_id=jasmine1 count=5
+2026/04/02 20:36:23.507032 event=participants_loaded blend_id=jas_jasmine1_random count=2 client_ip=129.100.255.84
+2026/04/02 20:36:23.553780 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:23.602838 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:25.323178 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:25.373955 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:27.006906 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:27.055850 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:28.641517 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:28.694381 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:29.992153 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:30.045625 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:31.011915 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:31.263907 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:32.618358 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:32.667053 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:33.584560 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:33.630966 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:34.773469 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:34.820868 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:35.723426 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:35.775567 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:44.006019 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:44.060214 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:47.744857 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:47.792722 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:49.220040 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:49.276264 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:50.162589 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:50.209594 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:51.629466 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:51.679349 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:36:52.674713 event=watch_later_loaded user_id=jas count=6 client_ip=129.100.255.84
+2026/04/02 20:36:52.723279 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:38:13.061459 event=auth_delete_succeeded user_id=jasmine1
+2026/04/02 20:38:34.439932 event=auth_register_succeeded user_id=jasmine1 username=jasmine1 client_ip=129.100.255.84
+2026/04/02 20:38:45.567843 event=watch_later_saved user_id=jasmine1 saved_count=6 client_ip=129.100.255.84
+2026/04/02 20:38:45.615995 event=blend_lookup_empty user_id=jasmine1 client_ip=129.100.255.84
+2026/04/02 20:39:09.920699 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:14.607602 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:14.661234 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:14.937953 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:14.987661 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:15.059983 event=blend_saved blend_id=jasmine1_jasmine2_random creator_id=jasmine1 participants=2 chat_room_id=jasmine1_jasmine2_random client_ip=129.100.255.84
+2026/04/02 20:39:15.140684 event=blend_saved blend_id=jasmine1_jasmine2_random creator_id=jasmine1 participants=2 chat_room_id=jasmine1_jasmine2_random client_ip=129.100.255.84
+2026/04/02 20:39:17.021598 event=user_blends_loaded user_id=jasmine1 count=1
+2026/04/02 20:39:21.040605 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:21.094776 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:22.294340 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:23.585097 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:23.871288 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:23.929930 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:24.185880 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:25.303328 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:26.892171 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:26.945774 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:28.326945 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:28.375645 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:29.713428 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:29.872628 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:30.774911 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:30.838158 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:32.259210 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:32.538408 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:33.366595 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:33.445018 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:34.631321 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:34.686114 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:35.751311 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:39:35.811666 event=watch_later_loaded user_id=jasmine2 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:01.606350 event=auth_register_succeeded user_id=sham username=sham client_ip=129.100.255.84
+2026/04/02 20:40:15.497715 event=watch_later_saved user_id=sham saved_count=88 client_ip=129.100.255.84
+2026/04/02 20:40:15.552846 event=blend_lookup_empty user_id=sham client_ip=129.100.255.84
+2026/04/02 20:40:31.179653 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:35.128613 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:35.231066 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:35.285284 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:35.365006 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:35.417846 event=blend_saved blend_id=sham_jasmine1_random creator_id=sham participants=2 chat_room_id=sham_jasmine1_random client_ip=129.100.255.84
+2026/04/02 20:40:35.466739 event=blend_saved blend_id=sham_jasmine1_random creator_id=sham participants=2 chat_room_id=sham_jasmine1_random client_ip=129.100.255.84
+2026/04/02 20:40:38.530560 event=user_blends_loaded user_id=sham count=1
+2026/04/02 20:40:43.731243 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:43.849934 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:45.002831 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:45.287725 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:46.399382 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:46.523711 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:47.680710 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:48.085428 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:49.373560 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:49.493853 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:50.497517 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:51.065705 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:52.003430 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:52.111447 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:53.016646 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:53.122389 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:54.080466 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:54.505924 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:55.335432 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:55.445154 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:56.417188 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:56.561883 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:58.003450 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:58.336177 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:40:59.028483 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:40:59.212077 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:00.675802 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:00.843673 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:04.495332 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:04.711861 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:07.891209 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:08.011428 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:08.940790 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:09.205252 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:09.993228 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:10.158782 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:11.151731 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:11.279880 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:12.287365 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:12.410095 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:13.523498 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:13.940982 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:14.919700 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:15.090123 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:30.827526 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:30.940836 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:32.085724 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:32.412382 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:41:33.752706 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:41:34.028012 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:45:04.005284 event=auth_login_succeeded user_id=jasmine1 client_ip=129.100.255.84
+2026/04/02 20:45:04.062398 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:45:04.118416 event=blend_lookup_succeeded user_id=jasmine1 blend_id=sham_jasmine1_random client_ip=129.100.255.84
+2026/04/02 20:45:04.167545 event=participants_loaded blend_id=sham_jasmine1_random count=2 client_ip=129.100.255.84
+2026/04/02 20:45:04.213849 event=watch_later_loaded user_id=jasmine1 count=6 client_ip=129.100.255.84
+2026/04/02 20:45:04.267938 event=watch_later_loaded user_id=sham count=88 client_ip=129.100.255.84
+2026/04/02 20:45:04.369407 event=user_blends_loaded user_id=jasmine1 count=2
+2026/04/02 20:45:12.271970 event=user_blends_loaded user_id=jasmine1 count=2
+2026/04/02 20:47:43.021619 event=server_signal_received signal=terminated received_at=2026-04-02T20:47:43Z
+2026/04/02 20:47:43.053395 event=server_shutdown signal=terminated graceful_shutdown=true stopped_at=2026-04-02T20:47:43Z
+2026/04/02 20:53:55.078961 event=server_start db_path=/opt/ytblnd-backend/ytblnd-server_data/ytblnd.db request_log_path=/opt/ytblnd-backend/ytblnd-server_data/requests.log.txt event_log_path=/opt/ytblnd-backend/ytblnd-server_data/events.log.txt started_at=2026-04-02T20:53:55Z
+2026/04/02 20:56:17.160864 event=auth_register_succeeded user_id=134234 username=134234 client_ip=129.100.255.82

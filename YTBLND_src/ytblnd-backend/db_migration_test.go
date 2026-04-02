@@ -9,10 +9,10 @@ import (
 )
 
 func TestMigrateLegacyDevDB_CopiesWhenTargetMissing(t *testing.T) {
-	// If ytblnd.db does not exist, migration should clone dev.db directly.
+	// If the target DB does not exist, migration should clone legacy dev.db directly.
 	root := t.TempDir()
 	legacyPath := filepath.Join(root, "dev.db")
-	targetPath := filepath.Join(root, "ytblnd.db")
+	targetPath := filepath.Join(root, "dev.db.migrated")
 
 	legacyDB := openSQLiteForTest(t, legacyPath)
 	seedSchema(t, legacyDB)
@@ -38,7 +38,7 @@ func TestMigrateLegacyDevDB_MergesMissingRows(t *testing.T) {
 	// If both DBs exist, migration should add rows missing from target only.
 	root := t.TempDir()
 	legacyPath := filepath.Join(root, "dev.db")
-	targetPath := filepath.Join(root, "ytblnd.db")
+	targetPath := filepath.Join(root, "dev.db.migrated")
 
 	legacyDB := openSQLiteForTest(t, legacyPath)
 	seedSchema(t, legacyDB)

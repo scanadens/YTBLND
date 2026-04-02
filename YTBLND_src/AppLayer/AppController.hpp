@@ -202,7 +202,11 @@ class AppController {
         void handleOpenChat(const EventPayload& payload);
 
         /**
-         * Checks whether a user with the given ID exists in the database.
+         * Checks whether a user with the given ID exists in the backend.
+         *
+         * This uses the auth user-profile endpoint so account existence checks
+         * are independent from feature data (for example users with no uploaded
+         * watch-later list yet).
          * \param userID The user ID to look up.
          * \return \c true if the user was found, \c false otherwise.
          */

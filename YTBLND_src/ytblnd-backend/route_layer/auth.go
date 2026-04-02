@@ -56,6 +56,7 @@ func RegisterAuthRoutes(api *gin.RouterGroup, dataManager database_layer.DataMan
 	auth := api.Group("/auth")
 	auth.POST("/register", h.Register)
 	auth.POST("/login", h.Login)
+	auth.GET("/users/:userID", h.GetUser)
 	auth.DELETE("/users/:userID", h.DeleteAccount)
 }
 
@@ -114,6 +115,36 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 	h.logger.LogEvent("auth_login_succeeded", "user_id=%s client_ip=%s", req.UserID, c.ClientIP())
+
+	c.JSON(http.StatusOK, AuthResponse{
+		UserID:   user.GetUserID(),
+		Username: user.GetUsername(),
+		Email:    user.GetEmail(),
+	})
+}
+
+// GetUser returns user profile fields for a specific user ID.
+func (h *AuthHandler) GetUser(c *gin.Context) {
+	userID := c.Param("userID")
+	if userID == "" {
+		h.logger.LogEvent("auth_user_lookup_rejected", "reason=missing_user_id client_ip=%s", c.ClientIP())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "userID path parameter is required"})
+		return
+	}
+
+	// Direct profile lookup allows clients to fetch user identity without side-effect routes.
+	user, err := h.dataManager.FindUserByID(userID)
+	if err != nil {
+		h.logger.LogEvent("auth_user_lookup_failed", "user_id=%s client_ip=%s error=%q", userID, c.ClientIP(), err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load user profile"})
+		return
+	}
+	if user == nil {
+		h.logger.LogEvent("auth_user_lookup_missing", "user_id=%s client_ip=%s", userID, c.ClientIP())
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+	h.logger.LogEvent("auth_user_lookup_succeeded", "user_id=%s client_ip=%s", userID, c.ClientIP())
 
 	c.JSON(http.StatusOK, AuthResponse{
 		UserID:   user.GetUserID(),

@@ -108,6 +108,22 @@ void DataInstructionsPanel::OnBrowse(wxCommandEvent& /*evt*/)
     m_controller.getEventRouter().dispatch("uploadData",
         {{"filePath", path}, {"userID", user->getUserID()}});
 
+    std::string uploadError = AppState::getInstance().takePendingUploadError();
+    if (!uploadError.empty()) {
+        wxMessageBox(uploadError, "Upload Failed", wxOK | wxICON_ERROR, this);
+        return;
+    }
+
+    if (user->getYouTubeData().getWatchLaterVideos().empty()) {
+        wxMessageBox(
+            "Upload did not produce any usable Watch Later videos. Please try another file.",
+            "Upload Incomplete",
+            wxOK | wxICON_WARNING,
+            this
+        );
+        return;
+    }
+
     m_nav(Page::BLEND_CREATION);
 }
 

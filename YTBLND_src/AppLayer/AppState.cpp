@@ -113,6 +113,16 @@ std::string AppState::takePendingBlendMessage() {
     return msg;
 }
 
+void AppState::setPendingUploadError(const std::string& msg) {
+    pendingUploadError = msg;
+}
+
+std::string AppState::takePendingUploadError() {
+    std::string msg = pendingUploadError;
+    pendingUploadError.clear();
+    return msg;
+}
+
 // ── Session ───────────────────────────────────────────────────────────────────
 
 void AppState::clearSession() {
@@ -123,4 +133,5 @@ void AppState::clearSession() {
     sessionUsers.clear();
     usersWithoutData.clear();
     pendingBlendMessage.clear();
+    pendingUploadError.clear();
 }

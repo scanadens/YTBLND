@@ -94,6 +94,10 @@ string HttpClient::build_chatroom_detail_endpoint(string blendID) {
 	return "/api/v1/blends/" + sanitizePathSegment(blendID) + "/chatroom";
 }
 
+string HttpClient::build_auth_user_lookup_endpoint(string userID) {
+	return AUTH_USER_PREFIX + sanitizePathSegment(userID);
+}
+
 string HttpClient::build_delete_user_endpoint(string userID) {
 	return DELETE_USER_PREFIX + sanitizePathSegment(userID);
 }

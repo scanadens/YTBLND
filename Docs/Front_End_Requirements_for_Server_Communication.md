@@ -77,6 +77,27 @@ Behavior summary: validates plaintext password, then loads and returns the store
 
 ---
 
+### `GET /api/v1/auth/users/:userID`
+Fetches one user profile directly by user ID.
+
+Behavior summary: performs a read-only lookup in `users` and returns identity fields needed by the client without requiring indirect lookup flows through blend/chat endpoints.
+
+**Success (200)**
+```json
+{
+  "user_id": "u1",
+  "username": "alice",
+  "email": "alice@example.com"
+}
+```
+
+**Errors**
+- `400` missing `userID` path param
+- `404` user not found
+- `500` server error while loading profile
+
+---
+
 ### `DELETE /api/v1/auth/users/:userID`
 Deletes a user account after password re-authentication.
 

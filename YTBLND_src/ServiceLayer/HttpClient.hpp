@@ -30,6 +30,8 @@ class HttpClient {
 		const std::string REG_USER = "/api/v1/auth/register";
 		// user login endpoint
 		const std::string LOGIN = "/api/v1/auth/login";
+		// user profile lookup endpoint prefix
+		const std::string AUTH_USER_PREFIX = "/api/v1/auth/users/";
 		// user delete endpoint prefix
 		const std::string DELETE_USER_PREFIX = "/api/v1/auth/users/";
 		// endpoint pertaining to creating a blend
@@ -160,6 +162,20 @@ class HttpClient {
 		 * \return Endpoint path string for chatroom details.
 		 */
 		std::string build_chatroom_detail_endpoint(std::string blendID);
+
+		/**
+		 * \brief Builds the auth user lookup endpoint for a specific user.
+		 *
+		 * Result format: \c /api/v1/auth/users/{userID}
+		 *
+		 * This endpoint is the canonical account-existence lookup in the
+		 * frontend/backend contract and should be used instead of feature routes
+		 * like watch-later when validating participant IDs.
+		 *
+		 * \param userID User identifier used in the endpoint path.
+		 * \return Endpoint path string for user profile lookup.
+		 */
+		std::string build_auth_user_lookup_endpoint(std::string userID);
 
 		/**
 		 * \brief Builds the account-delete endpoint for a specific user.

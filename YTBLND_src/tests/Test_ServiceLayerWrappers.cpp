@@ -259,6 +259,10 @@ TEST(HttpClientWrapperTest, EndpointBuildersGenerateExpectedPaths) {
         "/api/v1/blends/blend-42/chatroom"
     );
     EXPECT_EQ(
+        client.build_auth_user_lookup_endpoint("user-123"),
+        "/api/v1/auth/users/user-123"
+    );
+    EXPECT_EQ(
         client.build_delete_user_endpoint("user-123"),
         "/api/v1/auth/users/user-123"
     );

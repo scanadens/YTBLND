@@ -475,6 +475,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
     auto userIt = payload.find("userID");
     if (fileIt == payload.end() || userIt == payload.end()) {
         std::cerr << "[AppController] handleUploadData: missing 'filePath' or 'userID' in payload\n";
+        appState.setPendingUploadError("Upload failed: missing file path or user ID.");
         return;
     }
 
@@ -487,6 +488,18 @@ void AppController::handleUploadData(const EventPayload& payload) {
     } catch (const std::exception& ex) {
         std::cerr << "[AppController] handleUploadData: import failed for '"
                   << filePath << "' - " << ex.what() << "\n";
+        appState.setPendingUploadError(
+            "Upload failed: could not parse this file. Please select your Watch later videos.csv from Google Takeout."
+        );
+        return;
+    }
+
+    if (watchLater.empty()) {
+        std::cerr << "[AppController] handleUploadData: no videos found in '"
+                  << filePath << "'\n";
+        appState.setPendingUploadError(
+            "No videos were found in the selected CSV. Please verify you selected Takeout/YouTube and YouTube Music/playlists/Watch later videos.csv."
+        );
         return;
     }
 
@@ -523,6 +536,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
         if (!http.wasLastRequestSuccessful(http.P)) { // if response was not successfull
             std::cerr << "[AppController] handleUploadData: failed to persist watch-later list, HTTP "
                     << http.getLastStatusCode() << " response=" << saveWatchLaterResponse << "\n";
+            appState.setPendingUploadError("Upload failed: server could not save your data. Please try again.");
             return;
         }
 
@@ -530,6 +544,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
     } catch (exception& e) {
         std::cerr << "[AppController] handleUploadData: upload failed." << endl;
         cerr << "[AppController] handleUploadData - server response: " << saveWatchLaterResponse << endl;
+        appState.setPendingUploadError("Upload failed: unable to reach the server. Please try again.");
         return;
     }
 
@@ -544,6 +559,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
 
     std::cout << "[AppController] Saved " << watchLater.size()
               << " watch-later videos for user '" << userID << "'\n";
+    appState.setPendingUploadError("");
 
     // If this user is already a blend participant, re-run the algorithm
     // so their data is included and the blend stays up to date.
@@ -665,7 +681,9 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
 
 bool AppController::lookupUser(const std::string& userID) {
     try {
-        http.get(http.build_watch_later_endpoint(userID));
+        // User existence is validated via auth profile lookup. This avoids
+        // false negatives for valid users who have not uploaded watch-later yet.
+        http.get(http.build_auth_user_lookup_endpoint(userID));
         return http.wasLastRequestSuccessful(http.G);
     } catch (const std::exception&) {
         return false;
