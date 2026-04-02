@@ -268,7 +268,7 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
             // Blend was still created from whoever had data — warn and continue
             msg += "\nTheir videos were not included. The blend was created with the remaining users.";
             wxMessageBox(msg, "Some Users Missing Data", wxOK | wxICON_WARNING, this);
-            m_nav(Page::HOME);
+            m_nav(Page::BLEND_CHAT);
         } else {
             // No one had data — cannot create a blend at all
             msg += "\nNo blend could be created. Please ensure at least one user has uploaded their data.";
@@ -277,7 +277,7 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
         return;
     }
 
-    m_nav(Page::HOME);
+    m_nav(Page::BLEND_CHAT);
 }
 
 void BlendCreationPanel::OnRemoveUser(const std::string& username)
