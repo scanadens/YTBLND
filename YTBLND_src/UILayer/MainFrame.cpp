@@ -11,6 +11,7 @@
 #include "DataInstructionsPanel.hpp"
 #include "BlendFeedPanel.hpp"
 #include "UserPanel.hpp"
+#include "SettingsPanel.hpp"
 #include "BlendCreationPanel.hpp"
 #include "BlendChatPanel.hpp"
 #include "../AppLayer/AppController.hpp"
@@ -156,10 +157,10 @@ MainFrame::MainFrame(AppController& controller)
 
     auto* settingsPageBg = new wxPanel(book);
     settingsPageBg->SetBackgroundColour(UIColors::Background);
+    settingsPanel = new SettingsPanel(settingsPageBg, controller, nav);
     {
-        auto* settingsPage = BuildSettingsPage(settingsPageBg);
         auto* s = new wxBoxSizer(wxVERTICAL);
-        s->Add(settingsPage, 1, wxEXPAND);
+        s->Add(settingsPanel, 1, wxEXPAND);
         settingsPageBg->SetSizer(s);
     }
     book->AddPage(settingsPageBg, "Settings");
@@ -277,24 +278,6 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     page->SetSizer(vbox);
 
     return page;
-}
-
-// ── Settings page stub ───────────────────────────────────────────────────────
-wxPanel* MainFrame::BuildSettingsPage(wxWindow* parent) {
-    auto* stub = new wxPanel(parent, wxID_ANY);
-    auto* vbox = new wxBoxSizer(wxVERTICAL);
-
-    auto* back = new wxButton(stub, wxID_ANY, "< Back");
-    UIButtons::ApplySizeBounds(back, ButtonType::TopBarBack);
-    back->SetBackgroundColour(UIColors::Surface);
-    back->SetForegroundColour(UIColors::TextPrimary);
-    back->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::HOME); });
-
-    vbox->Add(back, 0, wxALL, 12);
-    vbox->Add(new wxStaticText(stub, wxID_ANY, "Settings — coming soon"),
-              0, wxALL, 20);
-    stub->SetSizer(vbox);
-    return stub;
 }
 
 bool MainFrame::LoadImage(int key, const wxString& path)
