@@ -1,76 +1,112 @@
-// ============================================================================
-// UserPanel.hpp — Account info and logout screen
-//
-// A simple panel that shows the current user's username and email, plus a
-// Log Out button at the bottom.
-//
-// LAYOUT
-// ──────
-//   TopBar    ("My Account", back → HOME)
-//   Info panel (Surface background):
-//     Username: <value>   (12pt, TextPrimary)
-//     Email:    <value>   (TextSecondary)
-//   Separator (wxStaticLine)
-//   Spacer (pushes Log Out to bottom)
-//   Log Out button (Danger colour, full width)
-//
-// REFRESH ON SHOW
-// ───────────────
-//   RefreshUserInfo() is called every time the panel becomes visible (via
-//   wxEVT_SHOW) so it always reflects the current AppState.
-//
-// LOGOUT
-// ──────
-//   OnLogout: ConfirmationDialog → dispatch("logout") → nav(LOGIN).
-//   TODO: If logout clears AppState but not any cached local state (e.g. the
-//         active blend), ensure those are also reset here or in the "logout"
-//         event handler in AppController.
-//
-// FUTURE FEATURES
-// ───────────────
-//   TODO: Add a "Change Password" form.
-//   TODO: Show the user's YouTube data status (# of Watch Later videos loaded)
-//         and an "Update CSV" button to re-upload fresh data.
-//   TODO: Display the user's blend history.
-// ============================================================================
+/**
+ * \file UIColors.hpp
+ * \brief Colour palletes to use throughout the GUI.
+ * \author Xavier Lusetti
+ * \author Jasmine Kumar
+ *
+ * All wxColour constants live here so the visual style
+ * is consistent and easy to retheme.
+ * 
+ * Palette:
+ * 
+ * Name / Usage
+ *      Background, Window / page background
+ *      Surface / Card / panel backgrounds
+ *      SurfaceRaised / Inputs, raised elements
+ *      Accent / Buttons 
+ *      AccentHover / Lighter purple for hover feedback
+ *      TextPrimary / Body text
+ *      TextSecondary / Secondary / caption text
+ *      TextMuted / Placeholder / disabled text
+ *      Separator / Rule lines
+ *      Danger / Destructive-action buttons
+ */
 
 #pragma once
 
 #include <wx/wx.h>
+#include <wx/window.h>
+#include <unordered_map>
 
-#include "IRefreshablePanel.hpp"
-#include "UIPages.hpp"
+enum class ColorRole {
+    Background,
+    Surface,
+    SurfaceRaised,
+    Accent,
+    AccentHover,
+    TextPrimary,
+    TextSecondary,
+    TextMuted,
+    Separator,
+    Danger,
 
-class AppController;
-class wxStaticText;
-class wxTextCtrl;
-class wxButton;
+    // If color doesn't match our palette return nothing
+    None
+};
 
-class UserPanel : public wxPanel, public IRefreshablePanel {
+struct Palette {
+    wxString Name; // The name of the colour theme associated with this palette.
+
+    // Palette has attribute ^colour roles^
+    wxColour Background;
+    wxColour Surface;
+    wxColour SurfaceRaised;
+    wxColour Accent;
+    wxColour AccentHover;
+    wxColour TextPrimary;
+    wxColour TextSecondary;
+    wxColour TextMuted;
+    wxColour Separator;
+    wxColour Danger;
+};
+
+class UIColors {
 public:
-    UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav);
-    void Refresh() override;
+        // The dictionary storing all themes loaded from the text file (themes.txt).
+    static std::unordered_map<wxString, Palette> ThemeMap;
+
+    // The current active palette pointer
+    static Palette* Current;
+
+    // Static Getter Methods used to get colours across the app.
+    static wxColour Background()    { if (!Current) SetTheme("Dark Mode"); return Current->Background; }
+    static wxColour Surface()       { if (!Current) SetTheme("Dark Mode"); return Current->Surface; }
+    static wxColour SurfaceRaised() { if (!Current) SetTheme("Dark Mode"); return Current->SurfaceRaised; }
+    static wxColour Accent()        { if (!Current) SetTheme("Dark Mode"); return Current->Accent; }
+    static wxColour AccentHover()   { if (!Current) SetTheme("Dark Mode"); return Current->AccentHover; }
+    static wxColour TextPrimary()   { if (!Current) SetTheme("Dark Mode"); return Current->TextPrimary; }
+    static wxColour TextSecondary() { if (!Current) SetTheme("Dark Mode"); return Current->TextSecondary; }
+    static wxColour TextMuted()     { if (!Current) SetTheme("Dark Mode"); return Current->TextMuted; }
+    static wxColour Separator()     { if (!Current) SetTheme("Dark Mode"); return Current->Separator; }
+    static wxColour Danger()        { if (!Current) SetTheme("Dark Mode"); return Current->Danger; }
+
+
+
+    /**
+     * \brief Parses the themes.txt file and populates the ThemeMap.
+     * \param filepath The path to the themes.txt file.
+     * \return True if successful, false if the file couldn't be loaded.
+     */
+    static bool LoadThemesFromFile(const wxString& filepath);
+
+    /**
+     * \brief Switches the active theme by looking up the name in the map.
+     * \param themeName The string name of the theme (default: "Dark Mode").
+     */
+    static void SetTheme(const wxString& themeName);
+
+
+    /**
+     * \brief Updates the displaying UI with the active palette.
+     * \param win The current window to be updated.
+     */
+    static void UpdateUI(wxWindow* win);
 
 private:
-    AppController& m_controller;
-    NavigateFn     m_nav;
-
-    // Labels that display the logged-in user's info
-    wxStaticText* m_usernameLabel;
-    wxStaticText* m_emailLabel;
-    wxTextCtrl*   m_deletePasswordField;
-    wxStaticText* m_deleteErrorLabel;
-    wxButton*     m_confirmDeleteBtn;
-
-    // Refreshes user-info labels from AppState on each show.
-    void RefreshUserInfo();
-
-    // Shows or hides the password re-auth controls for account deletion.
-    void SetDeleteReauthVisible(bool isVisible);
-
-    // Event handlers
-    void OnDeleteRequest(wxCommandEvent& evt);
-    void OnConfirmDelete(wxCommandEvent& evt);
-    void OnLogout (wxCommandEvent& evt);
-    void OnShow   (wxShowEvent&    evt);
+    /**
+     * \brief Checks a color against all loaded themes to find its role.
+     * \param col The colour value being passed to check its role.
+     * \return ColorRole The role matching the colour value.
+     */
+    static ColorRole GetRoleFromColour(const wxColour& col);
 };
