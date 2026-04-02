@@ -98,10 +98,13 @@ MainFrame::MainFrame(AppController& controller)
     if (bgPath.empty() || !LoadImage(BG_MAIN, bgPath)) {
         wxLogWarning("Background image not found. Checked ../resources and resources.");
     }
+
+    // Resolve the path to your theme file and load it. App can fall back to hardcoded defaults.
+    UIColors::LoadThemesFromFile(ResolveResourcePath("theme.txt"));
     
     // create the outer container panel with the app background colour
     auto* bgPanel = new wxPanel(this);
-    bgPanel->SetBackgroundColour(UIColors::Background);
+    bgPanel->SetBackgroundColour(UIColors::Background());
     
     // placing our new background panel in the book
     book = new wxSimplebook(bgPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
@@ -115,7 +118,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(loginPanel, "Login");
 
     auto* dataPageBg = new wxPanel(book);
-    dataPageBg->SetBackgroundColour(UIColors::Background);
+    dataPageBg->SetBackgroundColour(UIColors::Background());
     dataInstrPanel = new DataInstructionsPanel(dataPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -125,7 +128,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(dataPageBg, "DataInstructions");
 
     auto* creationPageBg = new wxPanel(book);
-    creationPageBg->SetBackgroundColour(UIColors::Background);
+    creationPageBg->SetBackgroundColour(UIColors::Background());
     creationPanel = new BlendCreationPanel(creationPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -135,7 +138,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(creationPageBg, "BlendCreation");
 
     auto* homePageBg = new wxPanel(book);
-    homePageBg->SetBackgroundColour(UIColors::Background);
+    homePageBg->SetBackgroundColour(UIColors::Background());
     feedPanel = new BlendFeedPanel(homePageBg, controller);
     {
         auto* homePage = BuildHomePage(homePageBg);
@@ -146,7 +149,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(homePageBg, "Home");
 
     auto* userPageBg = new wxPanel(book);
-    userPageBg->SetBackgroundColour(UIColors::Background);
+    userPageBg->SetBackgroundColour(UIColors::Background());
     userPanel = new UserPanel(userPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -156,7 +159,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(userPageBg, "User");
 
     auto* settingsPageBg = new wxPanel(book);
-    settingsPageBg->SetBackgroundColour(UIColors::Background);
+    settingsPageBg->SetBackgroundColour(UIColors::Background());
     settingsPanel = new SettingsPanel(settingsPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -166,7 +169,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(settingsPageBg, "Settings");
 
     auto* chatPageBg = new wxPanel(book);
-    chatPageBg->SetBackgroundColour(UIColors::Background);
+    chatPageBg->SetBackgroundColour(UIColors::Background());
     chatPanel = new BlendChatPanel(chatPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -217,8 +220,8 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     auto makeBtn = [&](wxPanel* parent, const wxString& label) {
         auto* btn = new wxButton(parent, wxID_ANY, label);
         UIButtons::ApplySizeBounds(btn, ButtonType::Nav);
-        btn->SetBackgroundColour(UIColors::SurfaceRaised);
-        btn->SetForegroundColour(UIColors::TextPrimary);
+        btn->SetBackgroundColour(UIColors::SurfaceRaised());
+        btn->SetForegroundColour(UIColors::TextPrimary());
         return btn;
     };
 
@@ -228,12 +231,7 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
 
     settingsBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::SETTINGS); });
     userBtn    ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::USER); });
-    blendBtn   ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){
-        if (AppState::getInstance().getActiveBlend() != nullptr)
-            NavigateTo(Page::BLEND_CHAT);
-        else
-            NavigateTo(Page::BLEND_CREATION);
-    });
+    blendBtn   ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::BLEND_CREATION); });
 
     hbox->Add(settingsBtn, 1, wxALL|wxEXPAND, 8);
     hbox->AddStretchSpacer(1);
@@ -248,7 +246,7 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     titleFont.SetPointSize(32);
     titleFont.SetWeight(wxFONTWEIGHT_BOLD);
     titleLabel->SetFont(titleFont);
-    titleLabel->SetForegroundColour(UIColors::Accent);
+    titleLabel->SetForegroundColour(UIColors::Accent());
     titleBox->AddStretchSpacer(1);
     titleBox->Add(titleLabel, 0, wxALL|wxALIGN_CENTER_VERTICAL, 12);
     titleBox->AddStretchSpacer(1);
