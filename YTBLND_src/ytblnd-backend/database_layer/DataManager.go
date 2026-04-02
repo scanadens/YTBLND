@@ -20,14 +20,23 @@ type DataManager interface {
 	// LoadWatchLater returns videos in the same order they were saved.
 	LoadWatchLater(userID string) ([]Video, error)
 
+	// DeleteUser removes a user and all their associated data.
+	DeleteUser(userID, password string) error
+
 	// SaveBlend upserts blend metadata and overwrites participant membership.
-	SaveBlend(blendID, creatorID, algorithm string, participants []string) error
+	SaveBlend(blendID, title, creatorID, algorithm string, participants []string) error
 
 	// FindBlendForUser returns the latest blend ID for a user, or an empty string.
 	FindBlendForUser(userID string) (string, error)
 
+	// FindAllBlendsForUser returns all blend IDs and titles for a user.
+	FindAllBlendsForUser(userID string) ([]BlendSummary, error)
+
 	// LoadBlendParticipants returns all user IDs currently linked to a blend.
 	LoadBlendParticipants(blendID string) ([]string, error)
+
+	// RemoveParticipantFromBlend removes a user from a blend and its chat room.
+	RemoveParticipantFromBlend(blendID, userID string) error
 
 	// GetChatRoomForBlend returns the chat room ID attached to a blend.
 	// Empty string means no chat room exists for that blend.

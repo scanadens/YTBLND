@@ -132,7 +132,7 @@ func TestSqliteDataManager_BlendFlow(t *testing.T) {
 	mgr := newTestManager(t)
 
 	participants := []string{"u-1", "u-2", "u-2", "u-3"}
-	if err := mgr.SaveBlend("b-1", "u-1", "round_robin", participants); err != nil {
+	if err := mgr.SaveBlend("b-1", "Test Blend", "u-1", "round_robin", participants); err != nil {
 		t.Fatalf("SaveBlend() error = %v", err)
 	}
 
@@ -186,7 +186,7 @@ func TestSqliteDataManager_BlendFlow(t *testing.T) {
 func TestSqliteDataManager_ChatHistory(t *testing.T) {
 	mgr := newTestManager(t)
 
-	if err := mgr.SaveBlend("b-chat", "u-1", "round_robin", []string{"u-1", "u-2"}); err != nil {
+	if err := mgr.SaveBlend("b-chat", "Chat Room Test", "u-1", "round_robin", []string{"u-1", "u-2"}); err != nil {
 		t.Fatalf("SaveBlend() error = %v", err)
 	}
 

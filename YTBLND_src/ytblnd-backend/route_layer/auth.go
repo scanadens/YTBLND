@@ -19,6 +19,11 @@ type RegisterRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// DeleteAccountRequest captures the password for re-authentication before deletion.
+type DeleteAccountRequest struct {
+	Password string `json:"password" binding:"required"`
+}
+
 // LoginRequest captures credentials required to authenticate a user.
 type LoginRequest struct {
 	UserID   string `json:"user_id" binding:"required"`
@@ -51,6 +56,7 @@ func RegisterAuthRoutes(api *gin.RouterGroup, dataManager database_layer.DataMan
 	auth := api.Group("/auth")
 	auth.POST("/register", h.Register)
 	auth.POST("/login", h.Login)
+	auth.DELETE("/users/:userID", h.DeleteAccount)
 }
 
 // Register creates a new user account.
@@ -114,4 +120,32 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Username: user.GetUsername(),
 		Email:    user.GetEmail(),
 	})
+}
+
+// DeleteAccount removes a user account after password re-authentication.
+func (h *AuthHandler) DeleteAccount(c *gin.Context) {
+	userID := c.Param("userID")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "userID path parameter is required"})
+		return
+	}
+
+	var req DeleteAccountRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.dataManager.DeleteUser(userID, req.Password); err != nil {
+		h.logger.LogEvent("auth_delete_failed", "user_id=%s error=%q", userID, err.Error())
+		if err.Error() == "invalid credentials" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete account"})
+		return
+	}
+	h.logger.LogEvent("auth_delete_succeeded", "user_id=%s", userID)
+
+	c.JSON(http.StatusOK, gin.H{"user_id": userID, "status": "deleted"})
 }
