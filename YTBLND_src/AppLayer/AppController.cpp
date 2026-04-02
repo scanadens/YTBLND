@@ -372,6 +372,7 @@ void AppController::handleLogin(const EventPayload& payload) {
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, restoredTitle)
     );
+    currentBlend->setBlendID(*blendID);
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
 
@@ -541,6 +542,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, existingTitle)
     );
+    currentBlend->setBlendID(*blendID);
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
 
@@ -770,9 +772,11 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
     }
 
     std::string refreshTitle = existing->getTitle();
+    std::string refreshID = existing->getBlendID();
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, refreshTitle)
     );
+    currentBlend->setBlendID(refreshID);
 
     // Prevent duplicate videos within the same refreshed blend payload.
     std::set<std::string> seenVideoIDs;
@@ -1048,6 +1052,7 @@ void AppController::handleSelectBlend(const EventPayload& payload) {
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, title)
     );
+    currentBlend->setBlendID(blendID);
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
 
