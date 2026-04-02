@@ -79,6 +79,7 @@ std::string buildDeleteAccountJson(const std::string& password);
  * \return JSON string safe for HTTP POST to the blend endpoint.
  */
 std::string buildBlendJson(const std::string& blendID,
+                           const std::string& title,
                            const std::string& creatorID,
                            const std::string& algorithm,
                            const std::vector<std::string>& participants);

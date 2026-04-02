@@ -293,6 +293,7 @@ TEST(RequestJsonBuilderTest, BuildBlendJsonProducesExpectedShape) {
     const std::vector<std::string> participants{"u1", "u2", "u3"};
     const std::string json = RequestJsonBuilder::buildBlendJson(
         "b1",
+        "My Blend",
         "creator-1",
         "RandomBlendAlgorithm",
         participants
@@ -301,6 +302,7 @@ TEST(RequestJsonBuilderTest, BuildBlendJsonProducesExpectedShape) {
     // Blend payload shape drives both blend creation and participant loading paths.
     const auto parsed = nlohmann::json::parse(json);
     EXPECT_EQ(parsed.at("blend_id").get<std::string>(), "b1");
+    EXPECT_EQ(parsed.at("title").get<std::string>(), "My Blend");
     EXPECT_EQ(parsed.at("creator_id").get<std::string>(), "creator-1");
     EXPECT_EQ(parsed.at("algorithm").get<std::string>(), "RandomBlendAlgorithm");
     ASSERT_TRUE(parsed.at("participants").is_array());
