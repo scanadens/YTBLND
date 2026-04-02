@@ -5,6 +5,7 @@
 #include "../ServiceLayer/YouTubeMetadataFetcher.hpp"
 #include "../ServiceLayer/RequestJsonBuilder.hpp"
 #include <algorithm>
+#include <cstdlib>
 #include <ctime>
 #include <exception>
 #include <iostream>
@@ -15,6 +16,20 @@
 
 using Json = nlohmann::json;
 using namespace std;
+
+namespace {
+
+std::string resolveBackendBaseUrl() {
+    const char* configured = std::getenv("YTBLND_BACKEND_BASE_URL");
+    if (configured != nullptr && configured[0] != '\0') {
+        return configured;
+    }
+
+    // Keep the contract default local-first unless explicitly overridden.
+    return "http://localhost:8080";
+}
+
+}
 
 std::optional<User> AppController::parseUserFromAuthResponse(const std::string& response,
                                                              const std::string& fallbackPassword) {
@@ -112,7 +127,18 @@ std::list<User> AppController::loadParticipantsWithWatchLater(const std::vector<
     std::list<User> participants;
 
     for (const auto& uid : participantIDs) {
-        const std::string watchLaterResponse = http.get(http.build_watch_later_endpoint(uid));
+        std::string watchLaterResponse;
+        try {
+            watchLaterResponse = http.get(http.build_watch_later_endpoint(uid));
+        } catch (const std::exception& ex) {
+            std::cerr << "[AppController] loadParticipantsWithWatchLater: failed to fetch watch-later for '"
+                      << uid << "' - " << ex.what() << "\n";
+            if (missingData != nullptr) {
+                missingData->push_back(uid);
+            }
+            continue;
+        }
+
         if (!http.wasLastRequestSuccessful(http.G)) {
             if (missingData != nullptr) {
                 missingData->push_back(uid);
@@ -122,6 +148,11 @@ std::list<User> AppController::loadParticipantsWithWatchLater(const std::vector<
 
         std::list<Video> watchLater = parseWatchLaterVideos(watchLaterResponse);
         if (watchLater.empty()) {
+            Json debug = Json::parse(watchLaterResponse, nullptr, false);
+            if (debug.is_discarded() || !debug.is_object() || !debug.contains("videos")) {
+                std::cerr << "[AppController] loadParticipantsWithWatchLater: malformed watch-later payload for '"
+                          << uid << "'\n";
+            }
             if (missingData != nullptr) {
                 missingData->push_back(uid);
             }
@@ -148,7 +179,7 @@ static const std::string kYouTubeAPIKey = "AIzaSyBDzH4_T9NSaAh_s59sFYrHtNnKvHmyA
 
 AppController::AppController(): 
     appState(AppState::getInstance()),
-    server_url("http://137.220.58.22:8080"), 
+    server_url(resolveBackendBaseUrl()), 
     http(server_url),
     isConnected(false) {
     registerEvents();
@@ -231,7 +262,7 @@ void AppController::handleRegister(const EventPayload& payload) {
      */
     try {
         if (isConnected) { // if connected to the server, attempt user registration
-            string registerResponse = http.post(
+            registerResponse = http.post(
                 http.REG_USER,
                 RequestJsonBuilder::buildRegisterJson(
                     newUser.getUserID(),
@@ -240,14 +271,16 @@ void AppController::handleRegister(const EventPayload& payload) {
                     newUser.getPassword()
                 )
             );
-        }
-
-        if (!http.wasLastRequestSuccessful(http.P)) { // validate request
-            if (http.getLastStatusCode() == http.DUPLICATE) {
-                cerr << "[AppController] handleRegister: userID '"
-                    << idIt->second 
-                    << "' already exists"
-                    << endl;
+            if (!http.wasLastRequestSuccessful(http.P)) { // validate request
+                if (http.getLastStatusCode() == http.DUPLICATE) {
+                    cerr << "[AppController] handleRegister: userID '"
+                        << idIt->second 
+                        << "' already exists"
+                        << endl;
+                    return;
+                }
+                cerr << "[AppController] handleRegister: registration failed with HTTP "
+                     << http.getLastStatusCode() << "\n";
                 return;
             }
         }
@@ -372,6 +405,7 @@ void AppController::handleLogin(const EventPayload& payload) {
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, restoredTitle)
     );
+    currentBlend->setBlendID(*blendID);
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
 
@@ -541,6 +575,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, existingTitle)
     );
+    currentBlend->setBlendID(*blendID);
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
 
@@ -773,6 +808,7 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, refreshTitle)
     );
+    currentBlend->setBlendID(existing->getBlendID());
 
     // Prevent duplicate videos within the same refreshed blend payload.
     std::set<std::string> seenVideoIDs;
@@ -848,52 +884,40 @@ void AppController::handleOpenChat(const EventPayload& payload) {
 }
 
 std::list<Message> AppController::parseChatHistory(const std::string& response) {
-    // Extracts a JSON string value from a flat object: "key":"value"
-    auto extractStr = [](const std::string& obj, const std::string& key) -> std::string {
-        const std::string needle = "\"" + key + "\":\"";
-        auto pos = obj.find(needle);
-        if (pos == std::string::npos) return "";
-        pos += needle.size();
-        const auto end = obj.find('"', pos);
-        return (end == std::string::npos) ? "" : obj.substr(pos, end - pos);
-    };
-
     std::list<Message> result;
 
-    const std::string arrayKey = "\"messages\":[";
-    auto start = response.find(arrayKey);
-    if (start == std::string::npos) return result;
-    start += arrayKey.size();
+    Json parsed = Json::parse(response, nullptr, false);
+    if (parsed.is_discarded() || !parsed.is_object() || !parsed.contains("messages")) {
+        return result;
+    }
 
-    const auto arrEnd = response.find(']', start);
-    if (arrEnd == std::string::npos) return result;
+    const Json& messages = parsed["messages"];
+    if (!messages.is_array()) {
+        return result;
+    }
 
-    const std::string arr = response.substr(start, arrEnd - start);
-    size_t pos = 0;
-    while (pos < arr.size()) {
-        const auto objStart = arr.find('{', pos);
-        if (objStart == std::string::npos) break;
-        const auto objEnd = arr.find('}', objStart);
-        if (objEnd == std::string::npos) break;
-
-        const std::string obj = arr.substr(objStart, objEnd - objStart + 1);
-
-        const std::string sender  = extractStr(obj, "sender_id");
-        const std::string content = extractStr(obj, "content");
-        const std::string sentAt  = extractStr(obj, "sent_at");
-
-        if (!sender.empty() && !content.empty()) {
-            std::time_t ts = std::time(nullptr);
-            if (!sentAt.empty()) {
-                std::tm tm{};
-                if (strptime(sentAt.c_str(), "%Y-%m-%dT%H:%M:%SZ", &tm) != nullptr) {
-                    ts = timegm(&tm);
-                }
-            }
-            result.emplace_back(sender, content, ts);
+    for (const auto& item : messages) {
+        if (!item.is_object()) {
+            continue;
         }
 
-        pos = objEnd + 1;
+        const std::string sender  = item.value("sender_id", "");
+        const std::string content = item.value("content", "");
+        const std::string sentAt  = item.value("sent_at", "");
+
+        if (sender.empty() || content.empty()) {
+            continue;
+        }
+
+        std::time_t ts = std::time(nullptr);
+        if (!sentAt.empty()) {
+            std::tm tm{};
+            if (strptime(sentAt.c_str(), "%Y-%m-%dT%H:%M:%SZ", &tm) != nullptr) {
+                ts = timegm(&tm);
+            }
+        }
+
+        result.emplace_back(sender, content, ts);
     }
 
     return result;
@@ -1048,6 +1072,7 @@ void AppController::handleSelectBlend(const EventPayload& payload) {
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, title)
     );
+    currentBlend->setBlendID(blendID);
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
 

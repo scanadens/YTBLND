@@ -68,6 +68,12 @@ class Blend {
         /// \return Number of videos in the blend.
         int size() const;
 
+        /**
+         * Overrides the blend identifier (used when reconciling with server IDs).
+         * \param blendID Server-authoritative blend identifier.
+         */
+        void setBlendID(const std::string& blendID);
+
         /// \return JSON string representation of this blend.
         std::string toString() const;
 };

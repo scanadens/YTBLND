@@ -44,6 +44,10 @@ void Blend::setVideoList(const std::list<Video>& videoList) {
     this->videoList = videoList;
 }
 
+void Blend::setBlendID(const std::string& blendID) {
+    this->blendID = blendID;
+}
+
 // Indexed Access 
 
 Video Blend::getVideo(int index) const {

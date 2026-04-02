@@ -5,7 +5,6 @@
  */
 
 #include "HttpClient.hpp"
-#include "../ModelLayer/JsonUtils.hpp"
 
 #include <stdexcept>
 
@@ -13,8 +12,30 @@ using namespace std;
 
 namespace {
 
+string urlEncodeComponent(const string& value) {
+	if (value.empty()) {
+		return value;
+	}
+
+	CURL* encoder = curl_easy_init();
+	if (encoder == nullptr) {
+		return value;
+	}
+
+	char* escaped = curl_easy_escape(encoder, value.c_str(), static_cast<int>(value.size()));
+	if (escaped == nullptr) {
+		curl_easy_cleanup(encoder);
+		return value;
+	}
+
+	string encoded(escaped);
+	curl_free(escaped);
+	curl_easy_cleanup(encoder);
+	return encoded;
+}
+
 string sanitizePathSegment(const string& value) {
-	return ModelJson::escape(value);
+	return urlEncodeComponent(value);
 }
 
 }

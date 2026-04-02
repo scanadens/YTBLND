@@ -1,19 +1,32 @@
 #include "ChatWebSocket.hpp"
+#include "../ModelLayer/JsonUtils.hpp"
 
+#include <nlohmann/json.hpp>
 #include <stdexcept>
 
 using namespace std;
+using Json = nlohmann::json;
 
-// Extracts the string value of a JSON key from a flat JSON object.
-// Expects the format: "key":"value" — sufficient for the server's chat messages.
-static std::string extractJsonStr(const std::string& json, const std::string& key) {
-	std::string needle = "\"" + key + "\":\"";
-	auto pos = json.find(needle);
-	if (pos == std::string::npos) return "";
-	pos += needle.size();
-	auto end = json.find('"', pos);
-	if (end == std::string::npos) return "";
-	return json.substr(pos, end - pos);
+static std::string urlEncode(const std::string& value) {
+	if (value.empty()) {
+		return value;
+	}
+
+	CURL* encoder = curl_easy_init();
+	if (encoder == nullptr) {
+		return value;
+	}
+
+	char* escaped = curl_easy_escape(encoder, value.c_str(), static_cast<int>(value.size()));
+	if (escaped == nullptr) {
+		curl_easy_cleanup(encoder);
+		return value;
+	}
+
+	std::string encoded(escaped);
+	curl_free(escaped);
+	curl_easy_cleanup(encoder);
+	return encoded;
 }
 
 ChatWebSocket::ChatWebSocket(const string url) {
@@ -23,10 +36,15 @@ ChatWebSocket::ChatWebSocket(const string url) {
 	ws.setOnMessageCallback([this](const ix::WebSocketMessagePtr& msg) {
         if (msg->type == ix::WebSocketMessageType::Message) {
             std::cout << "WS Received: " << msg->str << "\n";
-            // Parse sender_id and content and forward to the registered callback.
+			// Parse sender/content from contract-shaped outbound server messages.
             if (m_onMessage) {
-                std::string sender  = extractJsonStr(msg->str, "sender_id");
-                std::string content = extractJsonStr(msg->str, "content");
+				Json parsed = Json::parse(msg->str, nullptr, false);
+				if (parsed.is_discarded() || !parsed.is_object()) {
+					return;
+				}
+
+				std::string sender  = parsed.value("sender_id", "");
+				std::string content = parsed.value("content", "");
                 if (!sender.empty() && !content.empty()) {
                     m_onMessage(sender, content);
                 }
@@ -70,9 +88,7 @@ void ChatWebSocket::send_message(string msg) {
 }
 
 string ChatWebSocket::content_formatter(string content) {
-	stringstream ret;
-	ret << "{\"content\": \"" << content << "\"}";
-	return ret.str();
+	return "{\"content\":" + ModelJson::quote(content) + "}";
 }
 
 void ChatWebSocket::build_fullUrl() {
@@ -82,6 +98,6 @@ void ChatWebSocket::build_fullUrl() {
 	}
 
 	stringstream fu;
-	fu << url << blendID << "?user_id=" << userID;
+	fu << url << urlEncode(blendID) << "?user_id=" << urlEncode(userID);
 	fullUrl = fu.str(); 
 }

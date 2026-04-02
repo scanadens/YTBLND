@@ -100,8 +100,7 @@ This endpoint performs transactional cascade cleanup to avoid orphaned rows and 
 **Errors**
 - `400` invalid request body or missing `userID` path param
 - `401` invalid credentials
-- `404` user not found
-- `500` server error during deletion
+- `500` server error during deletion (including not-found or other delete failures)
 
 **Cascade delete behavior (summary)**
 - removes user row
@@ -162,12 +161,13 @@ Behavior summary: returns videos in persisted order (`position ASC`) with stored
 ### `POST /api/v1/blends`
 Creates or updates a blend and auto-attaches a chatroom.
 
-Behavior summary: upserts blend metadata, replaces participant membership, ensures one chat room exists for the blend, and syncs room members to participants.
+Behavior summary: upserts blend metadata (including optional title), replaces participant membership, ensures one chat room exists for the blend, and syncs room members to participants.
 
 **Request body**
 ```json
 {
   "blend_id": "b1",
+  "title": "Roadtrip Mix",
   "creator_id": "u1",
   "algorithm": "round_robin",
   "participants": ["u1", "u2", "u3"]
@@ -182,6 +182,8 @@ Behavior summary: upserts blend metadata, replaces participant membership, ensur
   "status": "saved"
 }
 ```
+
+Title note: `title` is optional on create/update but persisted in the backend `blends.title` column and returned by blend-listing endpoints.
 
 ---
 
@@ -235,7 +237,82 @@ Behavior summary: resolves the blend's attached chat room and returns that room'
 **Errors**
 - `404` chatroom not found for blend
 
+---
+
+### `GET /api/v1/users/:userID/blends`
+Returns all blends the user currently participates in.
+
+Behavior summary: returns a list of blend summaries (blend ID + title) for frontend blend-picker/navigation views.
+
+**Success (200)**
+```json
+{
+  "user_id": "u2",
+  "blends": [
+    { "blend_id": "b1", "title": "Roadtrip Mix" },
+    { "blend_id": "b2", "title": "Focus Session" }
+  ]
+}
+```
+
+**Errors**
+- `400` missing/invalid `userID` path param
+- `500` server error
+
+---
+
+### `POST /api/v1/blends/:blendID/leave`
+Removes one user from a blend and its linked chat room membership.
+
+**Request body**
+```json
+{
+  "user_id": "u2"
+}
+```
+
+**Success (200)**
+```json
+{
+  "blend_id": "b1",
+  "user_id": "u2",
+  "status": "left"
+}
+```
+
+**Errors**
+- `400` invalid payload or missing `blendID`
+- `500` server error
+
 ## 6. WebSocket Chat
+### Chat History
+`GET /api/v1/blends/:blendID/chat-history?user_id=:userID`
+
+Behavior summary: guarded by the same chat-room membership checks as websocket connect; returns up to the latest 100 persisted messages oldest-to-newest.
+
+**Success (200)**
+```json
+{
+  "blend_id": "b1",
+  "chat_room_id": "b1",
+  "messages": [
+    {
+      "type": "chat_message",
+      "room_id": "b1",
+      "sender_id": "u2",
+      "content": "hello everyone",
+      "sent_at": "2026-03-26T15:04:05Z"
+    }
+  ]
+}
+```
+
+**Errors**
+- `400` missing `blendID` path param or `user_id` query param
+- `403` user is not a member of the chat room
+- `404` chat room missing for blend
+- `500` server error
+
 ### Connect
 `GET ws://localhost:8080/api/v1/ws/chats/:blendID?user_id=:userID`
 
