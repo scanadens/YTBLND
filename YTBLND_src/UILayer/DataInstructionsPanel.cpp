@@ -21,7 +21,7 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
     , m_controller(controller)
     , m_nav(std::move(nav))
 {
-    SetBackgroundColour(UIColors::Background);
+    SetBackgroundColour(UIColors::Background());
 
     auto* outer = new wxBoxSizer(wxVERTICAL);
 
@@ -35,12 +35,12 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
         f.SetPointSize(22); f.SetWeight(wxFONTWEIGHT_BOLD);
         heading->SetFont(f);
     }
-    heading->SetForegroundColour(UIColors::TextPrimary);
+    heading->SetForegroundColour(UIColors::TextPrimary());
 
     auto* sub = new wxStaticText(this, wxID_ANY,
         "YTBLND needs your YouTube export data to create a blend.",
         wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
-    sub->SetForegroundColour(UIColors::TextSecondary);
+    sub->SetForegroundColour(UIColors::TextSecondary());
 
     outer->AddStretchSpacer(1);
     outer->Add(heading, 0, wxALIGN_CENTER | wxBOTTOM, 8);
@@ -48,7 +48,7 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
 
     // ── Steps card ────────────────────────────────────────────────────────────
     auto* card = new wxPanel(this, wxID_ANY);
-    card->SetBackgroundColour(UIColors::Surface);
+    card->SetBackgroundColour(UIColors::Surface());
     card->SetMinSize(wxSize(520, -1));
     auto* cardSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -62,34 +62,23 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
         "5.  Click \"Browse for Data File...\" below and select that file";
 
     auto* stepsLabel = new wxStaticText(card, wxID_ANY, steps);
-    stepsLabel->SetForegroundColour(UIColors::TextPrimary);
+    stepsLabel->SetForegroundColour(UIColors::TextPrimary());
     {
         wxFont f = stepsLabel->GetFont(); f.SetPointSize(11);
         stepsLabel->SetFont(f);
     }
 
     auto* div = new wxStaticLine(card, wxID_ANY);
-    div->SetBackgroundColour(UIColors::Separator);
+    div->SetBackgroundColour(UIColors::Separator());
 
-    auto* browseBtn = new wxButton(card, wxID_ANY, "Browse for CSV...");
+    auto* browseBtn = new wxButton(card, wxID_ANY, "Browse for Data File...");
     UIButtons::ApplySizeBounds(browseBtn, ButtonType::FullWidthPrimary);
-    browseBtn->SetBackgroundColour(UIColors::Accent);
-    browseBtn->SetForegroundColour(UIColors::TextPrimary);
-
-    // Add a Cancel button so users who decline to upload return to the login screen
-    auto* cancelBtn = new wxButton(card, wxID_ANY, "Cancel");
-    UIButtons::ApplySizeBounds(cancelBtn, ButtonType::FullWidthSecondary);
-    cancelBtn->SetBackgroundColour(UIColors::Surface);
-    cancelBtn->SetForegroundColour(UIColors::TextPrimary);
-
-    // Place buttons side-by-side (browse = primary, cancel = secondary)
-    auto* btnRow = new wxBoxSizer(wxHORIZONTAL);
-    btnRow->Add(browseBtn, 1, wxRIGHT, 8);
-    btnRow->Add(cancelBtn, 0);
+    browseBtn->SetBackgroundColour(UIColors::Accent());
+    browseBtn->SetForegroundColour(UIColors::TextPrimary());
 
     cardSizer->Add(stepsLabel, 0, wxALL, 24);
     cardSizer->Add(div,        0, wxEXPAND | wxLEFT | wxRIGHT, 0);
-    cardSizer->Add(btnRow,     0, wxEXPAND | wxALL, 20);
+    cardSizer->Add(browseBtn,  0, wxEXPAND | wxALL, 20);
     card->SetSizer(cardSizer);
 
     auto* hCentre = new wxBoxSizer(wxHORIZONTAL);
@@ -102,22 +91,6 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
     SetSizer(outer);
 
     browseBtn->Bind(wxEVT_BUTTON, &DataInstructionsPanel::OnBrowse, this);
-    // If the user cancels (does not upload), abort registration flow and return to login.
-    cancelBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
-        User* user = AppState::getInstance().getCurrentUser();
-        if (user) {
-            // If the user has no uploaded watch-later videos, remove the server account
-            // so the username isn't left reserved.
-            if (user->getYouTubeData().getWatchLaterVideos().empty()) {
-                // deleteAccount expects userID and password in payload
-                m_controller.getEventRouter().dispatch("deleteAccount",
-                    {{"userID", user->getUserID()}, {"password", user->getPassword()}});
-            }
-        }
-        // Clear local session and return to login
-        m_controller.getEventRouter().dispatch("logout", {});
-        m_nav(Page::LOGIN);
-    });
 }
 
 void DataInstructionsPanel::OnBrowse(wxCommandEvent& /*evt*/)

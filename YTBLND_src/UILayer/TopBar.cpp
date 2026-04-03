@@ -12,12 +12,12 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     , m_nav(std::move(nav))
     , m_backDest(backDest)
 {
-    SetBackgroundColour(UIColors::Surface);
+    SetBackgroundColour(UIColors::Surface());
 
     // ── Back button ──────────────────────────────────────────────────────────
     wxButton* backBtn = new wxButton(this, wxID_ANY, wxT("< Back"));
-    backBtn->SetBackgroundColour(UIColors::SurfaceRaised);
-    backBtn->SetForegroundColour(UIColors::TextPrimary);
+    backBtn->SetBackgroundColour(UIColors::SurfaceRaised());
+    backBtn->SetForegroundColour(UIColors::TextPrimary());
     UIButtons::ApplySizeBounds(backBtn, ButtonType::TopBarBack);
 
     backBtn->Bind(wxEVT_BUTTON, &TopBar::OnBack, this);
@@ -29,7 +29,7 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
         e.Skip();
     });
     backBtn->Bind(wxEVT_LEAVE_WINDOW, [backBtn](wxMouseEvent& e) {
-        backBtn->SetBackgroundColour(UIColors::SurfaceRaised);
+        backBtn->SetBackgroundColour(UIColors::SurfaceRaised());
         backBtn->Refresh();
         e.Skip();
     });
@@ -38,7 +38,7 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     wxStaticText* titleLabel = new wxStaticText(this, wxID_ANY, title,
                                                 wxDefaultPosition, wxDefaultSize,
                                                 wxALIGN_CENTER_HORIZONTAL);
-    titleLabel->SetForegroundColour(UIColors::TextPrimary);
+    titleLabel->SetForegroundColour(UIColors::TextPrimary());
 
     wxFont titleFont = titleLabel->GetFont();
     titleFont.SetPointSize(14);

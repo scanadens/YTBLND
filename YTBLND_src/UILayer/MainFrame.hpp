@@ -3,6 +3,7 @@
  * \brief Root application window containing the full-window page switcher.
  * \author Jasmine Kumar
  * \author Shamar Pennant
+ * \author Xavier Lusetti
  *
  * MainFrame is the single top-level wxFrame.  It contains a wxSimplebook that
  * acts as a full-window page switcher (no visible tabs).  Every panel is
@@ -94,15 +95,6 @@ private:
     void OnUser    (wxCommandEvent&);  ///< Navigates to USER.
     void OnBlend   (wxCommandEvent&);  ///< Navigates to BLEND_CHAT or BLEND_CREATION.
     void OnRefresh (wxCommandEvent&);  ///< Advances the feed by one page.
-
-    /**
-     * Recursively recolors every widget in the window tree by mapping
-     * old palette colours to the new palette after a theme switch.
-     */
-    void RecolorAll(const Palette& oldPalette);
-
-    /// Helper: recursively recolor a widget and its children.
-    void RecolorWidget(wxWindow* w, const Palette& oldPalette);
 
     bool LoadImage(int key, const wxString& path);
 };

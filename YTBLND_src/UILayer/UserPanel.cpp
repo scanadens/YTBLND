@@ -33,24 +33,24 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
 
     // ── User info section ─────────────────────────────────────────────────────
     auto* infoPanel = new wxPanel(this, wxID_ANY);
-    infoPanel->SetBackgroundColour(UIColors::Surface);
+    infoPanel->SetBackgroundColour(UIColors::Surface());
     auto* infoSizer = new wxBoxSizer(wxVERTICAL);
 
     m_usernameLabel = new wxStaticText(infoPanel, wxID_ANY, "Username: Not logged in");
-    m_usernameLabel->SetForegroundColour(UIColors::TextPrimary);
+    m_usernameLabel->SetForegroundColour(UIColors::TextPrimary());
     wxFont uf = m_usernameLabel->GetFont(); // grab a font
     uf.SetPointSize(24);
     m_usernameLabel->SetFont(uf);
 
     m_emailLabel = new wxStaticText(infoPanel, wxID_ANY, "Email: ");
-    m_emailLabel->SetForegroundColour(UIColors::TextSecondary);
+    m_emailLabel->SetForegroundColour(UIColors::TextSecondary());
     uf = m_emailLabel->GetFont();
     uf.SetPointSize(16);
     m_emailLabel->SetFont(uf);
 
     // ── Divider ───────────────────────────────────────────────────────────────
     auto* divider = new wxStaticLine(this, wxID_ANY);
-    divider->SetBackgroundColour(UIColors::Separator);
+    divider->SetBackgroundColour(UIColors::Separator());
     root->Add(divider, 0, wxEXPAND);
 
     // ── Spacer pushes buttons to bottom ───────────────────────────────────────
@@ -66,39 +66,39 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     // Re-upload YouTube data
     auto* reuploadBtn = new wxButton(this, wxID_ANY, "Re-upload YouTube Data");
     UIButtons::ApplySizeBounds(reuploadBtn, ButtonType::Large);
-    reuploadBtn->SetBackgroundColour(UIColors::Accent);
-    reuploadBtn->SetForegroundColour(UIColors::TextPrimary);
+    reuploadBtn->SetBackgroundColour(UIColors::Accent());
+    reuploadBtn->SetForegroundColour(UIColors::TextPrimary());
     root->Add(reuploadBtn, 0, wxEXPAND | wxCENTER | wxBOTTOM, 16);
 
     // Delete Account
     auto* del_acc = new wxButton(this, wxID_ANY, "Delete Account");
     UIButtons::ApplySizeBounds(del_acc, ButtonType::Large);
-    del_acc->SetBackgroundColour(UIColors::Danger);
-    del_acc->SetForegroundColour(UIColors::TextPrimary);
+    del_acc->SetBackgroundColour(UIColors::Danger());
+    del_acc->SetForegroundColour(UIColors::TextPrimary());
     root->Add(del_acc, 0, wxEXPAND | wxCENTER | wxBOTTOM, 16); // keep the button in the center
 
     m_deletePasswordField = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition,
                                            wxDefaultSize, wxTE_PASSWORD | wxTE_PROCESS_ENTER);
     m_deletePasswordField->SetHint("Re-enter password to delete account");
-    m_deletePasswordField->SetBackgroundColour(UIColors::SurfaceRaised);
-    m_deletePasswordField->SetForegroundColour(UIColors::TextPrimary);
+    m_deletePasswordField->SetBackgroundColour(UIColors::SurfaceRaised());
+    m_deletePasswordField->SetForegroundColour(UIColors::TextPrimary());
     root->Add(m_deletePasswordField, 0, wxEXPAND | wxCENTER | wxBOTTOM, 8);
 
     m_confirmDeleteBtn = new wxButton(this, wxID_ANY, "Confirm Delete");
     UIButtons::ApplySizeBounds(m_confirmDeleteBtn, ButtonType::Large);
-    m_confirmDeleteBtn->SetBackgroundColour(UIColors::Danger);
-    m_confirmDeleteBtn->SetForegroundColour(UIColors::TextPrimary);
+    m_confirmDeleteBtn->SetBackgroundColour(UIColors::Danger());
+    m_confirmDeleteBtn->SetForegroundColour(UIColors::TextPrimary());
     root->Add(m_confirmDeleteBtn, 0, wxEXPAND | wxCENTER | wxBOTTOM, 8);
 
     m_deleteErrorLabel = new wxStaticText(this, wxID_ANY, "");
-    m_deleteErrorLabel->SetForegroundColour(UIColors::Danger);
+    m_deleteErrorLabel->SetForegroundColour(UIColors::Danger());
     root->Add(m_deleteErrorLabel, 0, wxEXPAND | wxCENTER | wxBOTTOM, 12);
 
     // ── Logout ────────────────────────────────────────────────────────────────
     auto* logoutBtn = new wxButton(this, wxID_ANY, "Log Out");
     UIButtons::ApplySizeBounds(logoutBtn, ButtonType::Large);
-    logoutBtn->SetBackgroundColour(UIColors::Danger);
-    logoutBtn->SetForegroundColour(UIColors::TextPrimary);
+    logoutBtn->SetBackgroundColour(UIColors::Danger());
+    logoutBtn->SetForegroundColour(UIColors::TextPrimary());
     root->Add(logoutBtn, 0, wxEXPAND | wxCENTER | wxBOTTOM, 16); // keep the button in the bottom center as well
 
     // add some extra padding space beneath the buttons
