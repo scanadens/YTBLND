@@ -22,10 +22,11 @@
 namespace {
 wxString ResolveResourcePath(const wxString& fileName)
 {
+    /* only search for resources located within src. though structured this way in the event
+    that more resource organization is needed in the future with extra directories
+    */
     const wxArrayString relativeCandidates = {
-        "YTBLND_src/resources/" + fileName,
-        "resources/" + fileName,
-        "../resources/" + fileName,
+        "YTBLND_src/resources/" + fileName
     };
 
     for (const auto& candidate : relativeCandidates) {
@@ -37,9 +38,7 @@ wxString ResolveResourcePath(const wxString& fileName)
     wxFileName exePath(wxStandardPaths::Get().GetExecutablePath());
     const wxString exeDir = exePath.GetPath();
     const wxArrayString exeRelativeCandidates = {
-        exeDir + "/../../YTBLND_src/resources/" + fileName,
-        exeDir + "/../resources/" + fileName,
-        exeDir + "/resources/" + fileName,
+        exeDir + "/../../YTBLND_src/resources/" + fileName
     };
 
     for (const auto& candidate : exeRelativeCandidates) {
@@ -100,7 +99,8 @@ MainFrame::MainFrame(AppController& controller)
     // resolve the path to the background image and load it as a wxImage
     const wxString bgPath = ResolveResourcePath("checkered_wave_background.jpg");
     if (bgPath.empty() || !LoadImage(BG_MAIN, bgPath)) {
-        wxLogWarning("Background image not found. Checked ../resources and resources.");
+
+        wxLogWarning("Background image not found withing resources directory...");
     }
     
     // create the outer container panel with the app background colour
