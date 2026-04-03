@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include "../ServerConfig.hpp"
 #include "../ServiceLayer/HttpClient.hpp"
 
 #include <ixwebsocket/IXNetSystem.h>
@@ -74,14 +75,22 @@ bool containsAll(const std::string& value, const std::initializer_list<std::stri
 }
 
 bool isLiveBackendEnabled() {
-    // Live backend suite runs by default for CI/dev environments where the
-    // server is expected to be available. Opt out explicitly when needed.
+    // Explicit opt-out always wins.
     const char* skipLiveTests = std::getenv("YTBLND_SKIP_LIVE_BACKEND_TESTS");
     if (skipLiveTests && std::string(skipLiveTests) == "1") {
         return false;
     }
 
-    return true;
+    // Verify the configured server is actually reachable so tests skip
+    // gracefully instead of failing when the server is down.
+    HttpClient probe(kTestBackendBaseUrl);
+    try {
+        const std::string resp = probe.get("/ping");
+        return probe.wasLastRequestSuccessful(probe.G) &&
+               resp.find("pong") != std::string::npos;
+    } catch (...) {
+        return false;
+    }
 }
 
 std::string waitForChatRoomDetails(HttpClient& client, const std::string& blendID, const std::string& userID) {
@@ -139,26 +148,22 @@ void deleteUser(HttpClient& client, const std::string& userID, const std::string
 
 TEST(LiveBackendConnectivityTest, PingEndpointRespondsWithPong) {
     if (!isLiveBackendEnabled()) {
-        GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1. "
-                     << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
-                     << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
+        GTEST_SKIP() << "Live backend unreachable at " << kTestBackendBaseUrl;
     }
 
     // Fast health check that the live backend process is reachable.
-    HttpClient client(getenvOrDefault("YTBLND_LIVE_BACKEND_HTTP_BASE_URL", "http://localhost:8080"));
+    HttpClient client(kTestBackendBaseUrl);
     const std::string pingResponse = client.get("/ping");
     ASSERT_NE(pingResponse.find("pong"), std::string::npos) << pingResponse;
 }
 
 TEST(LiveBackendConnectivityTest, RegisterAndLoginRoundTripAgainstRunningServer) {
     if (!isLiveBackendEnabled()) {
-        GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1. "
-                     << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
-                     << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
+        GTEST_SKIP() << "Live backend unreachable at " << kTestBackendBaseUrl;
     }
 
     // Uses a per-test user ID so re-runs do not clash with prior DB state.
-    HttpClient client(getenvOrDefault("YTBLND_LIVE_BACKEND_HTTP_BASE_URL", "http://localhost:8080"));
+    HttpClient client(kTestBackendBaseUrl);
     const std::string userID = makeUniqueID("live_ws_user");
 
     registerAndLogin(client, userID);
@@ -166,12 +171,10 @@ TEST(LiveBackendConnectivityTest, RegisterAndLoginRoundTripAgainstRunningServer)
 
 TEST(LiveBackendConnectivityTest, DeleteAccountRemovesUserFromAuthLoginPath) {
     if (!isLiveBackendEnabled()) {
-        GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1. "
-                     << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
-                     << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
+        GTEST_SKIP() << "Live backend unreachable at " << kTestBackendBaseUrl;
     }
 
-    HttpClient client(getenvOrDefault("YTBLND_LIVE_BACKEND_HTTP_BASE_URL", "http://localhost:8080"));
+    HttpClient client(kTestBackendBaseUrl);
     const std::string userID = makeUniqueID("live_delete_user");
     const std::string password = "pw123";
 
@@ -190,13 +193,11 @@ TEST(LiveBackendConnectivityTest, DeleteAccountRemovesUserFromAuthLoginPath) {
 
 TEST(LiveBackendConnectivityTest, CreateBlendReturnsExpectedChatRoomLink) {
     if (!isLiveBackendEnabled()) {
-        GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1. "
-                     << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
-                     << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
+        GTEST_SKIP() << "Live backend unreachable at " << kTestBackendBaseUrl;
     }
 
     // This test isolates persistence behavior before websocket concerns.
-    HttpClient client(getenvOrDefault("YTBLND_LIVE_BACKEND_HTTP_BASE_URL", "http://localhost:8080"));
+    HttpClient client(kTestBackendBaseUrl);
     const std::string userID = makeUniqueID("live_ws_user");
     const std::string blendID = makeUniqueID("live_ws_blend");
 
@@ -206,17 +207,12 @@ TEST(LiveBackendConnectivityTest, CreateBlendReturnsExpectedChatRoomLink) {
 
 TEST(LiveBackendConnectivityTest, WebSocketRoundTripAgainstRunningServer) {
     if (!isLiveBackendEnabled()) {
-        GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1. "
-                     << "Optional overrides: YTBLND_LIVE_BACKEND_HTTP_BASE_URL and "
-                     << "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX.";
+        GTEST_SKIP() << "Live backend unreachable at " << kTestBackendBaseUrl;
     }
 
     // Full integration path: auth -> blend creation -> chatroom lookup -> WS.
-    const std::string httpBaseUrl = getenvOrDefault("YTBLND_LIVE_BACKEND_HTTP_BASE_URL", "http://localhost:8080");
-    const std::string wsEndpointPrefix = getenvOrDefault(
-        "YTBLND_LIVE_BACKEND_WS_ENDPOINT_PREFIX",
-        deriveWsEndpointPrefixFromHttpBase(httpBaseUrl));
-    HttpClient client(httpBaseUrl);
+    HttpClient client(kTestBackendBaseUrl);
+    const std::string wsEndpointPrefix = kTestBackendWsPrefix;
 
     const std::string userID = makeUniqueID("live_ws_user");
     const std::string blendID = makeUniqueID("live_ws_blend");
@@ -288,7 +284,7 @@ TEST(LiveBackendConnectivityTest, WebSocketRoundTripAgainstRunningServer) {
         ASSERT_TRUE(wsError.empty())
             << "WebSocket failed to connect"
             << " | ws_url=" << wsUrl
-            << " | http_base=" << httpBaseUrl
+            << " | http_base=" << kTestBackendBaseUrl
             << " | ws_http_status=" << wsErrorStatus
             << " | retries=" << wsRetries
             << " | blend_id=" << blendID

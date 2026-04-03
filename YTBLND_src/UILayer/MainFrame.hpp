@@ -77,6 +77,10 @@ private:
     SettingsPanel*         settingsPanel;
     BlendChatPanel*        chatPanel;
     ActiveBlendsPanel*     activeBlendsPanel;
+    // Home-page Refresh button reference so we can disable it during long refreshes.
+    wxButton*              refreshBtn;
+    // Guards against duplicate refresh dispatches from double-clicks.
+    bool                   refreshInProgress;
     std::unordered_map<int, wxImage> images; // images
 
     /**

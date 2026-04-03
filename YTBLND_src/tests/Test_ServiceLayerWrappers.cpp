@@ -3,6 +3,7 @@
 #include "../ServiceLayer/ChatWebSocket.hpp"
 #include "../ServiceLayer/HttpClient.hpp"
 #include "../ServiceLayer/RequestJsonBuilder.hpp"
+#include "../AppLayer/AppController.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -14,8 +15,11 @@
 #include <atomic>
 #include <chrono>
 #include <cstring>
+#include <mutex>
 #include <string>
 #include <thread>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace {
 
@@ -360,4 +364,95 @@ TEST(ChatWebSocketWrapperTest, BuildsExpectedSocketUrlBeforeSend) {
 
     // Let background socket thread process startup/connection failure cleanly.
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
+}
+
+
+TEST(MetadataWorkflowTest, BoundedSubsetEnrichmentOnlyUpdatesFirstIncompleteVideos) {
+    std::list<Video> videos;
+    videos.emplace_back("v1", "", "", "", 0, std::list<std::string>{});
+    videos.emplace_back("v2", "", "", "", 0, std::list<std::string>{});
+    videos.emplace_back("v3", "", "", "", 0, std::list<std::string>{});
+    videos.emplace_back("v4", "", "", "", 0, std::list<std::string>{});
+
+    auto enrichChunk = [](const std::list<Video>& chunk) {
+        std::list<Video> enriched;
+        for (const auto& v : chunk) {
+            enriched.emplace_back(
+                v.getVideoID(),
+                "Title-" + v.getVideoID(),
+                "Channel-" + v.getVideoID(),
+                "https://thumb/" + v.getVideoID(),
+                v.getDuration(),
+                v.getTags(),
+                "Channel Name",
+                "https://logo/" + v.getVideoID()
+            );
+        }
+        return enriched;
+    };
+
+    const std::list<Video> result = AppController::enrichMissingMetadataSubsetMultithreaded(
+        videos,
+        2,
+        3,
+        enrichChunk
+    );
+
+    std::vector<Video> resultVec(result.begin(), result.end());
+    ASSERT_EQ(resultVec.size(), 4u);
+    EXPECT_EQ(resultVec[0].getTitle(), "Title-v1");
+    EXPECT_EQ(resultVec[1].getTitle(), "Title-v2");
+    EXPECT_TRUE(resultVec[2].getTitle().empty());
+    EXPECT_TRUE(resultVec[3].getTitle().empty());
+}
+
+TEST(MetadataWorkflowTest, MultiThreadedPartitionAvoidsDuplicateWork) {
+    std::list<Video> videos;
+    for (int i = 1; i <= 9; ++i) {
+        videos.emplace_back("id-" + std::to_string(i), "", "", "", 0, std::list<std::string>{});
+    }
+
+    std::mutex seenMutex;
+    std::unordered_map<std::string, int> seenCounts;
+    std::unordered_set<std::thread::id> workerThreadIds;
+
+    auto enrichChunk = [&](const std::list<Video>& chunk) {
+        std::list<Video> enriched;
+        for (const auto& v : chunk) {
+            {
+                std::lock_guard<std::mutex> lock(seenMutex);
+                seenCounts[v.getVideoID()]++;
+                workerThreadIds.insert(std::this_thread::get_id());
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            enriched.emplace_back(
+                v.getVideoID(),
+                "Title-" + v.getVideoID(),
+                "Channel-" + v.getVideoID(),
+                "https://thumb/" + v.getVideoID(),
+                v.getDuration(),
+                v.getTags(),
+                "Channel Name",
+                "https://logo/" + v.getVideoID()
+            );
+        }
+        return enriched;
+    };
+
+    const std::list<Video> result = AppController::enrichMissingMetadataSubsetMultithreaded(
+        videos,
+        9,
+        3,
+        enrichChunk
+    );
+
+    for (const auto& kv : seenCounts) {
+        EXPECT_EQ(kv.second, 1) << "Duplicate enrichment for video " << kv.first;
+    }
+    EXPECT_GE(workerThreadIds.size(), 2u);
+
+    for (const auto& v : result) {
+        EXPECT_FALSE(v.getTitle().empty());
+        EXPECT_FALSE(v.getChannelID().empty());
+    }
 }

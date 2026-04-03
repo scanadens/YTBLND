@@ -10,6 +10,7 @@
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
+#include "UploadProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
@@ -232,9 +233,21 @@ void LoginPanel::OnSignIn(wxCommandEvent& /*evt*/)
         return;
     }
 
+    UploadProgressDialog progress(this, "Signing In");
+    progress.ShowModal();
+    progress.UpdateProgress(0.02, "Preparing login...");
+
+    m_controller.setProgressReporter([&progress](double ratio, const std::string& message) {
+        progress.UpdateProgress(ratio, wxString::FromUTF8(message));
+    });
+
     // Dispatch uses userID — username IS the userID in this app
     m_controller.getEventRouter().dispatch("login",
         {{"userID", username}, {"password", password}});
+    m_controller.clearProgressReporter();
+
+    progress.UpdateProgress(1.0, "Login finished");
+    progress.Destroy();
 
     if (AppState::getInstance().getCurrentUser() == nullptr) {
         m_siError->SetLabel("Incorrect username or password.");

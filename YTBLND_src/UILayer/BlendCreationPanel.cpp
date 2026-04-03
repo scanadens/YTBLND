@@ -11,6 +11,7 @@
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
 #include "UIPages.hpp"
+#include "UploadProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
@@ -324,7 +325,20 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
     for (std::size_t i = 0; i < m_addedUsers.size(); ++i)
         payload["userID_" + std::to_string(i)] = m_addedUsers[i];
 
+    UploadProgressDialog progress(this, "Creating Blend");
+    progress.ShowModal();
+    progress.UpdateProgress(0.02, "Preparing...");
+
+    // Wire up the progress reporter so AppController updates the bar as it works
+    m_controller.setProgressReporter([&progress](double ratio, const std::string& message) {
+        progress.UpdateProgress(ratio, wxString::FromUTF8(message));
+    });
+
     m_controller.getEventRouter().dispatch("createBlend", payload);
+    m_controller.clearProgressReporter();
+
+    progress.UpdateProgress(1.0, "Blend ready");
+    progress.Destroy();
 
     // Check if any participants were missing data
     std::vector<std::string> missing = AppState::getInstance().getUsersWithoutData();

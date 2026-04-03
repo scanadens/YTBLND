@@ -15,6 +15,7 @@
 #include "BlendCreationPanel.hpp"
 #include "BlendChatPanel.hpp"
 #include "ActiveBlendsPanel.hpp"
+#include "UploadProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 
@@ -92,7 +93,9 @@ MainFrame::MainFrame(AppController& controller)
     : wxFrame(nullptr, wxID_ANY, "YTBLND",
               wxDefaultPosition, wxSize(1280, 800),
               wxDEFAULT_FRAME_STYLE | wxMAXIMIZE),
-      controller(controller)
+    controller(controller),
+    refreshBtn(nullptr),
+    refreshInProgress(false)
 {
     // resolve the path to the background image and load it as a wxImage
     const wxString bgPath = ResolveResourcePath("checkered_wave_background.jpg");
@@ -227,7 +230,44 @@ void MainFrame::NavigateTo(Page page) {
 }
 
 void MainFrame::TriggerFeedRefresh() {
-    feedPanel->NextPage();
+    if (refreshInProgress) {
+        return;
+    }
+
+    refreshInProgress = true;
+    if (refreshBtn != nullptr) {
+        refreshBtn->Disable();
+    }
+
+    UploadProgressDialog progress(this, "Refreshing Feed");
+    progress.ShowModal();
+    progress.UpdateProgress(0.08, "Preparing refresh...");
+
+    controller.setProgressReporter([&progress](double ratio, const std::string& message) {
+        progress.UpdateProgress(ratio, wxString::FromUTF8(message));
+    });
+
+    // NextPage may either advance the local page offset immediately or trigger
+    // controller-level refresh work when a new blend sample is required.
+    progress.UpdateProgress(0.2, "Updating feed...");
+    try {
+        feedPanel->NextPage();
+        progress.UpdateProgress(1.0, "Feed refreshed");
+    } catch (...) {
+        controller.clearProgressReporter();
+        if (refreshBtn != nullptr) {
+            refreshBtn->Enable();
+        }
+        refreshInProgress = false;
+        throw;
+    }
+
+    controller.clearProgressReporter();
+    progress.Destroy();
+    if (refreshBtn != nullptr) {
+        refreshBtn->Enable();
+    }
+    refreshInProgress = false;
 }
 
 // ── Build Home Page ──────────────────────────────────────────────────────────
@@ -289,7 +329,8 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
 
     auto* refreshPanel = new wxPanel(page, wxID_ANY);
     auto* rbox = new wxBoxSizer(wxHORIZONTAL);
-    auto* refreshBtn = new wxButton(refreshPanel, wxID_ANY, "Refresh");
+    // Store this button on MainFrame so TriggerFeedRefresh can disable/enable it.
+    refreshBtn = new wxButton(refreshPanel, wxID_ANY, "Refresh");
     UIButtons::ApplySizeBounds(refreshBtn, ButtonType::Nav);
     const wxString refreshPath = ResolveResourcePath("refresh.png");
     if (!refreshPath.empty()) {

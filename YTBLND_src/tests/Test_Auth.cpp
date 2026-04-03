@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <filesystem>
+#include "../ServerConfig.hpp"
 #include "../ServiceLayer/SqliteDataManager.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
@@ -35,7 +36,7 @@ static std::string uniqueDbPath(const std::string& prefix) {
 }
 
 static bool canReachBackend() {
-    HttpClient http("http://137.220.58.22:8080");
+    HttpClient http(kTestBackendBaseUrl);
     try {
         const std::string resp = http.get("/ping");
         return http.wasLastRequestSuccessful(http.G) &&

@@ -34,3 +34,25 @@ std::list<Video> YouTubeDataImporter::import(const std::string& filePath) const 
         "YouTubeDataImporter: unsupported file extension for path: " + filePath
     );
 }
+
+std::list<Video> YouTubeDataImporter::importMultiThreaded(
+    const std::string& filePath,
+    std::function<void(double)> progressCallback) const {
+    // Multi-threaded import that leverages 3 worker threads for faster file processing.
+    // Routes to the appropriate parser based on file extension, then invokes
+    // that parser's multi-threaded parse method with progress feedback.
+
+    const std::string ext = lowerExtension(filePath);
+
+    if (ext == ".csv") {
+        return WatchLaterParser(filePath).parseMultiThreaded(progressCallback);
+    }
+
+    if (ext == ".html" || ext == ".htm") {
+        return WatchHistoryParser(filePath).parseMultiThreaded(progressCallback);
+    }
+
+    throw std::invalid_argument(
+        "YouTubeDataImporter: unsupported file extension for path: " + filePath
+    );
+}

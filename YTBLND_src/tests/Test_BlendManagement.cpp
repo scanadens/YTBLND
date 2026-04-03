@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 
+#include "../ServerConfig.hpp"
 #include "../ModelLayer/Blend.hpp"
 #include "../ModelLayer/User.hpp"
 #include "../ModelLayer/Video.hpp"
@@ -169,8 +170,7 @@ protected:
         if (!isLiveBackendEnabled()) {
             GTEST_SKIP() << "Live backend tests disabled.";
         }
-        httpBase = getenvOrDefault("YTBLND_LIVE_BACKEND_HTTP_BASE_URL",
-                                   "http://137.220.58.22:8080");
+        httpBase = kTestBackendBaseUrl;
         client = std::make_unique<HttpClient>(httpBase);
 
         // Quick connectivity check

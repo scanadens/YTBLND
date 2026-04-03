@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <list>
+#include <functional>
 #include <optional>
 #include <string>
 #include <vector>
@@ -38,6 +39,7 @@ class AppController {
         const std::string server_url;       // url and port to the server
         HttpClient http;                    // http client wrapper for server communications
         bool isConnected;                   // tracks whether AppState has a connection to the server
+        std::function<void(double, const std::string&)> progressReporter; // optional UI progress sink
 
         /// Owns the most recently generated Blend so AppState can hold a raw pointer.
         std::unique_ptr<Blend> currentBlend;
@@ -57,6 +59,14 @@ class AppController {
          */
         void enrichIfMissingMetadata(const std::string& userID,
                                      std::list<Video>&  videos);
+
+        /**
+         * Re-enriches only the currently displayed blend feed videos when any
+         * metadata fields are missing. This keeps display quality high without
+         * re-processing full watch-history sized lists on the UI path.
+         */
+        void enrichActiveBlendFeedIfMissingMetadata();
+
         /**
          * \brief Parses an authenticated user object from the login response payload.
          *
@@ -112,7 +122,21 @@ class AppController {
          * \return List of participant users that have usable watch-later data.
          */
         std::list<User> loadParticipantsWithWatchLater(const std::vector<std::string>& participantIDs,
-                                   std::vector<std::string>* missingData);
+                       std::vector<std::string>* missingData,
+                       bool enrichParticipantLists = false);
+
+        /**
+         * Parallel variant used by login restore flows when many participants exist.
+         * Uses separate HttpClient instances per worker to avoid shared-client contention.
+         */
+        std::list<User> loadParticipantsWithWatchLaterParallel(
+            const std::vector<std::string>& participantIDs,
+            std::vector<std::string>* missingData,
+            std::size_t workerThreads
+        );
+
+        /// Sends a coarse-grained progress update to the active UI reporter.
+        void reportProgress(double progress, const std::string& message);
 
         /**
          * POSTs the given blend to POST /api/v1/blends so the server
@@ -142,6 +166,12 @@ class AppController {
         /// \return Reference to the EventRouter so panels can call dispatch().
         EventRouter& getEventRouter();
 
+        /// Registers a UI progress sink used for long-running controller operations.
+        void setProgressReporter(std::function<void(double, const std::string&)> reporter);
+
+        /// Clears the active UI progress sink.
+        void clearProgressReporter();
+
         /**
          * Creates a new account and logs the user in on success.
          * \param payload { "userID": "...", "username": "...", "email": "...", "password": "..." }
@@ -167,8 +197,9 @@ class AppController {
         void handleDeleteAccount(const EventPayload& payload);
 
         /**
-         * Imports the file at filePath, enriches metadata via YouTube API,
-         * and persists the result to the database.
+         * Imports the file at filePath and persists the result to the database.
+         * Metadata enrichment is conditional and may be skipped for large HTML
+         * uploads to avoid blocking the UI path.
          * \param payload { "filePath": "...", "userID": "..." }
          */
         void handleUploadData(const EventPayload& payload);
@@ -274,6 +305,20 @@ class AppController {
          * \return Ordered list of Messages with original server timestamps.
          */
         static std::list<Message> parseChatHistory(const std::string& response);
+
+        /**
+         * Applies bounded metadata enrichment to at most \p maxVideosToEnrich videos
+         * that have incomplete metadata, partitioned across worker threads.
+         *
+         * This utility is shared by production blend-loading paths and unit tests
+         * to keep metadata workflow behavior consistent.
+         */
+        static std::list<Video> enrichMissingMetadataSubsetMultithreaded(
+            const std::list<Video>& videos,
+            std::size_t maxVideosToEnrich,
+            std::size_t workerThreads,
+            const std::function<std::list<Video>(const std::list<Video>&)>& enrichChunkFn
+        );
 };
 
 #endif

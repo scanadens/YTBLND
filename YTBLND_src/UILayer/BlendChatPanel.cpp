@@ -4,6 +4,7 @@
 
 #include "BlendChatPanel.hpp"
 
+#include "../ServerConfig.hpp"
 #include <wx/scrolwin.h>
 #include <ctime>
 #include <memory>
@@ -366,8 +367,7 @@ void BlendChatPanel::ConnectWebSocket(const std::string& blendID,
     m_wsBlendID.clear();
 
     try {
-        m_ws = std::make_unique<ChatWebSocket>(
-            "ws://137.220.58.22:8080/api/v1/ws/chats/");
+        m_ws = std::make_unique<ChatWebSocket>(kAppBackendWsPrefix);
         m_ws->set_blendID(blendID);
         m_ws->set_userID(userID);
 

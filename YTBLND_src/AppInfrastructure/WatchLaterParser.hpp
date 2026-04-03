@@ -7,6 +7,7 @@
 
 #include <list>
 #include <string>
+#include <functional>
 
 /**
  * \file WatchLaterParser.hpp
@@ -16,7 +17,8 @@
  * Parses YouTube Takeout 'Watch later-videos.csv' files into Video objects
  * with only the videoID field populated. Internally uses CsvSource for reading
  * and CsvParser for parsing. The resulting Videos have empty strings/zero for
- * all other fields since Watch Later CSV only provides ID and timestamp.
+ * all other field since Watch Later CSV only provides ID and timestamp.
+ * Supports both single-threaded and multi-threaded parsing.
  */
 
 /// Specialized parser for YouTube Takeout Watch Later CSV files.
@@ -36,6 +38,15 @@ public:
      * \return List of Video objects initialized from Watch Later CSV rows
      */
     std::list<Video> parse();
+
+    /**
+     * Multi-threaded parse using 2-3 worker threads for faster CSV processing.
+     * Each thread processes a range of CSV rows to avoid duplicate work.
+     * \param progressCallback Optional callback to report parsing progress (0.0 to 1.0)
+     * \return List of Video objects extracted from all threads
+     */
+    std::list<Video> parseMultiThreaded(std::function<void(double)> progressCallback = nullptr);
+
     int getParserId();
 
 private:

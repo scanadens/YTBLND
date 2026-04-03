@@ -4,6 +4,7 @@
 #include "ButtonsConfig.hpp"
 #include "TopBar.hpp"
 #include "ConfirmationDialog.hpp"
+#include "UploadProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
@@ -131,8 +132,21 @@ void ActiveBlendsPanel::RebuildList()
 void ActiveBlendsPanel::OnSelectBlend(const std::string& blendID,
                                        const std::string& title)
 {
+    UploadProgressDialog progress(this, "Loading Blend");
+    progress.ShowModal();
+    progress.UpdateProgress(0.02, "Preparing...");
+
+    // Wire up the progress reporter so AppController updates the bar as it works
+    m_controller.setProgressReporter([&progress](double ratio, const std::string& message) {
+        progress.UpdateProgress(ratio, wxString::FromUTF8(message));
+    });
+
     m_controller.getEventRouter().dispatch("selectBlend",
         {{"blendID", blendID}, {"blendTitle", title}});
+    m_controller.clearProgressReporter();
+
+    progress.UpdateProgress(1.0, "Blend ready");
+    progress.Destroy();
     m_nav(Page::HOME);
 }
 

@@ -208,6 +208,11 @@ std::string YouTubeMetadataFetcher::httpGet(const std::string& url) {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA,     &response);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_HTTPGET,        1L);
+    // Aggressive timeouts to prevent hanging on slow/unavailable API endpoints.
+    // 3s connect timeout ensures socket is reaching the server quickly.
+    // 10s total timeout prevents long waits for slow API responses.
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT,        10L);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);

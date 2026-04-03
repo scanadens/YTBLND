@@ -11,6 +11,7 @@
 
 #include "gtest/gtest.h"
 
+#include "../ServerConfig.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../ModelLayer/ChatRoom.hpp"
 #include "../ModelLayer/JsonUtils.hpp"
@@ -48,9 +49,22 @@ std::string getenvOrDefault(const char* key, const std::string& fallback) {
 }
 
 void skipUnlessLiveBackendEnabled() {
+    // Explicit opt-out always wins.
     const char* flag = std::getenv("YTBLND_SKIP_LIVE_BACKEND_TESTS");
     if (flag && std::string(flag) == "1") {
         GTEST_SKIP() << "Live backend tests disabled by YTBLND_SKIP_LIVE_BACKEND_TESTS=1.";
+    }
+
+    // Skip gracefully if the configured server is not reachable.
+    HttpClient probe(kTestBackendBaseUrl);
+    try {
+        const std::string resp = probe.get("/ping");
+        if (!probe.wasLastRequestSuccessful(probe.G) ||
+            resp.find("pong") == std::string::npos) {
+            GTEST_SKIP() << "Live backend unreachable at " << kTestBackendBaseUrl;
+        }
+    } catch (...) {
+        GTEST_SKIP() << "Live backend unreachable at " << kTestBackendBaseUrl;
     }
 }
 
@@ -167,10 +181,7 @@ TEST(ChatRoomAddMessageOverloadTest, AppendsAfterExistingMessages) {
 TEST(ChatHistoryIntegrationTest, MessageSentOverWebSocketAppearsInChatHistory) {
     skipUnlessLiveBackendEnabled();
 
-    const std::string httpBase = getenvOrDefault(
-        "YTBLND_LIVE_BACKEND_HTTP_BASE_URL", "http://localhost:8080");
-
-    HttpClient client(httpBase);
+    HttpClient client(kTestBackendBaseUrl);
 
     const std::string userID  = makeUniqueID("hist_user");
     const std::string blendID = makeUniqueID("hist_blend");
@@ -198,13 +209,7 @@ TEST(ChatHistoryIntegrationTest, MessageSentOverWebSocketAppearsInChatHistory) {
     // Send a message via WebSocket
     ix::initNetSystem();
 
-    std::string wsBase = httpBase;
-    if (wsBase.rfind("https://", 0) == 0)
-        wsBase.replace(0, 8, "wss://");
-    else if (wsBase.rfind("http://", 0) == 0)
-        wsBase.replace(0, 7, "ws://");
-    while (!wsBase.empty() && wsBase.back() == '/') wsBase.pop_back();
-    const std::string wsUrl = wsBase + "/api/v1/ws/chats/" + blendID + "?user_id=" + userID;
+    const std::string wsUrl = std::string(kTestBackendWsPrefix) + blendID + "?user_id=" + userID;
 
     std::mutex mu;
     std::condition_variable cv;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../ServerConfig.hpp"
 #include <ixwebsocket/IXWebSocket.h>
 #include <functional>
 #include <iostream>
@@ -77,7 +78,7 @@ class ChatWebSocket {
 	// Websocket object
 	ix::WebSocket ws;
 	// copy of the last given url
-	std::string url = "ws://localhost:8080/api/v1/ws/chats/";
+	std::string url = kAppBackendWsPrefix;
 	// copy of the last given blendID for the socket path
 	std::string blendID;
 	// copy of the last given userID for the socket path

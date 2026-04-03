@@ -63,8 +63,8 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
 
     root->AddStretchSpacer(1); // space out the buttons and the labels
 
-    // Re-upload CSV
-    auto* reuploadBtn = new wxButton(this, wxID_ANY, "Re-upload Watch Later CSV");
+    // Re-upload YouTube data
+    auto* reuploadBtn = new wxButton(this, wxID_ANY, "Re-upload YouTube Data");
     UIButtons::ApplySizeBounds(reuploadBtn, ButtonType::Large);
     reuploadBtn->SetBackgroundColour(UIColors::Accent);
     reuploadBtn->SetForegroundColour(UIColors::TextPrimary);
@@ -233,8 +233,11 @@ void UserPanel::OnReuploadCSV(wxCommandEvent& /*evt*/)
         return;
     }
 
-    wxFileDialog dlg(this, "Select Watch Later CSV", "", "",
-                     "CSV files (*.csv)|*.csv|All files (*.*)|*.*",
+    wxFileDialog dlg(this, "Select YouTube Export Data", "", "",
+                     "Supported files (*.csv;*.html;*.htm)|*.csv;*.html;*.htm|"
+                     "CSV files (*.csv)|*.csv|"
+                     "HTML files (*.html;*.htm)|*.html;*.htm|"
+                     "All files (*.*)|*.*",
                      wxFD_OPEN | wxFD_FILE_MUST_EXIST);
     if (dlg.ShowModal() != wxID_OK) return;
 
@@ -243,7 +246,13 @@ void UserPanel::OnReuploadCSV(wxCommandEvent& /*evt*/)
     m_controller.getEventRouter().dispatch("uploadData",
         {{"filePath", filePath}, {"userID", user->getUserID()}});
 
-    wxMessageBox("Your Watch Later data has been re-uploaded.\n"
+    std::string uploadError = AppState::getInstance().takePendingUploadError();
+    if (!uploadError.empty()) {
+        wxMessageBox(uploadError, "Upload Failed", wxOK | wxICON_ERROR, this);
+        return;
+    }
+
+    wxMessageBox("Your YouTube data has been re-uploaded.\n"
                  "Active blends will be updated with your new data.",
                  "Data Updated", wxOK | wxICON_INFORMATION, this);
 }

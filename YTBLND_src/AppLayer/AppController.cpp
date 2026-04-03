@@ -1,16 +1,22 @@
 #include "AppController.hpp"
+#include "../ServerConfig.hpp"
 #include "../AppInfrastructure/YouTubeDataImporter.hpp"
 #include "../AlgorithmLayer/RandomBlendAlgorithm.hpp"
 #include "../ModelLayer/JsonUtils.hpp"
 #include "../ServiceLayer/YouTubeMetadataFetcher.hpp"
 #include "../ServiceLayer/RequestJsonBuilder.hpp"
 #include <algorithm>
+#include <atomic>
+#include <chrono>
 #include <cstdlib>
 #include <ctime>
 #include <exception>
 #include <iostream>
 #include <list>
+#include <mutex>
 #include <set>
+#include <thread>
+#include <unordered_map>
 #include <nlohmann/json.hpp>
 #include <optional>
 
@@ -20,13 +26,60 @@ using namespace std;
 namespace {
 
 std::string resolveBackendBaseUrl() {
-    const char* configured = std::getenv("YTBLND_BACKEND_BASE_URL");
-    if (configured != nullptr && configured[0] != '\0') {
-        return configured;
+    return kAppBackendBaseUrl;
+}
+
+/// Threshold for deciding whether to enrich HTML upload metadata synchronously.
+/// Large watch-history HTML exports can contain many IDs and block the UI thread if
+/// enriched during upload. Small HTML files are enriched immediately for faster display.
+/// Videos beyond this count are persisted with minimal metadata and enriched later
+/// when the blend is displayed.
+constexpr std::size_t kHtmlUploadMetadataThreshold = 500;
+
+/// Maximum number of videos to enrich on initial file upload.
+/// Even for small files, we limit enrichment to this many IDs to keep upload fast.
+/// Remaining IDs will be enriched at blend-display time if needed.
+constexpr std::size_t kMaxUploadEnrichmentCount = 50;
+
+/// Maximum number of blend-feed videos to enrich during a single UI action.
+/// Keeping this bounded prevents create/select/refresh flows from hanging.
+constexpr std::size_t kMaxBlendFeedEnrichmentCount = 50;
+
+/// Number of worker threads used to enrich blend-feed metadata in parallel.
+constexpr std::size_t kBlendMetadataWorkerThreads = 3;
+
+/// Worker count for login-time participant watch-later loading.
+constexpr std::size_t kLoginParticipantLoadWorkerThreads = 3;
+
+/// Cap metadata enrichment during login to keep the sign-in path responsive.
+constexpr std::size_t kMaxLoginMetadataEnrichmentCount = 50;
+
+bool isMetadataIncomplete(const Video& v) {
+    return v.getTitle().empty() ||
+           v.getChannelID().empty() ||
+           v.getChannelName().empty() ||
+           v.getThumbnailURL().empty() ||
+           v.getChannelLogoURL().empty();
+}
+
+bool hasCompleteMetadata(const Video& v) {
+    return !v.getTitle().empty() &&
+           !v.getChannelID().empty() &&
+           !v.getChannelName().empty() &&
+           !v.getThumbnailURL().empty() &&
+           !v.getChannelLogoURL().empty();
+}
+
+std::string lowerExtension(const std::string& filePath) {
+    const std::size_t dotPos = filePath.find_last_of('.');
+    if (dotPos == std::string::npos) {
+        return "";
     }
 
-    // Keep the contract default local-first unless explicitly overridden.
-    return "http://localhost:8080";
+    std::string ext = filePath.substr(dotPos);
+    std::transform(ext.begin(), ext.end(), ext.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    return ext;
 }
 
 }
@@ -123,7 +176,9 @@ std::list<Video> AppController::parseWatchLaterVideos(const std::string& respons
     return videos;
 }
 
-std::list<User> AppController::loadParticipantsWithWatchLater(const std::vector<std::string>& participantIDs, std::vector<std::string>* missingData) {
+std::list<User> AppController::loadParticipantsWithWatchLater(const std::vector<std::string>& participantIDs,
+                                                              std::vector<std::string>* missingData,
+                                                              bool enrichParticipantLists) {
     std::list<User> participants;
 
     for (const auto& uid : participantIDs) {
@@ -159,8 +214,11 @@ std::list<User> AppController::loadParticipantsWithWatchLater(const std::vector<
             continue;
         }
 
-        // enrich any missing metadata
-        enrichIfMissingMetadata(uid, watchLater);
+        // Optional: enrich participant pools. For blend-create/select paths this
+        // is intentionally disabled to avoid expensive full-list metadata pulls.
+        if (enrichParticipantLists) {
+            enrichIfMissingMetadata(uid, watchLater);
+        }
 
         // create a local representation of the user
         User user(uid, uid, "", "");
@@ -168,6 +226,88 @@ std::list<User> AppController::loadParticipantsWithWatchLater(const std::vector<
         yt.setWatchLaterVideos(watchLater);
         user.setYouTubeData(yt);
         participants.push_back(user);
+    }
+
+    return participants;
+}
+
+std::list<User> AppController::loadParticipantsWithWatchLaterParallel(
+    const std::vector<std::string>& participantIDs,
+    std::vector<std::string>* missingData,
+    std::size_t workerThreads) {
+    std::list<User> participants;
+    if (participantIDs.empty() || workerThreads == 0) {
+        return participants;
+    }
+
+    const std::size_t workerCount = std::min<std::size_t>(workerThreads, participantIDs.size());
+    std::vector<std::optional<User>> usersByIndex(participantIDs.size());
+    std::mutex missingMutex;
+    std::atomic<std::size_t> completed{0};
+    std::vector<std::thread> workers;
+    workers.reserve(workerCount);
+
+    for (std::size_t workerIndex = 0; workerIndex < workerCount; ++workerIndex) {
+        workers.emplace_back([&, workerIndex]() {
+            HttpClient threadHttp(server_url);
+
+            for (std::size_t i = workerIndex; i < participantIDs.size(); i += workerCount) {
+                const std::string& uid = participantIDs[i];
+                try {
+                    const std::string response = threadHttp.get(threadHttp.build_watch_later_endpoint(uid));
+                    if (!threadHttp.wasLastRequestSuccessful(threadHttp.G)) {
+                        if (missingData != nullptr) {
+                            std::lock_guard<std::mutex> lock(missingMutex);
+                            missingData->push_back(uid);
+                        }
+                        completed.fetch_add(1, std::memory_order_relaxed);
+                        continue;
+                    }
+
+                    std::list<Video> watchLater = parseWatchLaterVideos(response);
+                    if (watchLater.empty()) {
+                        if (missingData != nullptr) {
+                            std::lock_guard<std::mutex> lock(missingMutex);
+                            missingData->push_back(uid);
+                        }
+                        completed.fetch_add(1, std::memory_order_relaxed);
+                        continue;
+                    }
+
+                    User user(uid, uid, "", "");
+                    YouTubeData yt;
+                    yt.setWatchLaterVideos(watchLater);
+                    user.setYouTubeData(yt);
+                    usersByIndex[i] = user;
+                } catch (const std::exception&) {
+                    if (missingData != nullptr) {
+                        std::lock_guard<std::mutex> lock(missingMutex);
+                        missingData->push_back(uid);
+                    }
+                }
+
+                completed.fetch_add(1, std::memory_order_relaxed);
+            }
+        });
+    }
+
+    while (completed.load(std::memory_order_relaxed) < participantIDs.size()) {
+        const double ratio = static_cast<double>(completed.load(std::memory_order_relaxed)) /
+                             static_cast<double>(participantIDs.size());
+        reportProgress(0.6 + (ratio * 0.22), "Loading blend participant data...");
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+
+    for (auto& worker : workers) {
+        if (worker.joinable()) {
+            worker.join();
+        }
+    }
+
+    for (const auto& maybeUser : usersByIndex) {
+        if (maybeUser.has_value()) {
+            participants.push_back(*maybeUser);
+        }
     }
 
     return participants;
@@ -231,6 +371,24 @@ void AppController::registerEvents() {
 
 EventRouter& AppController::getEventRouter() {
     return eventRouter;
+}
+
+void AppController::setProgressReporter(std::function<void(double, const std::string&)> reporter) {
+    progressReporter = std::move(reporter);
+}
+
+void AppController::clearProgressReporter() {
+    progressReporter = nullptr;
+}
+
+void AppController::reportProgress(double progress, const std::string& message) {
+    if (!progressReporter) {
+        return;
+    }
+
+    if (progress < 0.0) progress = 0.0;
+    if (progress > 1.0) progress = 1.0;
+    progressReporter(progress, message);
 }
 
 // ── Event Handlers ────────────────────────────────────────────────────────────
@@ -312,6 +470,8 @@ void AppController::handleLogin(const EventPayload& payload) {
         return;
     }
 
+    reportProgress(0.05, "Authenticating account...");
+
     const auto loginResponse = http.post(
         http.LOGIN,
         RequestJsonBuilder::buildLoginJson(idIt->second, pwIt->second)
@@ -327,6 +487,8 @@ void AppController::handleLogin(const EventPayload& payload) {
             << endl;
         return;
     }
+
+    reportProgress(0.2, "Loading your saved data...");
 
     std::optional<User> user = parseUserFromAuthResponse(loginResponse, pwIt->second);
     if (!user.has_value()) {
@@ -351,7 +513,20 @@ void AppController::handleLogin(const EventPayload& payload) {
 
     if (http.wasLastRequestSuccessful(http.G)) {
         watchLater = parseWatchLaterVideos(watchLaterResponse);
-        enrichIfMissingMetadata(idIt->second, watchLater);
+        reportProgress(0.3, "Refreshing metadata subset...");
+
+        // Keep login responsive by enriching only a bounded subset and skipping
+        // DB write-back on this path. Full enrichment can happen later during
+        // upload/blend-display workflows.
+        watchLater = enrichMissingMetadataSubsetMultithreaded(
+            watchLater,
+            kMaxLoginMetadataEnrichmentCount,
+            kBlendMetadataWorkerThreads,
+            [](const std::list<Video>& chunk) {
+                return YouTubeMetadataFetcher(kYouTubeAPIKey).enrich(chunk);
+            }
+        );
+        reportProgress(0.42, "Metadata step complete");
     }
 
     if (!watchLater.empty()) {
@@ -363,6 +538,7 @@ void AppController::handleLogin(const EventPayload& payload) {
 
     appState.setCurrentUser(new User(*user));
     std::cout << "[AppController] Logged in as '" << user->getUsername() << "'\n";
+    reportProgress(0.45, "Checking blend memberships...");
 
     // Check if this user belongs to a previously saved blend
     const std::string latestBlendResponse = http.get(http.build_latest_blend_endpoint(idIt->second));
@@ -380,7 +556,12 @@ void AppController::handleLogin(const EventPayload& payload) {
     }
 
     const std::vector<std::string> participantIDs = parseParticipantIDs(participantResponse);
-    std::list<User> participants = loadParticipantsWithWatchLater(participantIDs, nullptr);
+    reportProgress(0.6, "Loading blend participant data...");
+    std::list<User> participants = loadParticipantsWithWatchLaterParallel(
+        participantIDs,
+        nullptr,
+        kLoginParticipantLoadWorkerThreads
+    );
 
     if (participants.empty()) return; // no one has data yet — nothing to show
 
@@ -402,22 +583,28 @@ void AppController::handleLogin(const EventPayload& payload) {
     } catch (...) {}
 
     // Re-run the algorithm to produce a fresh blend from current persisted data
+    reportProgress(0.85, "Generating blend feed...");
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, restoredTitle)
     );
     currentBlend->setBlendID(*blendID);
+    // Attempt to fill in missing metadata for the restored blend's feed videos.
+    // If this blend contains videos from a large HTML import, they may lack title/channel
+    // data until this point. Metadata enrichment here is deferred and happens on-demand.
+    enrichActiveBlendFeedIfMissingMetadata();
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
 
     // If this user has no data, leave a message for LoginPanel to display
     if (watchLater.empty()) {
         appState.setPendingBlendMessage(
-            "You have been added to a blend. Upload your Watch Later "
+            "You have been added to a blend. Upload your YouTube playlist "
             "data to contribute your videos to it.");
     }
 
     std::cout << "[AppController] Restored blend '" << *blendID
               << "' with " << currentBlend->size() << " videos\n";
+    reportProgress(1.0, "Login complete");
 }
 
 void AppController::handleLogout(const EventPayload& payload) {
@@ -482,14 +669,27 @@ void AppController::handleUploadData(const EventPayload& payload) {
     const std::string& filePath = fileIt->second;
     const std::string& userID   = userIt->second;
 
+    std::cout << "[AppController] Starting file upload process for '" << filePath << "'\n";
+
     std::list<Video> watchLater;
     try {
-        watchLater = YouTubeDataImporter().import(filePath);
+        // Multi-threaded import with progress feedback via logging.
+        // Divides file processing across 3 worker threads for ~3x faster parsing of large files.
+        // Progress callback logs to stdout so users can monitor progress.
+        auto progressCallback = [](double progress) {
+            int percent = static_cast<int>(progress * 100);
+            std::cout << "[AppController] File parsing progress: " << percent << "%\n";
+        };
+
+        std::cout << "[AppController] Starting multi-threaded file import...\n";
+        watchLater = YouTubeDataImporter().importMultiThreaded(filePath, progressCallback);
+        std::cout << "[AppController] File import complete: " << watchLater.size() 
+                  << " videos extracted\n";
     } catch (const std::exception& ex) {
         std::cerr << "[AppController] handleUploadData: import failed for '"
                   << filePath << "' - " << ex.what() << "\n";
         appState.setPendingUploadError(
-            "Upload failed: could not parse this file. Please select your Watch later videos.csv from Google Takeout."
+            "Upload failed: could not parse this file. Please select a supported Google Takeout export (.csv, .html, or .htm)."
         );
         return;
     }
@@ -498,42 +698,89 @@ void AppController::handleUploadData(const EventPayload& payload) {
         std::cerr << "[AppController] handleUploadData: no videos found in '"
                   << filePath << "'\n";
         appState.setPendingUploadError(
-            "No videos were found in the selected CSV. Please verify you selected Takeout/YouTube and YouTube Music/playlists/Watch later videos.csv."
+            "No videos were found in the selected file. Please verify you selected a valid YouTube playlist CSV or watch-history HTML export from Google Takeout."
         );
         return;
     }
 
-    // Enrich with title, channel name, thumbnail URL, and channel logo via the API
-    std::cout << "[AppController] Fetching YouTube metadata for "
-              << watchLater.size() << " videos...\n";
-    bool enriched = false;
-    try {
-        watchLater = YouTubeMetadataFetcher(kYouTubeAPIKey).enrich(watchLater);
-        enriched = !kYouTubeAPIKey.empty();
-    } catch (const std::exception& ex) {
-        std::cerr << "[AppController] handleUploadData: metadata fetch failed: "
-                  << ex.what() << "\n";
-        // Non-fatal — continue with whatever data we have
+    const std::string fileExt = lowerExtension(filePath);
+    const bool isCsvUpload = (fileExt == ".csv");
+    const bool isHtmlUpload = (fileExt == ".html" || fileExt == ".htm");
+
+    // Smart metadata enrichment strategy:
+    // - On upload, enrich ONLY the first kMaxUploadEnrichmentCount videos to keep upload fast.
+    // - CSV: always enrich first 50
+    // - HTML ≤500 videos: enrich all
+    // - HTML >500 videos: enrich first 50, rest at display time
+    //
+    // This avoids blocking the UI while still providing good metadata for the most important videos.
+
+    std::list<Video> videosToEnrich;
+    std::list<Video> videosNotEnriched;
+
+    if (isHtmlUpload && watchLater.size() > kHtmlUploadMetadataThreshold) {
+        // Large HTML: enrich only first 50
+        auto it = watchLater.begin();
+        std::advance(it, std::min(watchLater.size(), kMaxUploadEnrichmentCount));
+        videosToEnrich.splice(videosToEnrich.end(), watchLater, watchLater.begin(), it);
+        videosNotEnriched.splice(videosNotEnriched.end(), watchLater);
+        std::cout << "[AppController] Large HTML upload (" << (videosToEnrich.size() + videosNotEnriched.size())
+                  << " videos): enriching first " << videosToEnrich.size() << ", deferring "
+                  << videosNotEnriched.size() << "\n";
+    } else if (isCsvUpload && watchLater.size() > kMaxUploadEnrichmentCount) {
+        // CSV with many videos: enrich first 50
+        auto it = watchLater.begin();
+        std::advance(it, std::min(watchLater.size(), kMaxUploadEnrichmentCount));
+        videosToEnrich.splice(videosToEnrich.end(), watchLater, watchLater.begin(), it);
+        videosNotEnriched.splice(videosNotEnriched.end(), watchLater);
+        std::cout << "[AppController] CSV with " << (videosToEnrich.size() + videosNotEnriched.size())
+                  << " videos: enriching first " << videosToEnrich.size() << "\n";
+    } else {
+        // Small HTML or CSV: enrich all
+        videosToEnrich = watchLater;
+        std::cout << "[AppController] Small file (" << videosToEnrich.size()
+                  << " videos): enriching all\n";
     }
 
-    // Drop videos the API couldn't find — they are deleted, private, or unavailable
+    // Execute metadata enrichment only on the manageable subset.
+    bool enriched = false;
+    if (!videosToEnrich.empty()) {
+        std::cout << "[AppController] Starting metadata enrichment for "
+                  << videosToEnrich.size() << " videos...\n";
+        try {
+            videosToEnrich = YouTubeMetadataFetcher(kYouTubeAPIKey).enrich(videosToEnrich);
+            enriched = !kYouTubeAPIKey.empty();
+            std::cout << "[AppController] Metadata enrichment complete\n";
+        } catch (const std::exception& ex) {
+            std::cerr << "[AppController] handleUploadData: metadata fetch failed: "
+                      << ex.what() << "\n";
+            // Non-fatal — continue with whatever data we have
+        }
+    }
+
+    // Recombine enriched and non-enriched videos.
+    videosToEnrich.splice(videosToEnrich.end(), videosNotEnriched);
+    watchLater = videosToEnrich;
+
+    // Drop videos the API couldn't find — they are deleted, private, or unavailable.
     if (enriched) {
         watchLater.remove_if([](const Video& v) { return v.getTitle().empty(); });
         std::cout << "[AppController] " << watchLater.size()
                   << " videos available after filtering unavailable entries\n";
     }
 
-    // attempt to post data to the server
+    std::cout << "[AppController] Uploading " << watchLater.size() 
+              << " videos to server...\n";
+
+    // Attempt to post data to the server
     std::string saveWatchLaterResponse;
     try {
-        // send the request and collect the response
         saveWatchLaterResponse = 
             http.post(
                 http.build_watch_later_endpoint(userID),
                 RequestJsonBuilder::buildWatchLaterJson(watchLater)
             );
-        // verify response from request
-        if (!http.wasLastRequestSuccessful(http.P)) { // if response was not successfull
+        if (!http.wasLastRequestSuccessful(http.P)) {
             std::cerr << "[AppController] handleUploadData: failed to persist watch-later list, HTTP "
                     << http.getLastStatusCode() << " response=" << saveWatchLaterResponse << "\n";
             appState.setPendingUploadError("Upload failed: server could not save your data. Please try again.");
@@ -579,9 +826,11 @@ void AppController::handleUploadData(const EventPayload& payload) {
     }
 
     const std::vector<std::string> participantIDs = parseParticipantIDs(participantResponse);
-    std::list<User> participants = loadParticipantsWithWatchLater(participantIDs, nullptr);
+    std::list<User> participants = loadParticipantsWithWatchLater(participantIDs, nullptr, false);
 
-    if (participants.empty()) return;
+    if (participants.empty()) {
+        return;
+    }
 
     // Preserve existing blend title if available
     std::string existingTitle;
@@ -592,6 +841,9 @@ void AppController::handleUploadData(const EventPayload& payload) {
         RandomBlendAlgorithm(5).generateBlend(participants, existingTitle)
     );
     currentBlend->setBlendID(*blendID);
+    // After regenerating the blend with new participant data, try to enrich
+    // any videos that may be missing metadata (e.g., from large HTML uploads).
+    enrichActiveBlendFeedIfMissingMetadata();
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
 
@@ -617,9 +869,10 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
         return;
     }
 
+    reportProgress(0.1, "Loading participant data...");
     std::vector<std::string> missingData;
     std::list<User> participants =
-        loadParticipantsWithWatchLater(allParticipantIDs, &missingData);
+        loadParticipantsWithWatchLater(allParticipantIDs, &missingData, false);
 
     // Report users without uploaded data back to the UI via AppState
     // (non-existent users are excluded — they should have been rejected at the UI level)
@@ -640,6 +893,7 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
     }
 
     appState.setIsBlendGenerating(true);
+    reportProgress(0.3, "Generating blend...");
 
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, blendTitle)
@@ -661,6 +915,7 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
         return;
     }
 
+    reportProgress(0.55, "Saving blend to server...");
     User* creator = appState.getCurrentUser();
     std::string creatorID = creator ? creator->getUserID() : allParticipantIDs[0];
     const std::string createBlendResponse =
@@ -677,9 +932,15 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
         return;
     }
 
+    // Attempt to fill in missing metadata for the newly created blend's videos.
+    // If participants have large HTML-imported watch lists, their contribution videos
+    // may lack enriched metadata until now.
+    reportProgress(0.8, "Enriching video metadata...");
+    enrichActiveBlendFeedIfMissingMetadata();
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
     appState.setIsBlendGenerating(false);
+    reportProgress(1.0, "Blend created!");
 
     // Register with server so the chat room is provisioned there too.
     registerBlendOnServer(*currentBlend, creatorID);
@@ -778,6 +1039,157 @@ void AppController::enrichIfMissingMetadata(const std::string& userID,
     }
 }
 
+std::list<Video> AppController::enrichMissingMetadataSubsetMultithreaded(
+    const std::list<Video>& videos,
+    std::size_t maxVideosToEnrich,
+    std::size_t workerThreads,
+    const std::function<std::list<Video>(const std::list<Video>&)>& enrichChunkFn) {
+    if (videos.empty() || maxVideosToEnrich == 0 || workerThreads == 0) {
+        return videos;
+    }
+
+    std::list<Video> updatedVideos = videos;
+
+    std::vector<Video> pending;
+    pending.reserve(std::min(maxVideosToEnrich, videos.size()));
+    for (const auto& video : videos) {
+        if (!isMetadataIncomplete(video)) {
+            continue;
+        }
+        pending.push_back(video);
+        if (pending.size() >= maxVideosToEnrich) {
+            break;
+        }
+    }
+
+    if (pending.empty()) {
+        return updatedVideos;
+    }
+
+    const std::size_t workerCount = std::max<std::size_t>(
+        1,
+        std::min<std::size_t>(workerThreads, pending.size())
+    );
+
+    std::unordered_map<std::string, Video> enrichedByID;
+    std::mutex resultMutex;
+    std::vector<std::thread> workers;
+    workers.reserve(workerCount);
+
+    for (std::size_t workerIndex = 0; workerIndex < workerCount; ++workerIndex) {
+        const std::size_t start = workerIndex * pending.size() / workerCount;
+        const std::size_t end = (workerIndex + 1) * pending.size() / workerCount;
+        if (start >= end) {
+            continue;
+        }
+
+        workers.emplace_back([&, start, end]() {
+            std::list<Video> chunk;
+            for (std::size_t i = start; i < end; ++i) {
+                chunk.push_back(pending[i]);
+            }
+
+            std::list<Video> chunkEnriched;
+            try {
+                chunkEnriched = enrichChunkFn(chunk);
+            } catch (...) {
+                return;
+            }
+
+            std::lock_guard<std::mutex> lock(resultMutex);
+            for (const auto& enriched : chunkEnriched) {
+                if (hasCompleteMetadata(enriched)) {
+                    enrichedByID.insert_or_assign(enriched.getVideoID(), enriched);
+                }
+            }
+        });
+    }
+
+    for (auto& worker : workers) {
+        if (worker.joinable()) {
+            worker.join();
+        }
+    }
+
+    for (auto& video : updatedVideos) {
+        auto enrichedIt = enrichedByID.find(video.getVideoID());
+        if (enrichedIt != enrichedByID.end()) {
+            video = enrichedIt->second;
+        }
+    }
+
+    return updatedVideos;
+}
+
+void AppController::enrichActiveBlendFeedIfMissingMetadata() {
+    // Re-enriches only the currently displayed blend's video feed when any metadata
+    // fields are incomplete. This keeps display quality high without re-processing
+    // full watch-history sized lists on the UI path.
+    //
+    // This complements handleUploadData which may skip enrichment for large HTML
+    // uploads. By deferring metadata fetch to blend-display time, we:
+    // - Keep upload fast (avoid blocking the UI during file ingestion).
+    // - Enrich only a small subset of videos (the active blend feed).
+    // - Still provide rich metadata when users view their blend.
+
+    if (!currentBlend) {
+        return;
+    }
+
+    std::list<Video> feedVideos = currentBlend->getVideoList();
+    const bool needsEnrichment =
+        std::any_of(feedVideos.begin(), feedVideos.end(), isMetadataIncomplete);
+
+    if (!needsEnrichment) {
+        return;
+    }
+
+    std::size_t incompleteCount = 0;
+    for (const auto& video : feedVideos) {
+        if (isMetadataIncomplete(video)) {
+            ++incompleteCount;
+        }
+    }
+    const std::size_t deferredCount = incompleteCount > kMaxBlendFeedEnrichmentCount
+                                        ? (incompleteCount - kMaxBlendFeedEnrichmentCount)
+                                        : 0;
+
+    std::cout << "[AppController] enrichActiveBlendFeedIfMissingMetadata: enriching up to "
+              << kMaxBlendFeedEnrichmentCount << " blend videos ("
+              << deferredCount << " deferred)\n";
+
+    try {
+        const std::list<Video> enrichedVideos = enrichMissingMetadataSubsetMultithreaded(
+            feedVideos,
+            kMaxBlendFeedEnrichmentCount,
+            kBlendMetadataWorkerThreads,
+            [](const std::list<Video>& chunk) {
+                return YouTubeMetadataFetcher(kYouTubeAPIKey).enrich(chunk);
+            }
+        );
+
+        std::size_t appliedCount = 0;
+        auto oldIt = feedVideos.begin();
+        auto newIt = enrichedVideos.begin();
+        for (; oldIt != feedVideos.end() && newIt != enrichedVideos.end(); ++oldIt, ++newIt) {
+            if (isMetadataIncomplete(*oldIt) && hasCompleteMetadata(*newIt)) {
+                ++appliedCount;
+            }
+        }
+
+        if (appliedCount > 0) {
+            currentBlend->setVideoList(enrichedVideos);
+        }
+
+        std::cout << "[AppController] enrichActiveBlendFeedIfMissingMetadata: completed "
+                  << appliedCount << " updates using "
+                  << kBlendMetadataWorkerThreads << " workers\n";
+    } catch (const std::exception& ex) {
+        std::cerr << "[AppController] enrichActiveBlendFeedIfMissingMetadata failed: "
+                  << ex.what() << "\n";
+    }
+}
+
 void AppController::handlePlayVideo(const EventPayload& payload) {
     // TODO: read "videoID" from payload
     // TODO: open the video — exact mechanism (browser, in-app) TBD
@@ -785,6 +1197,8 @@ void AppController::handlePlayVideo(const EventPayload& payload) {
 }
 
 void AppController::handleRefresh(const EventPayload& /*payload*/) {
+    reportProgress(0.05, "Preparing blend refresh...");
+
     Blend* existing = appState.getActiveBlend();
     if (!existing) {
         std::cerr << "[AppController] handleRefresh: no active blend\n";
@@ -801,11 +1215,13 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
     for (const User& participant : existing->getParticipants()) {
         participantIDs.push_back(participant.getUserID());
     }
+    reportProgress(0.2, "Loading participant video pools...");
 
     // Lightweight load for refresh: fetch each participant's watch-later list
     // but DO NOT call enrichIfMissingMetadata (that can trigger slow network calls).
     std::list<User> participants;
-    for (const auto& uid : participantIDs) {
+    for (std::size_t i = 0; i < participantIDs.size(); ++i) {
+        const auto& uid = participantIDs[i];
         const std::string watchLaterResponse = http.get(http.build_watch_later_endpoint(uid));
         if (!http.wasLastRequestSuccessful(http.G)) continue;
 
@@ -829,6 +1245,11 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
         User p(uid, uid, "", "");
         p.setYouTubeData(pyd);
         participants.push_back(p);
+
+        if (!participantIDs.empty()) {
+            const double ratio = static_cast<double>(i + 1) / static_cast<double>(participantIDs.size());
+            reportProgress(0.2 + (ratio * 0.35), "Loading participant video pools...");
+        }
     }
 
     if (participants.empty()) {
@@ -838,6 +1259,7 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
 
     std::string refreshTitle = existing->getTitle();
     std::string refreshID = existing->getBlendID();
+    reportProgress(0.62, "Generating refreshed blend...");
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, refreshTitle)
     );
@@ -852,8 +1274,14 @@ void AppController::handleRefresh(const EventPayload& /*payload*/) {
         }
     }
     currentBlend->setVideoList(uniqueVideos);
+    reportProgress(0.8, "Enriching missing metadata...");
+    // Attempt to enrich any missing metadata in the refreshed blend feed.
+    // After filtering and re-sampling, some videos may lack enriched fields, especially
+    // if the participant data originated from large HTML imports.
+    enrichActiveBlendFeedIfMissingMetadata();
 
     appState.setActiveBlend(currentBlend.get());
+    reportProgress(1.0, "Refresh complete");
 
     std::cout << "[AppController] Blend refreshed with "
               << currentBlend->size() << " new videos\n";
@@ -1084,14 +1512,16 @@ void AppController::handleSelectBlend(const EventPayload& payload) {
     const std::string& blendID = blendIt->second;
 
     // Fetch participants for this blend
+    reportProgress(0.1, "Fetching participants...");
     const std::string participantResponse = http.get(http.build_blend_participant_endpoint(blendID));
     if (!http.wasLastRequestSuccessful(http.G)) {
         std::cerr << "[AppController] handleSelectBlend: failed to fetch participants\n";
         return;
     }
 
+    reportProgress(0.3, "Loading participant data...");
     const std::vector<std::string> participantIDs = parseParticipantIDs(participantResponse);
-    std::list<User> participants = loadParticipantsWithWatchLater(participantIDs, nullptr);
+    std::list<User> participants = loadParticipantsWithWatchLater(participantIDs, nullptr, false);
 
     if (participants.empty()) {
         std::cerr << "[AppController] handleSelectBlend: no participants have data\n";
@@ -1102,12 +1532,19 @@ void AppController::handleSelectBlend(const EventPayload& payload) {
     auto titleIt = payload.find("blendTitle");
     std::string title = (titleIt != payload.end()) ? titleIt->second : "";
 
+    reportProgress(0.6, "Generating blend feed...");
     currentBlend = std::make_unique<Blend>(
         RandomBlendAlgorithm(5).generateBlend(participants, title)
     );
     currentBlend->setBlendID(blendID);
+    // Attempt to fill in missing metadata for the selected blend's feed.
+    // If the blend contains videos from an HTML import that was saved without enrichment,
+    // metadata will be fetched here to provide a complete display experience.
+    reportProgress(0.8, "Enriching video metadata...");
+    enrichActiveBlendFeedIfMissingMetadata();
     appState.setActiveBlend(currentBlend.get());
     appState.createChatRoom(*currentBlend);
+    reportProgress(1.0, "Blend loaded!");
 
     std::cout << "[AppController] Switched to blend '" << blendID
               << "' with " << currentBlend->size() << " videos\n";
