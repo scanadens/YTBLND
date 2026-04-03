@@ -71,14 +71,25 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
     auto* div = new wxStaticLine(card, wxID_ANY);
     div->SetBackgroundColour(UIColors::Separator);
 
-    auto* browseBtn = new wxButton(card, wxID_ANY, "Browse for Data File...");
+    auto* browseBtn = new wxButton(card, wxID_ANY, "Browse for CSV...");
     UIButtons::ApplySizeBounds(browseBtn, ButtonType::FullWidthPrimary);
     browseBtn->SetBackgroundColour(UIColors::Accent);
     browseBtn->SetForegroundColour(UIColors::TextPrimary);
 
+    // Add a Cancel button so users who decline to upload return to the login screen
+    auto* cancelBtn = new wxButton(card, wxID_ANY, "Cancel");
+    UIButtons::ApplySizeBounds(cancelBtn, ButtonType::FullWidthSecondary);
+    cancelBtn->SetBackgroundColour(UIColors::Surface);
+    cancelBtn->SetForegroundColour(UIColors::TextPrimary);
+
+    // Place buttons side-by-side (browse = primary, cancel = secondary)
+    auto* btnRow = new wxBoxSizer(wxHORIZONTAL);
+    btnRow->Add(browseBtn, 1, wxRIGHT, 8);
+    btnRow->Add(cancelBtn, 0);
+
     cardSizer->Add(stepsLabel, 0, wxALL, 24);
     cardSizer->Add(div,        0, wxEXPAND | wxLEFT | wxRIGHT, 0);
-    cardSizer->Add(browseBtn,  0, wxEXPAND | wxALL, 20);
+    cardSizer->Add(btnRow,     0, wxEXPAND | wxALL, 20);
     card->SetSizer(cardSizer);
 
     auto* hCentre = new wxBoxSizer(wxHORIZONTAL);
@@ -91,6 +102,22 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
     SetSizer(outer);
 
     browseBtn->Bind(wxEVT_BUTTON, &DataInstructionsPanel::OnBrowse, this);
+    // If the user cancels (does not upload), abort registration flow and return to login.
+    cancelBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
+        User* user = AppState::getInstance().getCurrentUser();
+        if (user) {
+            // If the user has no uploaded watch-later videos, remove the server account
+            // so the username isn't left reserved.
+            if (user->getYouTubeData().getWatchLaterVideos().empty()) {
+                // deleteAccount expects userID and password in payload
+                m_controller.getEventRouter().dispatch("deleteAccount",
+                    {{"userID", user->getUserID()}, {"password", user->getPassword()}});
+            }
+        }
+        // Clear local session and return to login
+        m_controller.getEventRouter().dispatch("logout", {});
+        m_nav(Page::LOGIN);
+    });
 }
 
 void DataInstructionsPanel::OnBrowse(wxCommandEvent& /*evt*/)
