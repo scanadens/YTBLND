@@ -58,6 +58,33 @@ wxString ResolveResourcePath(const wxString& fileName)
 
     return "";
 }
+
+void ApplyAppIcons(wxFrame& frame)
+{
+    const wxArrayString iconCandidates = {
+        "ytblnd-starv2.png",
+        "ytblnd-star.png",
+    };
+
+    wxIconBundle iconBundle;
+    for (const auto& fileName : iconCandidates) {
+        const wxString iconPath = ResolveResourcePath(fileName);
+        if (iconPath.empty()) {
+            continue;
+        }
+
+        wxIcon icon;
+        if (icon.LoadFile(iconPath, wxBITMAP_TYPE_PNG) && icon.IsOk()) {
+            iconBundle.AddIcon(icon);
+        }
+    }
+
+    if (!iconBundle.IsEmpty()) {
+        frame.SetIcons(iconBundle);
+    } else {
+        wxLogWarning("App icon files not found in resources.");
+    }
+}
 }
 
 // -- Background Panel ---------------------------------------------------------
@@ -107,6 +134,8 @@ MainFrame::MainFrame(AppController& controller)
 {
     // Resolve the path to the theme.txt containing the UI colour themes
     UIColors::LoadThemesFromFile(ResolveResourcePath("theme.txt"));
+
+    ApplyAppIcons(*this);
 
     // resolve the path to the background image and load it as a wxImage
     const wxString bgPath = ResolveResourcePath("checkered_wave_background.jpg");

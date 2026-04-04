@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=YTBLND
+Comment=Blend YouTube Watch Later data into a shared feed
+Categories=Utility;
+Terminal=false
+StartupNotify=true
+StartupWMClass=ytblnd
+Exec=/usr/bin/env bash -lc 'cd /home/slipnut44/git_repo/group45 && ./run_ytblnd_proto.sh'
+Icon=/home/slipnut44/git_repo/group45/YTBLND_src/resources/ytblnd-starv2.png
+Path=/home/slipnut44/git_repo/group45

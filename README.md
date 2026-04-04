@@ -94,6 +94,28 @@ To run the application after building:
 ./run_ytblnd_proto.sh
 ```
 
+## Linux Launcher
+
+A Linux desktop entry is included at [resources/linux/ytblnd.desktop](resources/linux/ytblnd.desktop).
+
+To install it for your current user:
+
+```bash
+mkdir -p ~/.local/share/applications
+cp resources/linux/ytblnd.desktop ~/.local/share/applications/
+update-desktop-database ~/.local/share/applications 2>/dev/null || true
+```
+
+This launcher currently uses absolute paths for this workspace on this machine. If the repository is moved, update the `Exec`, `Icon`, and `Path` fields in the desktop file.
+
+Cross-platform note: the `.desktop` file is Linux-only. The runtime window icon is set in the wxWidgets app itself, so the app window can use the same icon on Linux, Windows, and macOS, but each OS needs its own launcher/package metadata:
+
+- Linux uses a `.desktop` file and PNG icon paths.
+- Windows uses executable resources, typically via an `.ico` file.
+- macOS uses app bundle metadata with an `.icns` file.
+
+If you want one source asset, keep a master SVG and export the platform-specific icon files from it.
+
 ## Running Tests
 
 Unit tests are in `YTBLND_src/tests/`. After building, run them with:
