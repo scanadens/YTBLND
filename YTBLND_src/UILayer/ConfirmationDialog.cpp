@@ -1,3 +1,9 @@
+/**
+ * \file ConfirmationDialog.cpp
+ * \brief Implementation for ConfirmationDialog.
+ * \author Jasmine Kumar
+ */
+
 #include "ConfirmationDialog.hpp"
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"

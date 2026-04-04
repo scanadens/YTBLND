@@ -1,5 +1,12 @@
+/**
+ * \file LoginPanel.cpp
+ * \brief Implementation for LoginPanel.
+ * \author Jasmine Kumar
+ * \author Shamar Pennant
+ */
+
 // ============================================================================
-// LoginPanel.cpp — Sign In / Register screen implementation
+// LoginPanel.cpp - Sign In / Register screen implementation
 // ============================================================================
 
 #include "LoginPanel.hpp"
@@ -246,7 +253,7 @@ void LoginPanel::OnSignIn(wxCommandEvent& /*evt*/)
         progress.UpdateProgress(ratio, wxString::FromUTF8(message));
     });
 
-    // Dispatch uses userID — username IS the userID in this app
+    // Dispatch uses userID - username IS the userID in this app
     m_controller.getEventRouter().dispatch("login",
         {{"userID", username}, {"password", password}});
     m_controller.clearProgressReporter();
@@ -327,7 +334,7 @@ void LoginPanel::ProceedAfterLogin()
         return;
     }
 
-    // Has data but no blend yet — let them create one
+    // Has data but no blend yet - let them create one
     m_nav(Page::BLEND_CREATION);
 }
 

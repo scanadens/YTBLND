@@ -1,9 +1,10 @@
 /**
  * \file SettingsPanel.cpp
- * \brief Logic for controlling the theme.
+ * \brief Implementation for SettingsPanel.
+ * \author Jasmine Kumar
  * \author Xavier Lusetti
- *
  */
+
 #include "SettingsPanel.hpp"
 
 #include <wx/statline.h>

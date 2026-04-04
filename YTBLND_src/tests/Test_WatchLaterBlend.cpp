@@ -1,3 +1,16 @@
+/**
+ * \file Test_WatchLaterBlend.cpp
+ * \brief Unit tests for watch-later parsing and blend generation inputs.
+ * \author Jasmine Kumar
+ *
+ * \details
+ * Validates data-ingestion and blend-input behavior for:
+ * - WatchLaterParser extraction from fixture CSV files.
+ * - WatchHistoryParser extraction from fixture HTML files.
+ * - YouTubeDataImporter extension routing and unsupported-file handling.
+ * - RandomBlendAlgorithm bounds/selection behavior using parsed watch-later inputs.
+ */
+
 #include "gtest/gtest.h"
 
 #include "../AppInfrastructure/WatchHistoryParser.hpp"
@@ -16,16 +29,16 @@
 #define YTBLND_SRC_DIR "."
 #endif
 
-// Synthetic fixture — does not contain personal data
+// Synthetic fixture - does not contain personal data
 static const std::string WATCH_LATER_CSV =
     // Use the committed fixture filename exactly as it appears in the repo.
     YTBLND_SRC_DIR "/tests/fixtures/jas_watch_later-videos.csv";
 
-// Synthetic fixture — does not contain personal data
+// Synthetic fixture - does not contain personal data
 static const std::string WATCH_HISTORY_HTML =
     YTBLND_SRC_DIR "/tests/fixtures/shamar_sample_watch-history.html";
 
-// -- WatchLaterParser ----------------------------------------------------------
+// WatchLaterParser
 
 TEST(WatchLaterParserTest, ParsesNonEmptyList) {
     std::list<Video> videos = WatchLaterParser(WATCH_LATER_CSV).parse();
@@ -48,7 +61,7 @@ TEST(WatchLaterParserTest, NonIDFieldsAreEmpty) {
     EXPECT_EQ(0, first.getDuration());
 }
 
-// -- WatchHistoryParser --------------------------------------------------------
+// WatchHistoryParser
 
 TEST(WatchHistoryParserTest, ParsesNonEmptyList) {
     std::list<Video> videos = WatchHistoryParser(WATCH_HISTORY_HTML).parse();
@@ -62,7 +75,7 @@ TEST(WatchHistoryParserTest, EachVideoHasNonEmptyID) {
     }
 }
 
-// -- YouTubeDataImporter -------------------------------------------------------
+// YouTubeDataImporter
 
 TEST(YouTubeDataImporterTest, ImportsCsvAndHtmlFixtures) {
     YouTubeDataImporter importer;
@@ -79,7 +92,7 @@ TEST(YouTubeDataImporterTest, ThrowsOnUnsupportedExtension) {
     EXPECT_THROW(importer.import("fixtures/not_supported.txt"), std::invalid_argument);
 }
 
-// -- RandomBlendAlgorithm ------------------------------------------------------
+// RandomBlendAlgorithm
 
 static User makeUserWithWatchLater(const std::string& userID, const std::string& csvPath) {
     std::list<Video> videos = WatchLaterParser(csvPath).parse();

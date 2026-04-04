@@ -1,3 +1,16 @@
+/**
+ * \file Test_Auth.cpp
+ * \brief Unit and integration tests for authentication and account lifecycle flows.
+ * \author Jasmine Kumar
+ *
+ * \details
+ * Covers authentication-related behavior for:
+ * - SqliteDataManager user creation, duplicate handling, and credential checks.
+ * - AppController register/login/logout/delete dispatch flows.
+ * - AppState session transitions during auth events.
+ * - Live-backend auth integration paths when connectivity is available.
+ */
+
 #include "gtest/gtest.h"
 #include <atomic>
 #include <chrono>
@@ -8,7 +21,7 @@
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 
-// -- Helpers -------------------------------------------------------------------
+// Helpers
 
 // Every test that uses SqliteDataManager gets a fresh in-memory DB.
 static SqliteDataManager makeDB() {
@@ -88,7 +101,7 @@ static void ensureDummyAccountExists(AppController& ctrl,
         << "Could not login with dummy account userID=" << userID;
 }
 
-// -- SqliteDataManager tests ---------------------------------------------------
+// SqliteDataManager tests
 
 TEST(SqliteDataManagerTest, CreateUser_Succeeds) {
     SqliteDataManager db = makeDB();
@@ -98,7 +111,7 @@ TEST(SqliteDataManagerTest, CreateUser_Succeeds) {
 TEST(SqliteDataManagerTest, CreateUser_DuplicateID_Fails) {
     SqliteDataManager db = makeDB();
     db.createUser(makeUser());
-    EXPECT_FALSE(db.createUser(makeUser())); // same userID → PRIMARY KEY conflict
+    EXPECT_FALSE(db.createUser(makeUser())); // same userID -> PRIMARY KEY conflict
 }
 
 TEST(SqliteDataManagerTest, FindUserByID_ReturnsUser) {
@@ -135,7 +148,7 @@ TEST(SqliteDataManagerTest, ValidatePassword_UnknownUser_ReturnsFalse) {
     EXPECT_FALSE(db.validatePassword("nobody", "anything"));
 }
 
-// -- AppController auth flow tests ---------------------------------------------
+// AppController auth flow tests
 // These use the real AppController (which opens "ytblnd.db").
 // We reset AppState between tests to avoid cross-test pollution.
 

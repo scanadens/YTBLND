@@ -1,12 +1,18 @@
-// ============================================================================
-// Test_ThemeSwitching.cpp — UIColors theme switching unit tests
-//
-// Tests the file-based theme system: loading from theme.txt,
-// switching between themes, and verifying color values.
-//
+/**
+ * \file Test_ThemeSwitching.cpp
+ * \brief Unit tests for UIColors theme switching behavior.
+ * \author Xavier Wah-Huen Lusetti
+ *
+ * \details
+ * Verifies theme system behavior for:
+ * - UIColors::SetTheme transitions across Dark, Light, and Neon themes.
+ * - Synchronization of global color accessors with the active Palette.
+ * - Correctness of GetCurrentTheme tracking.
+ * - Stability when toggling themes repeatedly.
+ */
+
 // Requires wxWidgets headers (wxColour). Only compiled when
 // YTBLND_BUILD_UI_TESTS=ON.
-// ============================================================================
 
 #include "gtest/gtest.h"
 #include "../UILayer/UIColors.hpp"

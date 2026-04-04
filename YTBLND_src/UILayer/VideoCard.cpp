@@ -1,5 +1,11 @@
+/**
+ * \file VideoCard.cpp
+ * \brief Implementation for VideoCard.
+ * \author Jasmine Kumar
+ */
+
 // ============================================================================
-// VideoCard.cpp — Custom video preview card widget implementation
+// VideoCard.cpp - Custom video preview card widget implementation
 // ============================================================================
 
 #include "VideoCard.hpp"
@@ -25,7 +31,7 @@ wxDEFINE_EVENT(EVT_THUMBNAIL_LOADED,    ThumbnailEvent);
 wxDEFINE_EVENT(EVT_CHANNEL_LOGO_LOADED, ThumbnailEvent);
 
 // ---------------------------------------------------------------------------
-// Internal curl helper — downloads a URL into memory and returns a wxImage.
+// Internal curl helper - downloads a URL into memory and returns a wxImage.
 // Called only from background threads.
 // ---------------------------------------------------------------------------
 namespace {
@@ -281,7 +287,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
     gc->SetPen(*wxTRANSPARENT_PEN);
     gc->DrawRoundedRectangle(0, 0, W, H, 10.0);
 
-    // -- Thumbnail area — 16:9 capped at 145 px so the text area never
+    // -- Thumbnail area - 16:9 capped at 145 px so the text area never
     //    gets squeezed out when the grid sizer stretches cards wider.
     const double thumbH = std::min(W * 9.0 / 16.0, 300.0);
 
@@ -299,7 +305,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
         wxString label;
         if      (m_thumbLoading) label = "Loading...";
         else if (m_thumbFailed)  label = L"\u25B6";
-        // else: no video set — blank
+        // else: no video set - blank
 
         if (!label.IsEmpty()) {
             wxFont lf = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
@@ -337,7 +343,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
         const double rowH     = logoSize;
 
         if (m_channelLogo.IsOk()) {
-            // Punch a circle into the alpha channel — renders as a disc.
+            // Punch a circle into the alpha channel - renders as a disc.
             int sz = static_cast<int>(logoSize);
             wxImage scaled = m_channelLogo.ConvertToImage()
                                           .Scale(sz, sz, wxIMAGE_QUALITY_BILINEAR);

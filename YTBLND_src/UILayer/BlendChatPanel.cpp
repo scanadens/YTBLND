@@ -1,5 +1,11 @@
+/**
+ * \file BlendChatPanel.cpp
+ * \brief Implementation for BlendChatPanel.
+ * \author Jasmine Kumar
+ */
+
 // ============================================================================
-// BlendChatPanel.cpp — Blend chat screen implementation
+// BlendChatPanel.cpp - Blend chat screen implementation
 // ============================================================================
 
 #include "BlendChatPanel.hpp"
@@ -130,12 +136,12 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
     sendBtn->Bind(wxEVT_BUTTON,     &BlendChatPanel::OnSend,        this);
     m_inputCtrl->Bind(wxEVT_TEXT_ENTER, &BlendChatPanel::OnInputEnter, this);
 
-    // -- Poll timer — drains incoming WebSocket messages on the main thread ----
+    // -- Poll timer - drains incoming WebSocket messages on the main thread ----
     m_pollTimer = new wxTimer(this);
     Bind(wxEVT_TIMER, &BlendChatPanel::OnPollTimer, this, m_pollTimer->GetId());
     m_pollTimer->Start(500 /* ms */);
 
-    // -- Logout listener — close WebSocket immediately when user logs out -------
+    // -- Logout listener - close WebSocket immediately when user logs out -------
     m_controller.getEventRouter().registerListener("logout",
         [this](const EventPayload&) {
             m_ws.reset();
@@ -174,7 +180,7 @@ void BlendChatPanel::Reload()
     // -- Connect WebSocket if blend changed or not yet connected ---------------
     User* currentUser = state.getCurrentUser();
     if (currentUser && room->getBlendID() != m_wsBlendID) {
-        // Load history first (synchronous — ChatRoom is populated before UI rebuild)
+        // Load history first (synchronous - ChatRoom is populated before UI rebuild)
         m_controller.getEventRouter().dispatch("openChat",
             {{"blendID", room->getBlendID()},
              {"userID",  currentUser->getUserID()}});
@@ -189,7 +195,7 @@ void BlendChatPanel::Reload()
         auto* row = new wxPanel(m_participantsDropdown, wxID_ANY);
         row->SetBackgroundColour(UIColors::SurfaceRaised());
 
-        // Username — bold, slightly larger
+        // Username - bold, slightly larger
         auto* nameLbl = new wxStaticText(row, wxID_ANY,
                                          wxString::FromUTF8(p.getUsername()));
         nameLbl->SetForegroundColour(UIColors::TextPrimary());
@@ -200,7 +206,7 @@ void BlendChatPanel::Reload()
             nameLbl->SetFont(f);
         }
 
-        // User ID — normal weight, smaller
+        // User ID - normal weight, smaller
         auto* idLbl = new wxStaticText(row, wxID_ANY,
                                        wxString::FromUTF8("  (" + p.getUserID() + ")"));
         idLbl->SetForegroundColour(UIColors::TextSecondary());
@@ -322,7 +328,7 @@ void BlendChatPanel::DoSend()
     std::string userID  = user ? user->getUserID() : "anonymous";
     std::string textStr = text.ToStdString();
 
-    // Dispatch through AppController — handleSendMessage validates the sender
+    // Dispatch through AppController - handleSendMessage validates the sender
     // and calls room->addMessage(), making the message available for Reload().
     m_controller.getEventRouter().dispatch("sendMessage",
         {{"userID", userID}, {"text", textStr}});
@@ -371,7 +377,7 @@ void BlendChatPanel::ConnectWebSocket(const std::string& blendID,
         m_ws->set_blendID(blendID);
         m_ws->set_userID(userID);
 
-        // Register incoming-message callback — runs on the WS background thread.
+        // Register incoming-message callback - runs on the WS background thread.
         // Push to m_incoming; OnPollTimer drains it on the main thread.
         m_ws->setOnMessage([this](const std::string& sender,
                                   const std::string& content) {

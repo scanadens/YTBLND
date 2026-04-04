@@ -1,5 +1,11 @@
+/**
+ * \file TopBar.cpp
+ * \brief Implementation for TopBar.
+ * \author Jasmine Kumar
+ */
+
 // ============================================================================
-// TopBar.cpp — Reusable interior-page header bar implementation
+// TopBar.cpp - Reusable interior-page header bar implementation
 // ============================================================================
 
 #include "TopBar.hpp"
@@ -72,7 +78,9 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     titleFont.SetWeight(wxFONTWEIGHT_BOLD);
     titleLabel->SetFont(titleFont);
 
-    // -- Layout: [back icon | stretch | title | stretch | spacer] -------------
+    // -- Layout ---------------------------------------------------------------
+    // Three-column sizer: [back btn | title (stretch) | right spacer]
+    // The right spacer mirrors the back button width so the title stays centred.
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     sizer->Add(backBtn,    0, wxALIGN_CENTER_VERTICAL | wxLEFT, 8);
     sizer->AddStretchSpacer(1);

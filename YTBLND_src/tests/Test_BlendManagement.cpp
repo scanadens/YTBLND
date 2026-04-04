@@ -1,6 +1,16 @@
-// ============================================================================
-// Test_BlendManagement.cpp — Tests for blend management overhaul features
-//
+/**
+ * \file Test_BlendManagement.cpp
+ * \brief Unit and integration tests for blend management features.
+ * \author Jasmine Kumar
+ *
+ * \details
+ * Tests blend-management functionality for:
+ * - Blend title storage and serialization behavior.
+ * - RandomBlendAlgorithm title propagation and default-title behavior.
+ * - RequestJsonBuilder blend payload structure (including title field).
+ * - Live-backend blend creation, listing, leave-blend, and re-upload flows.
+ */
+
 // Unit tests:
 //   - Blend title field: constructor, getter, toString
 //   - RandomBlendAlgorithm passes title through
@@ -14,7 +24,6 @@
 //
 // Theme switching tests (UIColors) are in Test_ThemeSwitching.cpp and require
 // YTBLND_BUILD_UI_TESTS=ON since they depend on wxWidgets headers.
-// ============================================================================
 
 #include "gtest/gtest.h"
 
@@ -36,7 +45,7 @@
 #include <thread>
 #include <vector>
 
-// -- Helpers ------------------------------------------------------------------
+// Helpers
 
 namespace {
 
@@ -91,9 +100,7 @@ void deleteUser(HttpClient& client, const std::string& userID) {
 
 }  // namespace
 
-// ---------------------------------------------------------------------------
-// UNIT TESTS — Blend title
-// ---------------------------------------------------------------------------
+// UNIT TESTS - Blend title
 
 TEST(BlendTitleTest, ConstructorStoresTitle) {
     Blend b("id1", "My Blend", "random", {makeUser()}, {makeVideo()});
@@ -133,9 +140,7 @@ TEST(BlendTitleTest, AlgorithmDefaultsTitleToEmpty) {
     EXPECT_EQ(blend.getTitle(), "");
 }
 
-// ---------------------------------------------------------------------------
-// UNIT TESTS — RequestJsonBuilder blend title
-// ---------------------------------------------------------------------------
+// UNIT TESTS - RequestJsonBuilder blend title
 
 TEST(BuildBlendJsonTitleTest, IncludesTitleField) {
     std::vector<std::string> participants = {"u1", "u2"};
@@ -156,10 +161,8 @@ TEST(BuildBlendJsonTitleTest, EmptyTitleProducesEmptyString) {
         << "JSON: " << json;
 }
 
-// ---------------------------------------------------------------------------
-// INTEGRATION TESTS — Blend management against live backend
+// INTEGRATION TESTS - Blend management against live backend
 // (Gracefully skipped if server returns 404 or is unreachable)
-// ---------------------------------------------------------------------------
 
 class BlendManagementIntegrationTest : public ::testing::Test {
 protected:

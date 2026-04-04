@@ -1,11 +1,11 @@
 /**
  * \file MainFrame.cpp
- * \brief Logic for root application window containing the full-window page switcher.
+ * \brief Implementation for MainFrame.
  * \author Jasmine Kumar
  * \author Shamar Pennant
  * \author Xavier Lusetti
- *
  */
+
 #include "MainFrame.hpp"
 #include <wx/wx.h>
 #include <wx/simplebook.h>
@@ -125,7 +125,7 @@ MainFrame::MainFrame(AppController& controller)
 
     // --- Initialize pages and wrap each in a panel that paints the background image --
 
-    // the login panel — paints its own background image
+    // the login panel - paints its own background image
     loginPanel = new LoginPanel(book, controller, nav, images[BG_MAIN]);
     book->AddPage(loginPanel, "Login");
 

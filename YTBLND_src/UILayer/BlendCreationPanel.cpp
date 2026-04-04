@@ -1,5 +1,11 @@
+/**
+ * \file BlendCreationPanel.cpp
+ * \brief Implementation for BlendCreationPanel.
+ * \author Jasmine Kumar
+ */
+
 // ============================================================================
-// BlendCreationPanel.cpp — New-blend setup screen implementation
+// BlendCreationPanel.cpp - New-blend setup screen implementation
 // ============================================================================
 
 #include "BlendCreationPanel.hpp"
@@ -373,12 +379,12 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
             msg += "  \u2022 " + uid + "\n";
 
         if (AppState::getInstance().getActiveBlend() != nullptr) {
-            // Blend was still created from whoever had data — warn and continue
+            // Blend was still created from whoever had data - warn and continue
             msg += "\nTheir videos were not included. The blend was created with the remaining users.";
             wxMessageBox(msg, "Some Users Missing Data", wxOK | wxICON_WARNING, this);
             m_nav(Page::HOME);
         } else {
-            // No one had data — cannot create a blend at all
+            // No one had data - cannot create a blend at all
             msg += "\nNo blend could be created. Please ensure at least one user has uploaded their data.";
             wxMessageBox(msg, "Cannot Create Blend", wxOK | wxICON_ERROR, this);
         }

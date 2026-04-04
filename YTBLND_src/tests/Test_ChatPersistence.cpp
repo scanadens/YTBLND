@@ -1,13 +1,22 @@
-// ============================================================================
-// Test_ChatPersistence.cpp — Chat history persistence acceptance tests
-//
+/**
+ * \file Test_ChatPersistence.cpp
+ * \brief Unit and integration tests for chat history persistence.
+ * \author Jasmine Kumar
+ *
+ * \details
+ * Validates chat persistence behavior for:
+ * - AppController::parseChatHistory parsing of valid, empty, and malformed JSON.
+ * - Message timestamp handling and fallback behavior for missing sent_at values.
+ * - ChatRoom::addMessage(const Message&) timestamp preservation semantics.
+ * - End-to-end live-backend flow: send message over WebSocket, then read via chat-history API.
+ */
+
 // Unit tests:
 //   - parseChatHistory: valid / empty / malformed JSON
 //   - ChatRoom::addMessage(const Message&): timestamp preserved
 //
 // Integration tests (run by default; opt-out via YTBLND_SKIP_LIVE_BACKEND_TESTS=1):
 //   - Send a message over WebSocket, then retrieve it via /chat-history
-// ============================================================================
 
 #include "gtest/gtest.h"
 
@@ -31,7 +40,7 @@
 #include <string>
 #include <thread>
 
-// -- Helpers ------------------------------------------------------------------
+// Helpers
 
 namespace {
 
@@ -70,7 +79,7 @@ void skipUnlessLiveBackendEnabled() {
 
 }  // namespace
 
-// -- parseChatHistory unit tests -----------------------------------------------
+// parseChatHistory unit tests
 
 TEST(ParseChatHistoryTest, ParsesWellFormedHistoryCorrectly) {
     const std::string json =
@@ -144,7 +153,7 @@ TEST(ParseChatHistoryTest, FallsBackToCurrentTimeWhenSentAtAbsent) {
     EXPECT_LE(msgs.front().timestamp, after);
 }
 
-// -- ChatRoom::addMessage(const Message&) unit tests ---------------------------
+// ChatRoom::addMessage(const Message&) unit tests
 
 TEST(ChatRoomAddMessageOverloadTest, PreservesOriginalTimestamp) {
     ChatRoom room("blend-1", {"user-1"});
@@ -176,7 +185,7 @@ TEST(ChatRoomAddMessageOverloadTest, AppendsAfterExistingMessages) {
     EXPECT_EQ(it->timestamp, static_cast<std::time_t>(9999999999LL));
 }
 
-// -- Live backend integration test --------------------------------------------
+// Live backend integration test
 
 TEST(ChatHistoryIntegrationTest, MessageSentOverWebSocketAppearsInChatHistory) {
     skipUnlessLiveBackendEnabled();
