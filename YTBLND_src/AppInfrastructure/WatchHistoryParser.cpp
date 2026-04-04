@@ -1,3 +1,9 @@
+/**
+ * \file WatchHistoryParser.cpp
+ * \brief Implementation for WatchHistoryParser.
+ * \author Shamar Pennant
+ */
+
 #include "WatchHistoryParser.hpp"
 
 #include <cctype>

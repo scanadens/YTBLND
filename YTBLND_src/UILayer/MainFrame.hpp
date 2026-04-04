@@ -39,7 +39,13 @@ class BlendCreationPanel;
 class BlendChatPanel;
 class ActiveBlendsPanel;
 
-/// Root application window containing the full-window page switcher.
+/**
+ * \brief Root application window containing the full-window page switcher.
+ */
+/**
+ * \class MainFrame
+ * \brief MainFrame class declaration.
+ */
 class MainFrame : public wxFrame {
 public:
     /**

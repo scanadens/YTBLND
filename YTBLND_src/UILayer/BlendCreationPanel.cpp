@@ -11,7 +11,7 @@
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
 #include "UIPages.hpp"
-#include "UploadProgressDialog.hpp"
+#include "OperationProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
@@ -350,7 +350,7 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
     for (std::size_t i = 0; i < m_addedUsers.size(); ++i)
         payload["userID_" + std::to_string(i)] = m_addedUsers[i];
 
-    UploadProgressDialog progress(this, "Creating Blend");
+    OperationProgressDialog progress(this, "Creating Blend");
     progress.ShowModal();
     progress.UpdateProgress(0.02, "Preparing...");
 

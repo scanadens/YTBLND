@@ -10,7 +10,7 @@
 #include "HttpClient.hpp"
 
 /**
- * \file WebSocket.hpp
+ * \file ChatWebSocket.hpp
  * \author Shamar Pennant
  * \brief Simple WebSocket wrapper
  * 
@@ -18,11 +18,15 @@
  * server in regards to chatrooms
  */
 
+/**
+ * \class ChatWebSocket
+ * \brief ChatWebSocket class declaration.
+ */
 class ChatWebSocket {
 	public:
 	/**
 	 * Sets up WebSocket to perform specialized actions upon successful
-	 * connection, message recieving, and errors. Given the WebSocket
+	 * connection, message receiving, and errors. Given the WebSocket
 	 * remains connected after starting up until its been told to stop
 	 * listening for responses
 	 * \param url Is assigned to this->url
@@ -69,7 +73,7 @@ class ChatWebSocket {
 
 	/**
 	 * Sends a message through the WebSocket (given the url
-	 * has been correcly configured with blend and user ID)
+	 * has been correctly configured with blend and user ID)
 	 * \param msg String message (leave as plain string, no formatting needed)
 	 */
 	void send_message(std::string msg);
@@ -91,7 +95,7 @@ class ChatWebSocket {
 	std::function<void(const std::string&, const std::string&)> m_onMessage;
 
 	/**
-	 * Formats string into approapiate JSON structure as needed 
+	 * Formats string into appropriate JSON structure as needed 
 	 * by the server.
 	 * \param content String to be formatted
 	 * \return the structure JSON form of content ("({"content": <content>}"))
@@ -103,6 +107,4 @@ class ChatWebSocket {
 	 * send messages to
 	 */
 	void build_fullUrl();
-
-	// TODO: may need to setup ore specialized functions for the lambda expression in ChatWebSocket to use
 };

@@ -1,3 +1,9 @@
+/**
+ * \file ActiveBlendsPanel.hpp
+ * \brief Panel for viewing and managing active blends.
+ * \author Jasmine Kumar
+ */
+
 #pragma once
 
 #include <wx/wx.h>
@@ -8,6 +14,10 @@
 
 class AppController;
 
+/**
+ * \class ActiveBlendsPanel
+ * \brief ActiveBlendsPanel class declaration.
+ */
 class ActiveBlendsPanel : public wxPanel, public IRefreshablePanel {
 public:
     ActiveBlendsPanel(wxWindow* parent, AppController& controller, NavigateFn nav);

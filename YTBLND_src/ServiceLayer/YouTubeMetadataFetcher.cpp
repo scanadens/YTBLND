@@ -1,3 +1,9 @@
+/**
+ * \file YouTubeMetadataFetcher.cpp
+ * \brief Implementation for YouTubeMetadataFetcher.
+ * \author Jasmine Kumar
+ */
+
 // ============================================================================
 // YouTubeMetadataFetcher.cpp
 // ============================================================================
@@ -21,7 +27,7 @@ YouTubeMetadataFetcher::YouTubeMetadataFetcher(std::string apiKey)
 
 std::list<Video> YouTubeMetadataFetcher::enrich(const std::list<Video>& videos) {
     if (apiKey.empty()) {
-        std::cerr << "[YouTubeMetadataFetcher] No API key — returning videos unchanged\n";
+        std::cerr << "[YouTubeMetadataFetcher] No API key - returning videos unchanged\n";
         return videos;
     }
 
@@ -76,7 +82,7 @@ std::list<Video> YouTubeMetadataFetcher::enrich(const std::list<Video>& videos) 
     for (const auto& v : videos) {
         auto it = metaMap.find(v.getVideoID());
         if (it == metaMap.end()) {
-            // API didn't return this video (private/deleted) — keep as-is
+            // API didn't return this video (private/deleted) - keep as-is
             enriched.push_back(v);
             continue;
         }
@@ -179,7 +185,7 @@ YouTubeMetadataFetcher::fetchChannelLogos(const std::vector<std::string>& channe
             const auto& snippet = item.value("snippet", json::object());
             const auto& thumbs  = snippet.value("thumbnails", json::object());
 
-            // Channel logos: prefer medium (240×240) over default (88×88)
+            // Channel logos: prefer medium (240x240) over default (88x88)
             std::string logoUrl;
             for (const char* key : {"medium", "default"}) {
                 if (thumbs.contains(key)) {

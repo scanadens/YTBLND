@@ -4,8 +4,16 @@
 #include "IBlendAlgorithm.hpp"
 
 /**
- * \brief Blend algorithm that picks a random subset of videos from each
- *        participant's Watch Later list and combines them into one Blend.
+ * \file RandomBlendAlgorithm.hpp
+ * \brief Random Blend implementation of IBlendAlgorithm
+ * \author Jasmine Kumar
+ * 
+ * Blend algorithm that picks a random subset of videos from each participant's 
+ * Watch Later list and combines them into one Blend.
+ */
+/**
+ * \class RandomBlendAlgorithm
+ * \brief RandomBlendAlgorithm class declaration.
  */
 class RandomBlendAlgorithm : public IBlendAlgorithm {
 public:
@@ -16,6 +24,9 @@ public:
      */
     explicit RandomBlendAlgorithm(int videosPerUser = 5);
 
+    /**
+     * 
+     */
     Blend generateBlend(const std::list<User>& participants,
                         const std::string& title = "") override;
 

@@ -1,3 +1,9 @@
+/**
+ * \file ChatRoom.cpp
+ * \brief Implementation for ChatRoom.
+ * \author Jasmine Kumar
+ */
+
 #include "ChatRoom.hpp"
 #include "JsonUtils.hpp"
 

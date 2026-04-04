@@ -4,12 +4,16 @@
 /**
  * \file Friend.hpp
  * \brief Model representing a friend/contact entry on a User's list.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
  */
 
 #include <string>
 
-/// A friend or contact entry stored on a User's friends list.
+/** A friend or contact entry stored on a User's friends list. */
+/**
+ * \class Friend
+ * \brief Friend class declaration.
+ */
 class Friend {
     private:
         std::string userID;
@@ -27,18 +31,22 @@ class Friend {
                const std::string& displayName,
                const std::string& email);
 
-        /// \return Unique identifier of the friend's account.
+        /** \return Unique identifier of the friend's account. */
         std::string getUserID()      const;
-        /// \return Display name of the friend.
+        /** \return Display name of the friend. */
         std::string getDisplayName() const;
-        /// \return Email address of the friend.
+        /** \return Email address of the friend. */
         std::string getEmail()       const;
 
-        /// \param displayName New display name.
+        /** \param displayName New display name. */
         void setDisplayName(const std::string& displayName);
-        /// \param email New email address.
+        /** \param email New email address. */
         void setEmail(const std::string& email);
 
+        /** 
+         * String representation of \c Friend 
+         * \return \c string
+         * */
         std::string toString() const;
 };
 

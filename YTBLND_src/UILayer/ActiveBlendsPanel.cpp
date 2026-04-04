@@ -1,10 +1,16 @@
+/**
+ * \file ActiveBlendsPanel.cpp
+ * \brief Implementation for ActiveBlendsPanel.
+ * \author Jasmine Kumar
+ */
+
 #include "ActiveBlendsPanel.hpp"
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
 #include "TopBar.hpp"
 #include "ConfirmationDialog.hpp"
-#include "UploadProgressDialog.hpp"
+#include "OperationProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
@@ -132,7 +138,7 @@ void ActiveBlendsPanel::RebuildList()
 void ActiveBlendsPanel::OnSelectBlend(const std::string& blendID,
                                        const std::string& title)
 {
-    UploadProgressDialog progress(this, "Loading Blend");
+    OperationProgressDialog progress(this, "Loading Blend");
     progress.ShowModal();
     progress.UpdateProgress(0.02, "Preparing...");
 

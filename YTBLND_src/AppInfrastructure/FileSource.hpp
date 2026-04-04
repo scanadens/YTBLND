@@ -14,7 +14,11 @@
  * Defines the interface for file reading operations across different file formats.
  * Subclasses implement format-specific source reading (CSV, HTML, etc.).
  */
-/// Abstract interface for reading file source data.
+/** Abstract interface for reading file source data. */
+/**
+ * \class FileSource
+ * \brief FileSource class declaration.
+ */
 class FileSource {
 	public:
 		virtual ~FileSource() = default;

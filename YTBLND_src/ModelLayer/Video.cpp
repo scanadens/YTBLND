@@ -1,3 +1,9 @@
+/**
+ * \file Video.cpp
+ * \brief Implementation for Video.
+ * \author Jasmine Kumar
+ */
+
 #include "Video.hpp"
 #include "JsonUtils.hpp"
 

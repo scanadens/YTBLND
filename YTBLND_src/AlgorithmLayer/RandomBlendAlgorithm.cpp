@@ -1,3 +1,9 @@
+/**
+ * \file RandomBlendAlgorithm.cpp
+ * \brief Implementation for RandomBlendAlgorithm.
+ * \author Jasmine Kumar
+ */
+
 #include "RandomBlendAlgorithm.hpp"
 
 #include <algorithm>

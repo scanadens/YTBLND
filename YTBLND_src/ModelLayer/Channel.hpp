@@ -10,12 +10,15 @@
 #include <string>
 #include <list>
 
-/// A YouTube channel with display metadata.
+/**
+ * \class Channel
+ * \brief Channel class declaration.
+ */
 class Channel {
     private:
-        std::string channelID;
-        std::string displayName;
-        std::list<std::string> categories;
+        std::string channelID;              // identifying channel method
+        std::string displayName;            // the channel front facing name (as seen on YouTube)
+        std::list<std::string> categories;  // categories/themes of the channel
 
     public:
         /**
@@ -28,11 +31,11 @@ class Channel {
                 const std::string& displayName,
                 const std::list<std::string>& categories);
 
-        /// \return Unique YouTube channel identifier.
+        /** \return Unique YouTube channel identifier. */
         std::string getChannelID()    const;
-        /// \return Human-readable channel name.
+        /** \return Human-readable channel name. */
         std::string getDisplayName()  const;
-        /// \return Content categories for this channel.
+        /** \return Content categories for this channel. */
         std::list<std::string> getCategories() const;
 
         std::string toString() const;

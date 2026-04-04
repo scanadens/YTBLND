@@ -9,11 +9,18 @@
 #include "../ModelLayer/Video.hpp"
 
 /**
+ * \file DataManager.hpp
  * \brief Interface for all user-persistence operations.
+ * \author Shamar Pennant
+ * \author Jasmine Kumar
  *
  * AppController depends only on this interface, keeping it decoupled from
  * the concrete storage back-end (SQLite today, something else tomorrow).
  * Tests can inject a mock implementation without touching the real DB.
+ */
+/**
+ * \class DataManager
+ * \brief DataManager class declaration.
  */
 class DataManager {
 public:
@@ -71,6 +78,8 @@ public:
 
     /**
      * Returns all participant userIDs for a given blend.
+     * \param blendID to be used for loading the respective participants
+     * \return vector of strings representing userIDs
      */
     virtual std::vector<std::string> loadBlendParticipants(const std::string& blendID) = 0;
 };

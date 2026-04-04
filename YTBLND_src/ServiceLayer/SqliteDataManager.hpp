@@ -8,11 +8,17 @@
 #include <list>
 
 /**
+ * \file SqliteDataManager.hpp
  * \brief SQLite-backed implementation of DataManager.
+ * \author Jasmine Kumar
  *
  * Opens (or creates) a .db file on construction and runs the schema
  * migration automatically. Pass ":memory:" as the path to get an
- * in-memory database — useful for unit tests.
+ * in-memory database - useful for unit tests.
+ */
+/**
+ * \class SqliteDataManager
+ * \brief SqliteDataManager type declaration.
  */
 class SqliteDataManager : public DataManager {
 public:

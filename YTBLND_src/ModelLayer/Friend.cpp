@@ -1,3 +1,9 @@
+/**
+ * \file Friend.cpp
+ * \brief Implementation for Friend.
+ * \author Jasmine Kumar
+ */
+
 #include "Friend.hpp"
 #include "JsonUtils.hpp"
 
@@ -21,7 +27,7 @@ std::string Friend::getEmail() const {
     return email;
 }
 
-//Setters (userID is intentionally omitted — it is immutable after construction)
+//Setters (userID is intentionally omitted - it is immutable after construction)
 
 void Friend::setDisplayName(const std::string& displayName) {
     this->displayName = displayName;

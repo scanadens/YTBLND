@@ -44,6 +44,10 @@ enum class ColorRole {
     None
 };
 
+/**
+ * \struct Palette
+ * \brief Palette class declaration.
+ */
 struct Palette {
     wxString Name; // The name of the colour theme associated with this palette.
 

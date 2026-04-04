@@ -4,35 +4,39 @@
 /**
  * \file EventRouter.hpp
  * \brief Lightweight event-dispatch system connecting the UI layer to AppController.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
  *
  * UI panels dispatch named events with a string-to-string payload map.
  * AppController registers a handler for each event name during construction.
  * Panels never call AppController directly; AppController never polls the UI.
  *
  * Payload conventions by event name:
- * - \c "login"       → { "userID": "...", "password": "..." }
- * - \c "logout"      → {}
- * - \c "deleteAccount" → { "userID": "...", "password": "..." }
- * - \c "uploadData"  → { "filePath": "...", "userID": "..." }
- * - \c "createBlend" → { "userID_0": "...", "userID_1": "..." }
- * - \c "playVideo"   → { "videoID": "..." }
- * - \c "refresh"     → {}
- * - \c "openChat"    → {}
- * - \c "sendMessage" → { "userID": "...", "text": "..." }
+ * - \c "login"       -> \code { "userID": "...", "password": "..." } \endcode
+ * - \c "logout"      -> \c {} 
+ * - \c "deleteAccount" -> \code { "userID": "...", "password": "..." } \endcode
+ * - \c "uploadData"  -> \code { "filePath": "...", "userID": "..." } \endcode
+ * - \c "createBlend" -> \code { "userID_0": "...", "userID_1": "..." } \endcode
+ * - \c "playVideo"   -> \code { "videoID": "..." } \endcode
+ * - \c "refresh"     -> \c {}
+ * - \c "openChat"    -> \c {}
+ * - \c "sendMessage" -> \code { "userID": "...", "text": "..." } \endcode
  */
 
 #include <functional>
 #include <map>
 #include <string>
 
-/// String-to-string map passed with every dispatched event.
+/** String-to-string map passed with every dispatched event. */
 using EventPayload = std::map<std::string, std::string>;
 
-/// Any callable that accepts an EventPayload.
+/** Any callable that accepts an EventPayload. */
 using EventHandler = std::function<void(const EventPayload&)>;
 
-/// Lightweight event-dispatch system connecting the UI layer to AppController.
+/** Lightweight event-dispatch system connecting the UI layer to AppController. */
+/**
+ * \class EventRouter
+ * \brief EventRouter class declaration.
+ */
 class EventRouter {
     private:
         std::map<std::string, EventHandler> listeners;

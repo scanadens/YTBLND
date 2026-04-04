@@ -1,3 +1,9 @@
+/**
+ * \file AppState.cpp
+ * \brief Implementation for AppState.
+ * \author Jasmine Kumar
+ */
+
 #include "AppState.hpp"
 
 using namespace std;

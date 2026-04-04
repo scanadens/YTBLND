@@ -1,3 +1,10 @@
+/**
+ * \file AppController.cpp
+ * \brief Implementation for AppController.
+ * \author Jasmine Kumar
+ * \author Shamar Pennant
+ */
+
 #include "AppController.hpp"
 #include "../ServerConfig.hpp"
 #include "../AppInfrastructure/YouTubeDataImporter.hpp"
@@ -345,6 +352,26 @@ AppController::AppController(const std::string& /*dbPath*/)
     : AppController() {}
 
 AppController::~AppController() {
+    // If application shutting down and there's a server-created pending account,
+    // attempt to delete it so username isn't left reserved.
+    if (pendingAccountCreated_ && pendingRegistration_.has_value() && isConnected) {
+        try {
+            const std::string delResp = http.del(
+                http.build_delete_user_endpoint(pendingRegistration_->getUserID()),
+                RequestJsonBuilder::buildDeleteAccountJson(pendingRegistration_->getPassword())
+            );
+            if (http.wasLastRequestSuccessful(http.D)) {
+                std::cout << "[AppController] Deleted pending account '" << pendingRegistration_->getUserID()
+                          << "' on shutdown\n";
+            } else {
+                std::cerr << "[AppController] Failed to delete pending account on shutdown, HTTP "
+                          << http.getLastStatusCode() << " response=" << delResp << "\n";
+            }
+        } catch (...) {
+            // best-effort; swallow errors
+        }
+    }
+
     eventRouter.deregisterAll();
 }
 
@@ -406,21 +433,17 @@ void AppController::handleRegister(const EventPayload& payload) {
         return;
     }
 
-    // building user data structure
+    // Build a local User object
     User newUser(idIt->second,
                  unIt->second,
                  emIt != payload.end() ? emIt->second : "",
                  pwIt->second);
 
-    string registerResponse;
-
-    /**
-     * attempt http request. if failed, user will not be able to persist 
-     * further into the application
-     */
-    try {
-        if (isConnected) { // if connected to the server, attempt user registration
-            registerResponse = http.post(
+    // Attempt to create the account on the server immediately so we can delete it if
+    // the user cancels or exits before uploading their data (backend requires it).
+    if (isConnected) {
+        try {
+            const std::string registerResponse = http.post(
                 http.REG_USER,
                 RequestJsonBuilder::buildRegisterJson(
                     newUser.getUserID(),
@@ -429,34 +452,38 @@ void AppController::handleRegister(const EventPayload& payload) {
                     newUser.getPassword()
                 )
             );
-            if (!http.wasLastRequestSuccessful(http.P)) { // validate request
+
+            if (!http.wasLastRequestSuccessful(http.P)) {
                 if (http.getLastStatusCode() == http.DUPLICATE) {
-                    cerr << "[AppController] handleRegister: userID '"
-                        << idIt->second 
-                        << "' already exists"
-                        << endl;
-                    return;
+                    std::cerr << "[AppController] handleRegister: userID '"
+                              << newUser.getUserID() << "' already exists\n";
+                } else {
+                    std::cerr << "[AppController] handleRegister: registration failed, HTTP "
+                              << http.getLastStatusCode() << " response=" << registerResponse << "\n";
                 }
-                cerr << "[AppController] handleRegister: registration failed with HTTP "
-                     << http.getLastStatusCode() << "\n";
                 return;
             }
-        }
-    } catch (const std::exception& e) { // catch any unexpected errors
-        std::cerr << "[AppController] handleRegister: HTTP error, unable to move forward: "
-            << e.what() << "\n";
-        cout << "Server response: " 
-            << registerResponse
-            << endl;
 
-        return;
+            // success - keep pendingRegistration_ so we can delete it if upload never happens
+            pendingRegistration_ = newUser;
+            pendingAccountCreated_ = true;
+            std::cout << "[AppController] Account created on server for '" << newUser.getUserID()
+                      << "' (pending upload)\n";
+        } catch (const std::exception& ex) {
+            std::cerr << "[AppController] handleRegister: HTTP error creating account: "
+                      << ex.what() << "\n";
+            return;
+        }
+    } else {
+        // Offline: still store pendingRegistration_ locally (account not created on server).
+        pendingRegistration_ = newUser;
+        pendingAccountCreated_ = false;
+        std::cout << "[AppController] Pending local registration stored for '" << newUser.getUserID()
+                  << "' (offline)\n";
     }
 
-    // update this states current user    
+    // Set the current user locally so the UI can continue to the DataInstructionsPanel.
     appState.setCurrentUser(new User(newUser));
-    std::cout << "[AppController] Registered and logged in as '"
-              << newUser.getUsername() << "'\n";
-
     return;
 }
 
@@ -563,7 +590,7 @@ void AppController::handleLogin(const EventPayload& payload) {
         kLoginParticipantLoadWorkerThreads
     );
 
-    if (participants.empty()) return; // no one has data yet — nothing to show
+    if (participants.empty()) return; // no one has data yet - nothing to show
 
     // Try to recover the blend title from the server
     std::string restoredTitle;
@@ -608,6 +635,28 @@ void AppController::handleLogin(const EventPayload& payload) {
 }
 
 void AppController::handleLogout(const EventPayload& payload) {
+    // If there is a server-created pending account and the user is logging out
+    // before uploading, attempt to delete it.
+    if (pendingAccountCreated_ && pendingRegistration_.has_value() && isConnected) {
+        try {
+            const std::string delResp = http.del(
+                http.build_delete_user_endpoint(pendingRegistration_->getUserID()),
+                RequestJsonBuilder::buildDeleteAccountJson(pendingRegistration_->getPassword())
+            );
+            if (http.wasLastRequestSuccessful(http.D)) {
+                std::cout << "[AppController] Deleted pending account '"
+                          << pendingRegistration_->getUserID() << "' on logout\n";
+            } else {
+                std::cerr << "[AppController] Failed to delete pending account on logout, HTTP "
+                          << http.getLastStatusCode() << " response=" << delResp << "\n";
+            }
+        } catch (const std::exception& ex) {
+            std::cerr << "[AppController] handleLogout: failed to delete pending account: " << ex.what() << "\n";
+        }
+        pendingRegistration_.reset();
+        pendingAccountCreated_ = false;
+    }
+
     User* u = appState.getCurrentUser();
     if (u) {
         std::cout << "[AppController] Logging out '" << u->getUsername() << "'\n";
@@ -669,6 +718,43 @@ void AppController::handleUploadData(const EventPayload& payload) {
     const std::string& filePath = fileIt->second;
     const std::string& userID   = userIt->second;
 
+    // If there's a pending registration for this user, create the server account first.
+    if (pendingRegistration_.has_value() && pendingRegistration_->getUserID() == userID) {
+        if (!isConnected) {
+            appState.setPendingUploadError("Cannot create account while offline. Please connect and try again.");
+            return;
+        }
+        std::string registerResponse;
+        try {
+            registerResponse = http.post(
+                http.REG_USER,
+                RequestJsonBuilder::buildRegisterJson(
+                    pendingRegistration_->getUserID(),
+                    pendingRegistration_->getUsername(),
+                    pendingRegistration_->getEmail(),
+                    pendingRegistration_->getPassword()
+                )
+            );
+            if (!http.wasLastRequestSuccessful(http.P)) {
+                if (http.getLastStatusCode() == http.DUPLICATE) {
+                    appState.setPendingUploadError("Registration failed: username already taken. Choose a different username.");
+                } else {
+                    appState.setPendingUploadError("Registration failed: server returned an error. Please try again.");
+                }
+                // clear pending to allow retry or new username flow
+                pendingRegistration_.reset();
+                return;
+            }
+            // success - clear pendingRegistration_
+            pendingRegistration_.reset();
+            std::cout << "[AppController] Account created on server for '" << userID << "'\n";
+        } catch (const std::exception& ex) {
+            appState.setPendingUploadError("Registration failed: network error while creating account. Please try again.");
+            std::cerr << "[AppController] handleUploadData: failed to create account for '" << userID << "' - " << ex.what() << "\n";
+            return;
+        }
+    }
+
     std::cout << "[AppController] Starting file upload process for '" << filePath << "'\n";
 
     std::list<Video> watchLater;
@@ -710,7 +796,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
     // Smart metadata enrichment strategy:
     // - On upload, enrich ONLY the first kMaxUploadEnrichmentCount videos to keep upload fast.
     // - CSV: always enrich first 50
-    // - HTML ≤500 videos: enrich all
+    // - HTML <=500 videos: enrich all
     // - HTML >500 videos: enrich first 50, rest at display time
     //
     // This avoids blocking the UI while still providing good metadata for the most important videos.
@@ -754,7 +840,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
         } catch (const std::exception& ex) {
             std::cerr << "[AppController] handleUploadData: metadata fetch failed: "
                       << ex.what() << "\n";
-            // Non-fatal — continue with whatever data we have
+            // Non-fatal - continue with whatever data we have
         }
     }
 
@@ -762,7 +848,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
     videosToEnrich.splice(videosToEnrich.end(), videosNotEnriched);
     watchLater = videosToEnrich;
 
-    // Drop videos the API couldn't find — they are deleted, private, or unavailable.
+    // Drop videos the API couldn't find - they are deleted, private, or unavailable.
     if (enriched) {
         watchLater.remove_if([](const Video& v) { return v.getTitle().empty(); });
         std::cout << "[AppController] " << watchLater.size()
@@ -793,6 +879,12 @@ void AppController::handleUploadData(const EventPayload& payload) {
         cerr << "[AppController] handleUploadData - server response: " << saveWatchLaterResponse << endl;
         appState.setPendingUploadError("Upload failed: unable to reach the server. Please try again.");
         return;
+    }
+
+    // Clear pending registration state (account created + upload complete)
+    if (pendingRegistration_.has_value() && pendingRegistration_->getUserID() == userID) {
+        pendingRegistration_.reset();
+        pendingAccountCreated_ = false;
     }
 
     // Update the current user's in-memory YouTubeData
@@ -848,7 +940,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
     appState.createChatRoom(*currentBlend);
 
     std::cout << "[AppController] Re-generated blend '" << *blendID
-              << "' after data upload — now " << currentBlend->size() << " videos\n";
+              << "' after data upload - now " << currentBlend->size() << " videos\n";
 }
 
 void AppController::handleCreateBlend(const EventPayload& payload) {
@@ -875,13 +967,13 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
         loadParticipantsWithWatchLater(allParticipantIDs, &missingData, false);
 
     // Report users without uploaded data back to the UI via AppState
-    // (non-existent users are excluded — they should have been rejected at the UI level)
+    // (non-existent users are excluded - they should have been rejected at the UI level)
     appState.setUsersWithoutData(missingData);
 
     // Enforce upload: if any participant is missing Watch Later data, refuse to create the blend.
     if (!missingData.empty()) {
         appState.setIsBlendGenerating(false);
-        std::cerr << "[AppController] handleCreateBlend: cannot create blend — the following participants have not uploaded Watch Later data:\n";
+        std::cerr << "[AppController] handleCreateBlend: cannot create blend - the following participants have not uploaded Watch Later data:\n";
         for (const auto& uid : missingData) std::cerr << "  " << uid << "\n";
         // UI should show users without data via appState; do not proceed.
         return;
@@ -901,7 +993,7 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
 
     // Persist the blend and all valid participants (existing users, even those
     // without data yet, so they are found on their next login).
-    // Non-existent users (notFound) are excluded — they have no DB row.
+    // Non-existent users (notFound) are excluded - they have no DB row.
     std::vector<std::string> validParticipantIDs;
     for (const auto& uid : allParticipantIDs) {
         if (lookupUser(uid)) {
@@ -990,7 +1082,7 @@ bool AppController::registerBlendOnServer(const Blend& blend,
                       << blend.getBlendID() << "' registered\n";
             return true;
         }
-        // 409 Conflict means it already exists — treat as success.
+        // 409 Conflict means it already exists - treat as success.
         if (http.getLastStatusCode() == http.DUPLICATE) {
             std::cout << "[AppController] registerBlendOnServer: blend '"
                       << blend.getBlendID() << "' already on server\n";
@@ -999,7 +1091,7 @@ bool AppController::registerBlendOnServer(const Blend& blend,
         std::cerr << "[AppController] registerBlendOnServer: server returned "
                   << http.getLastStatusCode() << "\n";
     } catch (const std::exception& e) {
-        std::cerr << "[AppController] registerBlendOnServer: HTTP failed — "
+        std::cerr << "[AppController] registerBlendOnServer: HTTP failed - "
                   << e.what() << "\n";
     }
     return false;
@@ -1021,7 +1113,7 @@ void AppController::enrichIfMissingMetadata(const std::string& userID,
               << videos.size() << " videos for '" << userID << "'\n";
     try {
         videos = YouTubeMetadataFetcher(kYouTubeAPIKey).enrich(videos);
-        // Drop any video still missing a title — confirmed unavailable on YouTube
+        // Drop any video still missing a title - confirmed unavailable on YouTube
         if (!kYouTubeAPIKey.empty())
             videos.remove_if([](const Video& v) { return v.getTitle().empty(); });
 
@@ -1192,7 +1284,7 @@ void AppController::enrichActiveBlendFeedIfMissingMetadata() {
 
 void AppController::handlePlayVideo(const EventPayload& payload) {
     // TODO: read "videoID" from payload
-    // TODO: open the video — exact mechanism (browser, in-app) TBD
+    // TODO: open the video - exact mechanism (browser, in-app) TBD
     std::cout << "[AppController] handlePlayVideo called (stub)\n";
 }
 
@@ -1302,7 +1394,7 @@ void AppController::handleOpenChat(const EventPayload& payload) {
     }
 
     if (!isConnected) {
-        std::cout << "[AppController] handleOpenChat: offline — skipping history fetch\n";
+        std::cout << "[AppController] handleOpenChat: offline - skipping history fetch\n";
         return;
     }
 
@@ -1312,7 +1404,7 @@ void AppController::handleOpenChat(const EventPayload& payload) {
         std::string response = http.get(endpoint);
 
         if (http.getLastStatusCode() == http.MISS_RM_CNTXT) {
-            // Blend not registered on server yet — provision it now and retry.
+            // Blend not registered on server yet - provision it now and retry.
             Blend* blend = appState.getActiveBlend();
             if (blend) {
                 User* creator = appState.getCurrentUser();
@@ -1325,7 +1417,7 @@ void AppController::handleOpenChat(const EventPayload& payload) {
 
         if (!http.wasLastRequestSuccessful(http.G)) {
             std::cerr << "[AppController] handleOpenChat: server returned "
-                      << http.getLastStatusCode() << " — leaving ChatRoom empty\n";
+                      << http.getLastStatusCode() << " - leaving ChatRoom empty\n";
             return;
         }
 
@@ -1339,7 +1431,7 @@ void AppController::handleOpenChat(const EventPayload& payload) {
                   << blendIt->second << "'\n";
 
     } catch (const std::exception& e) {
-        std::cerr << "[AppController] handleOpenChat: HTTP failed — "
+        std::cerr << "[AppController] handleOpenChat: HTTP failed - "
                   << e.what() << "\n";
     }
 }

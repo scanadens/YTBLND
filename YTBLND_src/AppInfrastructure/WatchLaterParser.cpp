@@ -1,3 +1,10 @@
+/**
+ * \file WatchLaterParser.cpp
+ * \brief Implementation for WatchLaterParser.
+ * \author Shamar Pennant
+ * \author Jasmine Kumar
+ */
+
 #include "WatchLaterParser.hpp"
 
 #include <memory>

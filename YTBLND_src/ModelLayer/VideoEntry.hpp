@@ -4,7 +4,7 @@
 /**
  * \file VideoEntry.hpp
  * \brief A Video decorated with watch-history metadata.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
  *
  * Wraps a Video with a watch count and a last-watched timestamp so the
  * watch-history list can record how many times a user has seen a video.
@@ -12,12 +12,16 @@
 
 #include "Video.hpp"
 
-/// A Video decorated with watch-history metadata.
+/** A Video decorated with watch-history metadata. */
+/**
+ * \class VideoEntry
+ * \brief VideoEntry class declaration.
+ */
 class VideoEntry {
     private:
-        Video video;
-        int watchCount;
-        int lastWatched;
+        Video video;     // video to wrap extra data around
+        int watchCount;  // number of times user has watched this video
+        int lastWatched; // unix timestamp of the most recent time the video was watched
 
     public:
         /**
@@ -28,18 +32,22 @@ class VideoEntry {
          */
         VideoEntry(const Video& video, int watchCount, int lastWatched);
 
-        /// \return The underlying Video.
+        /** \return The underlying Video. */
         Video getVideo()       const;
-        /// \return Number of times the user has watched this video.
+        /** \return Number of times the user has watched this video. */
         int   getWatchCount()  const;
-        /// \return Unix timestamp of the most recent watch event.
+        /** \return Unix timestamp of the most recent watch event. */
         int   getLastWatched() const;
 
-        /// \param watchCount Updated watch count.
+        /** \param watchCount Updated watch count. */
         void setWatchCount(int watchCount);
-        /// \param lastWatched Updated last-watched Unix timestamp.
+        /** \param lastWatched Updated last-watched Unix timestamp. */
         void setLastWatched(int lastWatched);
 
+        /**
+         * String representation of \c VideoEntry
+         * \return \c string
+         */
         std::string toString() const;
 };
 

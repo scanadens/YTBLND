@@ -12,7 +12,7 @@
  * events through EventRouter; AppController handles them by updating AppState
  * and calling the appropriate backend services.
  *
- * No panel or backend class should call another directly — everything routes
+ * No panel or backend class should call another directly - everything routes
  * through AppController.
  */
 
@@ -31,8 +31,195 @@
 
 class YouTubeDataParser;  ///< Stub for future use.
 
-/// Central application coordinator.
+/** Central application coordinator. */
+/**
+ * \class AppController
+ * \brief AppController class declaration.
+ */
 class AppController {
+public:
+        /**
+         * Initialises AppState, EventRouter, and backend services.
+         */
+        explicit AppController();
+
+        /**
+         * Compatibility constructor used by tests that inject a DB path.
+         * The current HTTP-backed controller ignores this value.
+         */
+        explicit AppController(const std::string& dbPath);
+
+        /**
+         * Persists any unsaved changes, deregisters all EventRouter listeners,
+         * and releases backend resources.
+         */
+        ~AppController();
+
+        /** \return Reference to the EventRouter so panels can call dispatch().*/
+        EventRouter& getEventRouter();
+
+        /** Registers a UI progress sink used for long-running controller operations. */
+        void setProgressReporter(std::function<void(double, const std::string&)> reporter);
+
+        /** Clears the active UI progress sink. */
+        void clearProgressReporter();
+
+        /**
+         * Creates a new account and logs the user in on success.
+         * \param payload { "userID": "...", "username": "...", "email": "...", "password": "..." }
+         */
+        void handleRegister(const EventPayload& payload);
+
+        /**
+         * Validates credentials and sets AppState::currentUser on success.
+         * \param payload { "userID": "...", "password": "..." }
+         */
+        void handleLogin(const EventPayload& payload);
+
+        /**
+         * Persists the current user, clears AppState, and navigates to LoginPanel.
+         * \param payload {}
+         */
+        void handleLogout(const EventPayload& payload);
+
+        /**
+         * Deletes the current account after password re-authentication.
+         * \param payload { "userID": "...", "password": "..." }
+         */
+        void handleDeleteAccount(const EventPayload& payload);
+
+        /**
+         * Imports the file at filePath and persists the result to the database.
+         * Metadata enrichment is conditional and may be skipped for large HTML
+         * uploads to avoid blocking the UI path.
+         * \param payload { "filePath": "...", "userID": "..." }
+         */
+        void handleUploadData(const EventPayload& payload);
+
+        /**
+         * Runs the blend algorithm over the listed participants, stores the
+         * result, and creates a ChatRoom for the new blend.
+         * \param payload { "userID_0": "...", "userID_1": "...", ... }
+         */
+        void handleCreateBlend(const EventPayload& payload);
+
+        /**
+         * Opens the selected video (currently a stub).
+         * \param payload { "videoID": "..." }
+         */
+        void handlePlayVideo(const EventPayload& payload);
+
+        /**
+         * Generates a new blend from the existing participants, excluding videos
+         * already in the current blend.  Re-enriches any videos missing metadata
+         * via the YouTube API before sampling.
+         * \param payload {}
+         */
+        void handleRefresh(const EventPayload& payload);
+
+        /**
+         * Opens the ChatPanel for the active blend's ChatRoom.
+         * No-ops if there is no active blend or no room for it.
+         * \param payload {}
+         */
+        void handleOpenChat(const EventPayload& payload);
+
+        /**
+         * Checks whether a user with the given ID exists in the backend.
+         *
+         * This uses the auth user-profile endpoint so account existence checks
+         * are independent from feature data (for example users with no uploaded
+         * watch-later list yet).
+         * \param userID The user ID to look up.
+         * \return \c true if the user was found, \c false otherwise.
+         */
+        bool lookupUser(const std::string& userID);
+
+        /**
+         * Validates the sender is a blend participant, then adds the message.
+         * \param payload { "userID": "...", "text": "..." }
+         */
+        void handleSendMessage(const EventPayload& payload);
+
+        // --- helpers for GUI to easily access user information such as their
+
+        /**
+         * Retrieves the current user from the AppSate
+         * \return \c User shared pointer. \c nullptr if \c User DNE
+         */
+        const User* get_current_user();
+
+        /**
+         * Rretrieves the current users username
+         * \return \c string copy of username. \c "" if \c User DNE
+         */
+        std::string get_current_username();
+
+        /**
+         * Retrievesthe current users email (if an email was used on signup)
+         * \return \c string copy of users email. \c "" if \c User DNE or they provided no email on signup
+         */
+        std::string get_current_email();
+
+        /**
+         * Holds summary info about a blend for display in the active blends list.
+         */
+/**
+ * \struct BlendSummary
+ * \brief BlendSummary class declaration.
+ */
+        struct BlendSummary {
+            std::string blendID;
+            std::string title;
+        };
+
+        /**
+         * Fetches the list of blends the current user participates in.
+         * \return Vector of BlendSummary with blend IDs and titles.
+         */
+        std::vector<BlendSummary> fetchUserBlends();
+
+        /**
+         * Leaves a blend: notifies server to remove the user, posts a system
+         * message to the chat, and clears the active blend if it was the one left.
+         * \param payload { "blendID": "...", "blendTitle": "..." }
+         */
+        void handleLeaveBlend(const EventPayload& payload);
+
+        /**
+         * Switches the active blend to the specified blend ID, loading participants
+         * and regenerating the video feed.
+         * \param payload { "blendID": "..." }
+         */
+        void handleSelectBlend(const EventPayload& payload);
+
+        /**
+         * Parses the JSON response from GET /chat-history into a list of Messages.
+         * Expected format: \code {"messages":[{"sender_id":"...","content":"...","sent_at":"..."},...]} \endcode
+         * Exposed as public static so it can be unit-tested without a live server.
+         * \param response Raw JSON string from the server.
+         * \return Ordered list of Messages with original server timestamps.
+         */
+        static std::list<Message> parseChatHistory(const std::string& response);
+
+        /**
+         * Applies bounded metadata enrichment to at most \p maxVideosToEnrich videos
+         * that have incomplete metadata, partitioned across worker threads.
+         *
+         * This utility is shared by production blend-loading paths and unit tests
+         * to keep metadata workflow behavior consistent.
+         * 
+         * \param videos list of videos to go through
+         * \param maxVideosToEnrich upper bound on the number of videos the algorithm should process
+         * \param workerThreads number of threads to be working on video enrichment
+         * \param enrichChunkFn function each thread will use to enrich their assigned sub-set of videos
+         */
+        static std::list<Video> enrichMissingMetadataSubsetMultithreaded(
+            const std::list<Video>& videos,
+            std::size_t maxVideosToEnrich,
+            std::size_t workerThreads,
+            const std::function<std::list<Video>(const std::list<Video>&)>& enrichChunkFn
+        );
     private:
         AppState&    appState;    // Singleton session state
         EventRouter  eventRouter; // Messenger between UI and controller
@@ -41,7 +228,7 @@ class AppController {
         bool isConnected;                   // tracks whether AppState has a connection to the server
         std::function<void(double, const std::string&)> progressReporter; // optional UI progress sink
 
-        /// Owns the most recently generated Blend so AppState can hold a raw pointer.
+        /** Owns the most recently generated Blend so AppState can hold a raw pointer. */
         std::unique_ptr<Blend> currentBlend;
 
         /**
@@ -135,7 +322,7 @@ class AppController {
             std::size_t workerThreads
         );
 
-        /// Sends a coarse-grained progress update to the active UI reporter.
+        /** Sends a coarse-grained progress update to the active UI reporter. */
         void reportProgress(double progress, const std::string& message);
 
         /**
@@ -145,180 +332,11 @@ class AppController {
          */
         bool registerBlendOnServer(const Blend& blend, const std::string& creatorID);
 
-    public:
-        /**
-         * Initialises AppState, EventRouter, and backend services.
-         */
-        explicit AppController();
+        // Holds a pending registration until upload completes (or is cancelled).
+        std::optional<User> pendingRegistration_;
+        bool pendingAccountCreated_ = false;
 
-        /**
-         * Compatibility constructor used by tests that inject a DB path.
-         * The current HTTP-backed controller ignores this value.
-         */
-        explicit AppController(const std::string& dbPath);
 
-        /**
-         * Persists any unsaved changes, deregisters all EventRouter listeners,
-         * and releases backend resources.
-         */
-        ~AppController();
+    };
 
-        /// \return Reference to the EventRouter so panels can call dispatch().
-        EventRouter& getEventRouter();
-
-        /// Registers a UI progress sink used for long-running controller operations.
-        void setProgressReporter(std::function<void(double, const std::string&)> reporter);
-
-        /// Clears the active UI progress sink.
-        void clearProgressReporter();
-
-        /**
-         * Creates a new account and logs the user in on success.
-         * \param payload { "userID": "...", "username": "...", "email": "...", "password": "..." }
-         */
-        void handleRegister(const EventPayload& payload);
-
-        /**
-         * Validates credentials and sets AppState::currentUser on success.
-         * \param payload { "userID": "...", "password": "..." }
-         */
-        void handleLogin(const EventPayload& payload);
-
-        /**
-         * Persists the current user, clears AppState, and navigates to LoginPanel.
-         * \param payload {}
-         */
-        void handleLogout(const EventPayload& payload);
-
-        /**
-         * Deletes the current account after password re-authentication.
-         * \\param payload { "userID": "...", "password": "..." }
-         */
-        void handleDeleteAccount(const EventPayload& payload);
-
-        /**
-         * Imports the file at filePath and persists the result to the database.
-         * Metadata enrichment is conditional and may be skipped for large HTML
-         * uploads to avoid blocking the UI path.
-         * \param payload { "filePath": "...", "userID": "..." }
-         */
-        void handleUploadData(const EventPayload& payload);
-
-        /**
-         * Runs the blend algorithm over the listed participants, stores the
-         * result, and creates a ChatRoom for the new blend.
-         * \param payload { "userID_0": "...", "userID_1": "...", ... }
-         */
-        void handleCreateBlend(const EventPayload& payload);
-
-        /**
-         * Opens the selected video (currently a stub).
-         * \param payload { "videoID": "..." }
-         */
-        void handlePlayVideo(const EventPayload& payload);
-
-        /**
-         * Generates a new blend from the existing participants, excluding videos
-         * already in the current blend.  Re-enriches any videos missing metadata
-         * via the YouTube API before sampling.
-         * \param payload {}
-         */
-        void handleRefresh(const EventPayload& payload);
-
-        /**
-         * Opens the ChatPanel for the active blend's ChatRoom.
-         * No-ops if there is no active blend or no room for it.
-         * \param payload {}
-         */
-        void handleOpenChat(const EventPayload& payload);
-
-        /**
-         * Checks whether a user with the given ID exists in the backend.
-         *
-         * This uses the auth user-profile endpoint so account existence checks
-         * are independent from feature data (for example users with no uploaded
-         * watch-later list yet).
-         * \param userID The user ID to look up.
-         * \return \c true if the user was found, \c false otherwise.
-         */
-        bool lookupUser(const std::string& userID);
-
-        /**
-         * Validates the sender is a blend participant, then adds the message.
-         * \param payload { "userID": "...", "text": "..." }
-         */
-        void handleSendMessage(const EventPayload& payload);
-
-        // --- helpers for GUI to easily access user information such as their
-
-        /**
-         * Retrieves the current user from the AppSate
-         * \return \c User \c shared pointer. \c nullptr \c if \c User \c DNE
-         */
-        const User* get_current_user();
-
-        /**
-         * Rretrieves the current users username
-         * \return \c string \c copy of username. \c "" \c if \c User \c DNE
-         */
-        std::string get_current_username();
-
-        /**
-         * Retrievesthe current users email (if an email was used on signup)
-         * \return \c string \c copy of users email. \c "" \c if \c User \c DNE or they provided no email on signup
-         */
-        std::string get_current_email();
-
-        /**
-         * Holds summary info about a blend for display in the active blends list.
-         */
-        struct BlendSummary {
-            std::string blendID;
-            std::string title;
-        };
-
-        /**
-         * Fetches the list of blends the current user participates in.
-         * \return Vector of BlendSummary with blend IDs and titles.
-         */
-        std::vector<BlendSummary> fetchUserBlends();
-
-        /**
-         * Leaves a blend: notifies server to remove the user, posts a system
-         * message to the chat, and clears the active blend if it was the one left.
-         * \param payload { "blendID": "...", "blendTitle": "..." }
-         */
-        void handleLeaveBlend(const EventPayload& payload);
-
-        /**
-         * Switches the active blend to the specified blend ID, loading participants
-         * and regenerating the video feed.
-         * \param payload { "blendID": "..." }
-         */
-        void handleSelectBlend(const EventPayload& payload);
-
-        /**
-         * Parses the JSON response from GET /chat-history into a list of Messages.
-         * Expected format: {"messages":[{"sender_id":"...","content":"...","sent_at":"..."},...]}
-         * Exposed as public static so it can be unit-tested without a live server.
-         * \param response Raw JSON string from the server.
-         * \return Ordered list of Messages with original server timestamps.
-         */
-        static std::list<Message> parseChatHistory(const std::string& response);
-
-        /**
-         * Applies bounded metadata enrichment to at most \p maxVideosToEnrich videos
-         * that have incomplete metadata, partitioned across worker threads.
-         *
-         * This utility is shared by production blend-loading paths and unit tests
-         * to keep metadata workflow behavior consistent.
-         */
-        static std::list<Video> enrichMissingMetadataSubsetMultithreaded(
-            const std::list<Video>& videos,
-            std::size_t maxVideosToEnrich,
-            std::size_t workerThreads,
-            const std::function<std::list<Video>(const std::list<Video>&)>& enrichChunkFn
-        );
-};
-
-#endif
+#endif // APPCONTROLLER_HPP

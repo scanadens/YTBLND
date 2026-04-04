@@ -1,3 +1,9 @@
+/**
+ * \file SqliteDataManager.cpp
+ * \brief Implementation for SqliteDataManager.
+ * \author Jasmine Kumar
+ */
+
 #include "SqliteDataManager.hpp"
 #include <iostream>
 #include <ctime>
@@ -57,7 +63,7 @@ void SqliteDataManager::initSchema() {
         ");"
 
         // -- Blend participants -------------------------------------------------
-        // One row per (blend, user) pair — enables fast lookup in both directions.
+        // One row per (blend, user) pair - enables fast lookup in both directions.
         "CREATE TABLE IF NOT EXISTS blend_participants ("
         "  blend_id TEXT NOT NULL,"
         "  user_id  TEXT NOT NULL,"
@@ -159,7 +165,7 @@ bool SqliteDataManager::saveWatchLater(const std::string& userID,
                                        const std::list<Video>& videos) {
     if (!db) return false;
 
-    // Delete existing rows for this user then re-insert — handles re-uploads cleanly.
+    // Delete existing rows for this user then re-insert - handles re-uploads cleanly.
     const char* delSql = "DELETE FROM user_watch_later WHERE user_id = ?;";
     sqlite3_stmt* del = nullptr;
     if (sqlite3_prepare_v2(db, delSql, -1, &del, nullptr) != SQLITE_OK) {
@@ -269,7 +275,7 @@ bool SqliteDataManager::saveBlend(const std::string& blendID,
     sqlite3_step(bs);
     sqlite3_finalize(bs);
 
-    // Replace participant rows — delete first so removed users are cleaned up
+    // Replace participant rows - delete first so removed users are cleaned up
     const char* delSql = "DELETE FROM blend_participants WHERE blend_id = ?;";
     sqlite3_stmt* del = nullptr;
     sqlite3_prepare_v2(db, delSql, -1, &del, nullptr);

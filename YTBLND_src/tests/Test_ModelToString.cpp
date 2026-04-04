@@ -1,3 +1,16 @@
+/**
+ * \file Test_ModelToString.cpp
+ * \brief Unit tests for model toString JSON serialization output.
+ * \author Shamar Pennant
+ *
+ * \details
+ * Confirms JSON serialization contracts for model toString() methods:
+ * - Field/key names expected by service endpoints.
+ * - Presence of required identifiers and nested structures.
+ * - Timestamp formatting and schema compatibility for chat messages.
+ * - Aggregate object serialization for Blend, ChatRoom, and YouTubeData.
+ */
+
 #include <gtest/gtest.h>
 
 #include "../ModelLayer/Blend.hpp"

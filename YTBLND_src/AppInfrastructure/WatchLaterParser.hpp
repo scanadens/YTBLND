@@ -12,6 +12,7 @@
 /**
  * \file WatchLaterParser.hpp
  * \author Shamar Pennant
+ * \author Jasmine Kumar
  * \brief Specialized parser for YouTube Takeout Watch Later CSV files
  * 
  * Parses YouTube Takeout 'Watch later-videos.csv' files into Video objects
@@ -21,7 +22,11 @@
  * Supports both single-threaded and multi-threaded parsing.
  */
 
-/// Specialized parser for YouTube Takeout Watch Later CSV files.
+/** Specialized parser for YouTube Takeout Watch Later CSV files. */
+/**
+ * \class WatchLaterParser
+ * \brief WatchLaterParser class declaration.
+ */
 class WatchLaterParser {
 public:
     /** Constructs WatchLaterParser for the given CSV file.

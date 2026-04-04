@@ -3,7 +3,7 @@
 <aside>
 <img src="https://www.notion.so/icons/pencil_orange.svg" alt="https://www.notion.so/icons/pencil_orange.svg" width="40px" />
 
-> **Contributors**: Shamar Pennant, Xavier Lusetti, Jasmine Kumar, Yousef Selim
+> **Contributors**: Shamar Pennant, Xavier Lusetti, Jasmine Kumar, Yousef Selim, Sophie Smith Stewart
 **Author**: Shamar Pennant, Jasmine Kumar
 > 
 </aside>
@@ -19,30 +19,19 @@
 ### required
 
 1. user experience and settings
-    - have access to peoples google accounts and their YouTube data
-        - be able to request access to google account
-    - be able to blend the participating users interests based on YouTube tags
-    - have users be able to block certain types of content from all chat feeds based on a selection of tags
+    - have access to peoples YouTube data through CSV file user uploads
+    - be able to blend the participating users videos 
 2. recommendation engine
-    - extract tags from liked videos, watch/search history
-    - be able to take a given list of YouTube meta tags and produce suggestions
-    - allows adjustments based on user feedback and content control rather than a fully opaque machine learning model
+    - suggests videos based on the poeple in the blend's CSV file uploads
 3. back end infrastructure
     1. web interface (have it be accessible via website)
 4. personal data management
     - authentication / users export own data
     - account deletion
-5. recommendation Transparency & Feed Control
-    - Provide reasoning behind the recommendations by displaying:
-        - Influencing tags and topics
-        - Relative contribution of participating users
-    - Allow users to give explicit feedback to the recommendation system (e.g., “show more like this” / “show less like this”) to refine future blended recommendations.
-    - “show more” and “show less” buttons to allow users to modulate the amount of information on their screen
-    - Support fine-grained content controls:
-        - Temporary and permanent tag muting
-        - Per-blend overrides of blocked content
+    - account creation
 6. Data Persistence
-    - User preferences, blended profiles, chatroom configurations, and interaction history will be saved across sessions
+    - Blends the user is part of are saved 
+    - Users CSV saved accross sessions
 7. System Architecture
     - separate concerns such as:
         - user management
@@ -59,6 +48,11 @@
 
 # wish list
 
+- Allow users to give explicit feedback to the recommendation system (e.g., “show more like this” / “show less like this”) to refine future 
+- save chatroom history
+- be able to take a given list of YouTube meta tags and produce suggestions
+- allows adjustments based on user feedback and content control rather than a fully opaque machine learning model
+- extract tags from liked videos, watch/search history
 - be able to seamlessly integrate into the browser as a plugin
 - Have pre-selected themes for users to choose from per each users individual view
 - chatroom

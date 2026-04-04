@@ -3,6 +3,7 @@
 
 /**
  * \file IBlendAlgorithm.hpp
+ * \author Jasmine Kumar
  * \brief Abstract interface for blend-generation algorithms.
  *
  * All blend algorithms must implement this interface so AppController
@@ -14,7 +15,11 @@
 #include "../ModelLayer/User.hpp"
 #include "../ModelLayer/Blend.hpp"
 
-/// Abstract interface for blend-generation algorithms.
+/** Abstract interface for blend-generation algorithms. */
+/**
+ * \class IBlendAlgorithm
+ * \brief IBlendAlgorithm class declaration.
+ */
 class IBlendAlgorithm {
 public:
     virtual ~IBlendAlgorithm() = default;

@@ -1,9 +1,10 @@
-// ============================================================================
-/// \file UploadProgressDialog.cpp
-/// \brief Implementation of non-modal progress dialog
-/// ============================================================================
+/**
+ * \file OperationProgressDialog.cpp
+ * \brief Implementation of non-modal progress dialog.
+ * \author Shamar Pennant
+ */
 
-#include "UploadProgressDialog.hpp"
+#include "OperationProgressDialog.hpp"
 #include "UIColors.hpp"
 
 #include <wx/dcbuffer.h>
@@ -16,7 +17,7 @@ namespace {
 constexpr int kProgressBorderPx = 1;
 }
 
-UploadProgressDialog::UploadProgressDialog(wxWindow* parent, const wxString& title)
+OperationProgressDialog::OperationProgressDialog(wxWindow* parent, const wxString& title)
     : wxDialog(parent, wxID_ANY, title,
                wxDefaultPosition, wxSize(420, 180),
                wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER) {
@@ -82,15 +83,15 @@ UploadProgressDialog::UploadProgressDialog(wxWindow* parent, const wxString& tit
     SetWindowStyle(wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
     UpdateProgressFill();
 
-    std::cout << "[UploadProgressDialog] Created progress dialog: "
+    std::cout << "[OperationProgressDialog] Created progress dialog: "
               << std::string(title.mb_str()) << "\n";
 }
 
-UploadProgressDialog::~UploadProgressDialog() {
-    std::cout << "[UploadProgressDialog] Destroyed progress dialog\n";
+OperationProgressDialog::~OperationProgressDialog() {
+    std::cout << "[OperationProgressDialog] Destroyed progress dialog\n";
 }
 
-void UploadProgressDialog::UpdateProgress(double progress, const wxString& message) {
+void OperationProgressDialog::UpdateProgress(double progress, const wxString& message) {
     // Clamp progress to 0.0-1.0 range
     if (progress < 0.0) progress = 0.0;
     if (progress > 1.0) progress = 1.0;
@@ -114,13 +115,13 @@ void UploadProgressDialog::UpdateProgress(double progress, const wxString& messa
     wxYield();
 }
 
-int UploadProgressDialog::ShowModal() {
+int OperationProgressDialog::ShowModal() {
     // Display non-modally to keep application responsive
     Show(true);
     return wxID_OK;
 }
 
-void UploadProgressDialog::UpdateProgressFill() {
+void OperationProgressDialog::UpdateProgressFill() {
     if (progressTrack == nullptr || progressFill == nullptr) {
         return;
     }

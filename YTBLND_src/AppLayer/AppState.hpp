@@ -4,11 +4,12 @@
 /**
  * \file AppState.hpp
  * \brief Session-scoped singleton holding all runtime application state.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
+ * 
  * AppState is the application's in-memory session store.  It records who is
  * logged in, what blend is active, and what chat rooms exist.
  *
- * This is a Singleton — use AppState::getInstance() everywhere.  The
+ * This is a Singleton - use AppState::getInstance() everywhere.  The
  * constructor is private to enforce this.  AppState holds no business logic
  * and performs no I/O; it is updated exclusively by AppController.
  */
@@ -22,20 +23,24 @@
 #include "../ModelLayer/ChatRoom.hpp"
 #include "../ServiceLayer/HttpClient.hpp"
 
-/// Session-scoped singleton holding all runtime application state.
+/** Session-scoped singleton holding all runtime application state. */
+/**
+ * \class AppState
+ * \brief AppState class declaration.
+ */
 class AppState {
     private:
         User*  currentUser;        ///< Logged-in user; null when no session is active.
         Blend* activeBlend;        ///< Most recently generated or loaded Blend; null if none.
         bool   isBlendGenerating;  ///< True while an IBlendAlgorithm is running.
 
-        /// All chat rooms for this session, keyed by blendID.
+        /** All chat rooms for this session, keyed by blendID. */
         std::map<std::string, ChatRoom> chatRooms;
 
-        /// Participants that have uploaded Watch Later data, keyed by userID.
+        /** Participants that have uploaded Watch Later data, keyed by userID. */
         std::map<std::string, User> sessionUsers;
 
-        /// Participants who had no data when the last blend was created.
+        /** Participants who had no data when the last blend was created. */
         std::vector<std::string> usersWithoutData;
 
         /**
@@ -61,19 +66,19 @@ class AppState {
          */
         static AppState& getInstance();
 
-        /// \return Pointer to the logged-in user, or nullptr if no session is active.
+        /** \return Pointer to the logged-in user, or nullptr if no session is active. */
         User* getCurrentUser()               const;
-        /// \param user Pointer to the newly logged-in User (AppController owns it).
+        /** \param user Pointer to the newly logged-in User (AppController owns it). */
         void  setCurrentUser(User* user);
 
-        /// \return Pointer to the active Blend, or nullptr if none exists.
+        /** \return Pointer to the active Blend, or nullptr if none exists. */
         Blend* getActiveBlend()              const;
-        /// \param blend Raw pointer to the active Blend (AppController owns it).
+        /** \param blend Raw pointer to the active Blend (AppController owns it). */
         void   setActiveBlend(Blend* blend);
 
-        /// \return True while an IBlendAlgorithm is running.
+        /** \return True while an IBlendAlgorithm is running. */
         bool isGeneratingBlend()             const;
-        /// \param flag True to mark blend generation as in-progress.
+        /** \param flag True to mark blend generation as in-progress. */
         void setIsBlendGenerating(bool flag);
 
         /**
@@ -102,10 +107,10 @@ class AppState {
          */
         void addSessionUser(const User& user);
 
-        /// \return All users that have uploaded data in this session.
+        /** \return All users that have uploaded data in this session. */
         std::map<std::string, User> getSessionUsers() const;
 
-        /// Removes all session participants (call before starting a new blend).
+        /** Removes all session participants (call before starting a new blend). */
         void clearSessionUsers();
 
         /**
@@ -115,7 +120,7 @@ class AppState {
          */
         void setUsersWithoutData(const std::vector<std::string>& users);
 
-        /// \return userIDs of participants without data from the last blend creation.
+        /** \return userIDs of participants without data from the last blend creation. */
         std::vector<std::string> getUsersWithoutData() const;
 
         /**

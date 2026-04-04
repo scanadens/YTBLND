@@ -8,7 +8,11 @@
  */
 #pragma once
 
-/// File format ID constants for validating source-parser compatibility.
+/** File format ID constants for validating source-parser compatibility. */
+/**
+ * \class File_ID
+ * \brief File_ID class declaration.
+ */
 class File_ID {
 	public:
 	static constexpr int CSV = 1;

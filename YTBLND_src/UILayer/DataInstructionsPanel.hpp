@@ -1,6 +1,9 @@
-// ============================================================================
-// DataInstructionsPanel.hpp — Google Takeout CSV setup screen
-//
+/**
+ * \file DataInstructionsPanel.hpp
+ * \brief Setup instructions panel for importing Google Takeout CSV data.
+ * \author Jasmine Kumar
+ */
+
 // Shown after login when the user has no YouTube Watch Later data.
 // Walks them through exporting from Google Takeout and loading the CSV.
 //
@@ -18,7 +21,7 @@
 // ----------
 //   OnBrowse: opens wxFileDialog (CSV filter), dispatches "uploadData" with
 //   {filePath, userID} from AppState, then navigates to BLEND_CREATION.
-//   TODO: Display a loading indicator while parsing — large CSV files may
+//   TODO: Display a loading indicator while parsing - large CSV files may
 //         take a noticeable amount of time.
 //   TODO: Show an error/success message if the upload fails or the CSV is
 //         malformed, rather than always navigating to BLEND_CREATION.
@@ -30,7 +33,6 @@
 //   personal data to work with).
 //   TODO: Remind the user on the blend creation screen that they skipped
 //         data upload, so the blend may not be personalised.
-// ============================================================================
 
 #pragma once
 #include <wx/wx.h>
@@ -41,6 +43,10 @@ class AppController;
 // Shown after login when the user has no YouTube data loaded yet.
 // Explains how to obtain and place the Watch Later CSV, then lets the
 // user browse for the file or skip and go straight to blend creation.
+/**
+ * \class DataInstructionsPanel
+ * \brief DataInstructionsPanel class declaration.
+ */
 class DataInstructionsPanel : public wxPanel {
 public:
     DataInstructionsPanel(wxWindow* parent, AppController& controller, NavigateFn nav);

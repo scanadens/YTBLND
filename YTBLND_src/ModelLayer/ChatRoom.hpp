@@ -4,10 +4,10 @@
 /**
  * \file ChatRoom.hpp
  * \brief In-memory chat session tied to a specific Blend.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
  *
  * Identified by the blendID of the Blend it belongs to.  Messages are not
- * persisted in this version — all chat history is lost when the session ends.
+ * persisted in this version - all chat history is lost when the session ends.
  *
  * Currently only one ChatRoom is active at a time (the one matching the active
  * Blend in AppState), but AppState holds a map<string, ChatRoom> keyed by
@@ -20,7 +20,11 @@
 
 #include "Message.hpp"
 
-/// In-memory chat session associated with a Blend.
+/** In-memory chat session associated with a Blend. */
+/**
+ * \class ChatRoom
+ * \brief ChatRoom class declaration.
+ */
 class ChatRoom {
     private:
         std::string              blendID;         ///< ID of the owning Blend.
@@ -36,11 +40,11 @@ class ChatRoom {
         ChatRoom(const std::string& blendID,
                  const std::vector<std::string>& participantIDs);
 
-        /// \return ID of the Blend this room belongs to.
+        /** \return ID of the Blend this room belongs to. */
         std::string              getBlendID()        const;
-        /// \return List of participant userIDs.
+        /** \return List of participant userIDs. */
         std::vector<std::string> getParticipantIDs() const;
-        /// \return In-memory message history, oldest first.
+        /** \return In-memory message history, oldest first. */
         std::list<Message>       getMessages()        const;
 
         /**

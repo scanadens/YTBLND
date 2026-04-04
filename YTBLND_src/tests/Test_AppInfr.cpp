@@ -1,3 +1,18 @@
+/**
+ * \file Test_AppInfr.cpp
+ * \brief Unit tests for AppInfrastructure parsers, sources, and import pipeline.
+ * \author Shamar Pennant
+ *
+ * \details
+ * Validates AppInfrastructure behavior for:
+ * - File_ID constant stability and expected values.
+ * - CsvParser parsing rules, including headers and row mapping.
+ * - CsvSource file loading behavior and error handling.
+ * - DataExtractor source-parser wiring and compatibility checks.
+ * - WatchLaterParser and WatchHistoryParser extraction correctness.
+ * - YouTubeDataImporter routing by file extension and unsupported-type errors.
+ */
+
 #include <gtest/gtest.h>
 
 #include <filesystem>

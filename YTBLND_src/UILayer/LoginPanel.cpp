@@ -10,7 +10,7 @@
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
-#include "UploadProgressDialog.hpp"
+#include "OperationProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
@@ -238,7 +238,7 @@ void LoginPanel::OnSignIn(wxCommandEvent& /*evt*/)
         return;
     }
 
-    UploadProgressDialog progress(this, "Signing In");
+    OperationProgressDialog progress(this, "Signing In");
     progress.ShowModal();
     progress.UpdateProgress(0.02, "Preparing login...");
 

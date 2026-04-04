@@ -1,5 +1,11 @@
+/**
+ * \file UserPanel.cpp
+ * \brief Implementation for UserPanel.
+ * \author Jasmine Kumar
+ */
+
 // ============================================================================
-// UserPanel.cpp — Account info and logout screen implementation
+// UserPanel.cpp - Account info and logout screen implementation
 // ============================================================================
 
 #include "UserPanel.hpp"

@@ -4,7 +4,7 @@
 /**
  * \file Message.hpp
  * \brief A single chat message sent within a ChatRoom.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
  *
  * Kept as a plain struct since it is pure data with no behaviour.
  */
@@ -14,6 +14,10 @@
 
 /**
  * \brief A single chat message sent within a ChatRoom.
+ */
+/**
+ * \struct Message
+ * \brief Message class declaration.
  */
 struct Message {
     std::string userID;    ///< ID of the User who sent this message.
@@ -31,6 +35,10 @@ struct Message {
             std::time_t timestamp = std::time(nullptr))
         : userID(userID), text(text), timestamp(timestamp) {}
 
+    /**
+     * String representation of \c Message
+     * \return \c string 
+     */
     std::string toString() const;
 };
 

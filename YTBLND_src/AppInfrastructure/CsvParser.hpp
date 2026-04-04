@@ -11,7 +11,11 @@
 
 #include "Parser.hpp"
 
-/// CSV file parser implementing the Parser interface.
+/** CSV file parser implementing the Parser interface. */
+/**
+ * \class CsvParser
+ * \brief CsvParser class declaration.
+ */
 class CsvParser : public Parser {
     public:
         CsvParser();
@@ -35,7 +39,7 @@ class CsvParser : public Parser {
          */
         void setData(std::list<std::string> data) override;
 
-        /// \return File_ID::CSV
+        /** \return File_ID::CSV */
         int getParseId() override;
 
     private:

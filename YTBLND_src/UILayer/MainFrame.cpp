@@ -23,7 +23,7 @@
 #include "BlendCreationPanel.hpp"
 #include "BlendChatPanel.hpp"
 #include "ActiveBlendsPanel.hpp"
-#include "UploadProgressDialog.hpp"
+#include "OperationProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 
@@ -245,7 +245,7 @@ void MainFrame::TriggerFeedRefresh() {
         refreshBtn->Disable();
     }
 
-    UploadProgressDialog progress(this, "Refreshing Feed");
+    OperationProgressDialog progress(this, "Refreshing Feed");
     progress.ShowModal();
     progress.UpdateProgress(0.08, "Preparing refresh...");
 

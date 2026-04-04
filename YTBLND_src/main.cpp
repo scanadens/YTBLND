@@ -1,5 +1,11 @@
+/**
+ * \file main.cpp
+ * \brief Implementation for main.
+ * \author Jasmine Kumar
+ */
+
 // ============================================================================
-// main.cpp — Application entry point
+// main.cpp - Application entry point
 //
 // Creates the single AppController (which owns AppState, EventRouter, and
 // SqliteDataManager), initialises wxWidgets image handlers for thumbnail

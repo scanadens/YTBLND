@@ -14,6 +14,10 @@
  * Keeps AppController clean by hiding CSV-vs-HTML parser selection.
  * Supports both single-threaded and multi-threaded import with progress tracking.
  */
+/**
+ * \class YouTubeDataImporter
+ * \brief YouTubeDataImporter class declaration.
+ */
 class YouTubeDataImporter {
 public:
     /**
@@ -22,6 +26,9 @@ public:
      * Supported extensions:
      * - .csv  : Watch Later export
      * - .html/.htm : watch-history export
+     * 
+     * \param filePath path to the specified file
+     * \return \code list<video> \endcode extracted and formatted from \code filePath \endcode
      */
     std::list<Video> import(const std::string& filePath) const;
 
@@ -36,5 +43,10 @@ public:
                                          std::function<void(double)> progressCallback = nullptr) const;
 
 private:
+    /**
+     * Helper to ensure extensions are always lowered
+     * \param filePath desired file
+     * \return \code string \endcode of the file path with the lowered extension
+     */
     static std::string lowerExtension(const std::string& filePath);
 };

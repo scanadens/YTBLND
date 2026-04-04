@@ -13,6 +13,10 @@
 class AppController;
 class wxChoice;
 
+/**
+ * \class SettingsPanel
+ * \brief SettingsPanel class declaration.
+ */
 class SettingsPanel : public wxPanel {
 public:
     SettingsPanel(wxWindow* parent, AppController& controller, NavigateFn nav);
