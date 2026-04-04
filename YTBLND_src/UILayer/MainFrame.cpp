@@ -228,7 +228,10 @@ MainFrame::MainFrame(AppController& controller)
 void MainFrame::NavigateTo(Page page) {
     if (page == Page::LOGIN)           loginPanel->Refresh();
     if (page == Page::BLEND_CREATION)  creationPanel->Refresh();
-    if (page == Page::HOME)            feedPanel->Refresh();
+    if (page == Page::HOME) {
+        feedPanel->Refresh();
+        UpdateBlendIndicatorLabel();
+    }
     if (page == Page::USER)            userPanel->Refresh();
     if (page == Page::BLEND_CHAT)      chatPanel->Refresh();
     if (page == Page::ACTIVE_BLENDS)  activeBlendsPanel->Refresh();
@@ -274,6 +277,22 @@ void MainFrame::TriggerFeedRefresh() {
         refreshBtn->Enable();
     }
     refreshInProgress = false;
+}
+
+void MainFrame::UpdateBlendIndicatorLabel() {
+    if (blendIndicatorLabel == nullptr) {
+        return;
+    }
+
+    const std::string title = controller.get_current_blend_title();
+    const wxString uiText = title.empty()
+        ? wxString("No active blend selected")
+        : wxString::FromUTF8(title);
+
+    blendIndicatorLabel->SetLabel(uiText);
+    blendIndicatorLabel->SetForegroundColour(UIColors::Accent());
+    blendIndicatorLabel->Wrap(-1);
+    blendIndicatorLabel->Refresh();
 }
 
 // -- Icon helpers -------------------------------------------------------------
@@ -344,7 +363,7 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
 
     // -- Row 2: Title row (YTBLND centered-left, blends + chat icons right) ---
     auto* titlePanel = new wxPanel(page, wxID_ANY);
-    auto* titleBox = new wxBoxSizer(wxHORIZONTAL);
+    auto* titleGrid = new wxGridSizer(1, 3, 0, 0);
 
     auto* titleLabel = new wxStaticText(titlePanel, wxID_ANY, "YTBLND");
     wxFont titleFont = titleLabel->GetFont();
@@ -353,8 +372,14 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     titleLabel->SetFont(titleFont);
     titleLabel->SetForegroundColour(UIColors::Accent());
 
-    blendsIconBtn = MakeIconButton(titlePanel, "blends", IconBase::Background, 32);
-    chatIconBtn   = MakeIconButton(titlePanel, "chat",   IconBase::Background, 32);
+    auto* leftSlot = new wxPanel(titlePanel, wxID_ANY);
+    leftSlot->SetBackgroundColour(UIColors::Background());
+
+    auto* rightSlot = new wxPanel(titlePanel, wxID_ANY);
+    rightSlot->SetBackgroundColour(UIColors::Background());
+
+    blendsIconBtn = MakeIconButton(rightSlot, "blends", IconBase::Background, 32);
+    chatIconBtn   = MakeIconButton(rightSlot, "chat",   IconBase::Background, 32);
     auto* blendsBtn = blendsIconBtn;
     auto* chatBtn   = chatIconBtn;
 
@@ -366,12 +391,19 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
             NavigateTo(Page::BLEND_CREATION);
     });
 
-    titleBox->AddStretchSpacer(1);
-    titleBox->Add(titleLabel, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 24);
-    titleBox->AddStretchSpacer(1);
-    titleBox->Add(blendsBtn, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 12);
-    titleBox->Add(chatBtn,   0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 20);
-    titlePanel->SetSizer(titleBox);
+    // Keep actions in the right third and right-align within that column.
+    auto* rightControls = new wxBoxSizer(wxHORIZONTAL);
+    rightControls->AddStretchSpacer(1);
+    rightControls->Add(blendsBtn, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 12);
+    rightControls->Add(chatBtn,   0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 20);
+    rightSlot->SetSizer(rightControls);
+
+    // Equal-width 3-column grid: empty left slot, centered title, right actions.
+    // This keeps the title centered in the full frame while scaling naturally.
+    titleGrid->Add(leftSlot, 1, wxEXPAND);
+    titleGrid->Add(titleLabel, 0, wxALIGN_CENTER);
+    titleGrid->Add(rightSlot, 1, wxEXPAND);
+    titlePanel->SetSizer(titleGrid);
 
     // -- Feed grid (unchanged) ------------------------------------------------
     feedPanel->Reparent(page);
@@ -386,8 +418,27 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     rbox->AddStretchSpacer(1);
     refreshPanel->SetSizer(rbox);
 
+    // setting up the label to indicate the current blend
+    wxPanel* bi_panel = new wxPanel(page, wxID_ANY);
+
+    bi_panel->SetBackgroundColour(UIColors::Background());
+    blendIndicatorLabel = new wxStaticText(bi_panel, wxID_ANY, wxEmptyString);
+    wxFont indicator_font = blendIndicatorLabel->GetFont();
+    indicator_font.SetPointSize(16);
+    indicator_font.SetWeight(wxFONTWEIGHT_LIGHT);
+    blendIndicatorLabel->SetFont(indicator_font);
+    blendIndicatorLabel->SetForegroundColour(UIColors::TextPrimary());
+    UpdateBlendIndicatorLabel();
+
+    auto* BI_lbl_box = new wxBoxSizer(wxHORIZONTAL);
+    BI_lbl_box->AddStretchSpacer(1);
+    BI_lbl_box->Add(blendIndicatorLabel);
+    BI_lbl_box->AddStretchSpacer(1);
+    bi_panel->SetSizer(BI_lbl_box);
+
     vbox->Add(ribbon, 0, wxEXPAND);
     vbox->Add(titlePanel, 0, wxEXPAND);
+    vbox->Add(bi_panel, 0, wxEXPAND | wxCENTER);
     vbox->Add(feedPanel, 1, wxEXPAND | wxALL, 16);
     vbox->Add(refreshPanel, 0, wxEXPAND);
     vbox->AddSpacer(16);

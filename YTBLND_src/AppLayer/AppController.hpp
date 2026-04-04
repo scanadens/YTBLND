@@ -164,6 +164,18 @@ public:
         /**
          * Holds summary info about a blend for display in the active blends list.
          */
+
+        /** 
+         * Processes the current blend selected or loaded by default by the user
+         * \return \c string representing the current blend id
+         */
+        std::string get_current_blend_id();
+
+        /**
+         * Processes the current blends title
+         * \return \c string representing the blends title
+         */
+        std::string get_current_blend_title();
 /**
  * \struct BlendSummary
  * \brief BlendSummary class declaration.

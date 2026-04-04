@@ -84,8 +84,18 @@ void ActiveBlendsPanel::RebuildList()
         m_listSizer->Add(m_emptyLabel, 0);
 
         for (const auto& blend : blends) {
+            wxColor c_to_use; // holds the background color to use for each list item
+            
+            // if the the current blend iteration matches the current blend in the app controller,
+            // change the background so it stands out from other blend items
+            if (blend.blendID == m_controller.get_current_blend_id()) {
+                c_to_use = UIColors::Accent();
+            } else { // otherwise, set as a basic color for contrast
+                c_to_use = UIColors::SurfaceRaised();
+            }
+            
             auto* row = new wxPanel(m_listInner, wxID_ANY);
-            row->SetBackgroundColour(UIColors::SurfaceRaised());
+            row->SetBackgroundColour(c_to_use);
             row->SetMinSize(wxSize(-1, 52));
 
             auto* rowSizer = new wxBoxSizer(wxHORIZONTAL);

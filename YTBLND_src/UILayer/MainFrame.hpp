@@ -90,11 +90,14 @@ private:
     wxButton*              userIconBtn     = nullptr;
     wxButton*              blendsIconBtn   = nullptr;
     wxButton*              chatIconBtn     = nullptr;
+    wxStaticText*          blendIndicatorLabel = nullptr;
     // Guards against duplicate refresh dispatches from double-clicks.
     bool                   refreshInProgress;
 
     /// Reloads all themed icon bitmaps after a theme switch.
     void ReloadThemedIcons();
+    /// Updates the home-page active blend title label from controller state.
+    void UpdateBlendIndicatorLabel();
     std::unordered_map<int, wxImage> images; // images
 
     /**
