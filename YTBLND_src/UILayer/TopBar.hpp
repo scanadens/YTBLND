@@ -29,6 +29,13 @@ public:
 
 private:
     /**
+     * \brief Load the themed back icon bitmap for the top bar.
+     * \param size Target icon size in pixels.
+     * \return Loaded back icon bitmap, or wxNullBitmap on failure.
+     */
+    static wxBitmap LoadBackIcon(int size = 24);
+
+    /**
      * \brief Handle clicks on the back button.
      * \param evt Button click event.
      */

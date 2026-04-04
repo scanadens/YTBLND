@@ -69,6 +69,11 @@ public:
     void TriggerFeedRefresh();
 
 private:
+    enum class IconBase {
+        Surface,
+        Background,
+    };
+
     enum ImageKey {
         BG_MAIN = 0,
     };
@@ -98,6 +103,31 @@ private:
     void ReloadThemedIcons();
     /// Updates the home-page active blend title label from controller state.
     void UpdateBlendIndicatorLabel();
+
+    /**
+     * \brief Load a themed icon bitmap from the resources directory.
+     * \param name Icon base name without extension.
+     * \param size Target icon size in pixels.
+     * \return Loaded bitmap or wxNullBitmap if unavailable.
+     */
+    static wxBitmap LoadThemedIcon(const wxString& name, int size = 24);
+
+    /**
+     * \brief Create a button that displays a themed icon and hover background.
+     * \param parent Parent window that owns the button.
+     * \param iconName Icon base name without extension.
+     * \param base Determines which base background color to use.
+     * \param iconSize Icon size in pixels.
+     * \return Newly created icon button.
+     */
+    wxButton* MakeIconButton(wxWindow* parent, const wxString& iconName,
+                             IconBase base, int iconSize = 24);
+
+    /**
+     * \brief Load and apply available application icon assets to this frame.
+     */
+    void ApplyAppIcons();
+
     std::unordered_map<int, wxImage> images; // images
 
     /**

@@ -10,11 +10,10 @@
 #include <wx/wx.h>
 #include <wx/simplebook.h>
 #include <wx/dcbuffer.h>
-#include <wx/filename.h>
-#include <wx/stdpaths.h>
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
+#include "ResourcePathUtils.hpp"
 #include "LoginPanel.hpp"
 #include "DataInstructionsPanel.hpp"
 #include "BlendFeedPanel.hpp"
@@ -27,48 +26,17 @@
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 
-namespace {
-wxString ResolveResourcePath(const wxString& fileName)
-{
-    const wxArrayString relativeCandidates = {
-        "YTBLND_src/resources/" + fileName,
-        "resources/" + fileName,
-        "../resources/" + fileName,
-    };
-
-    for (const auto& candidate : relativeCandidates) {
-        if (wxFileExists(candidate)) {
-            return candidate;
-        }
-    }
-
-    wxFileName exePath(wxStandardPaths::Get().GetExecutablePath());
-    const wxString exeDir = exePath.GetPath();
-    const wxArrayString exeRelativeCandidates = {
-        exeDir + "/../../YTBLND_src/resources/" + fileName,
-        exeDir + "/../resources/" + fileName,
-        exeDir + "/resources/" + fileName,
-    };
-
-    for (const auto& candidate : exeRelativeCandidates) {
-        if (wxFileExists(candidate)) {
-            return candidate;
-        }
-    }
-
-    return "";
-}
-
-void ApplyAppIcons(wxFrame& frame)
+void MainFrame::ApplyAppIcons()
 {
     const wxArrayString iconCandidates = {
+        "ytblnd-framev2.png",
         "ytblnd-starv2.png",
         "ytblnd-star.png",
     };
 
     wxIconBundle iconBundle;
     for (const auto& fileName : iconCandidates) {
-        const wxString iconPath = ResolveResourcePath(fileName);
+        const wxString iconPath = UIResourcePaths::FindResourcePath(fileName);
         if (iconPath.empty()) {
             continue;
         }
@@ -80,11 +48,10 @@ void ApplyAppIcons(wxFrame& frame)
     }
 
     if (!iconBundle.IsEmpty()) {
-        frame.SetIcons(iconBundle);
+        SetIcons(iconBundle);
     } else {
         wxLogWarning("App icon files not found in resources.");
     }
-}
 }
 
 // -- Background Panel ---------------------------------------------------------
@@ -133,12 +100,12 @@ MainFrame::MainFrame(AppController& controller)
     refreshInProgress(false)
 {
     // Resolve the path to the theme.txt containing the UI colour themes
-    UIColors::LoadThemesFromFile(ResolveResourcePath("theme.txt"));
+    UIColors::LoadThemesFromFile(UIResourcePaths::FindResourcePath("theme.txt"));
 
-    ApplyAppIcons(*this);
+    ApplyAppIcons();
 
     // resolve the path to the background image and load it as a wxImage
-    const wxString bgPath = ResolveResourcePath("checkered_wave_background.jpg");
+    const wxString bgPath = UIResourcePaths::FindResourcePath("checkered_wave_background.jpg");
     if (bgPath.empty() || !LoadImage(BG_MAIN, bgPath)) {
         wxLogWarning("Background image not found. Checked ../resources and resources.");
     }
@@ -326,10 +293,10 @@ void MainFrame::UpdateBlendIndicatorLabel() {
 
 // -- Icon helpers -------------------------------------------------------------
 
-static wxBitmap LoadThemedIcon(const wxString& name, int size = 24) {
+wxBitmap MainFrame::LoadThemedIcon(const wxString& name, int size) {
     wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
     wxString folder = themeName.BeforeFirst(' ').Lower();
-    wxString path = ResolveResourcePath("icons/" + folder + "/" + name + ".png");
+    wxString path = UIResourcePaths::FindResourcePath("icons/" + folder + "/" + name + ".png");
     if (!path.empty()) {
         wxImage img(path, wxBITMAP_TYPE_PNG);
         if (img.IsOk()) {
@@ -340,10 +307,8 @@ static wxBitmap LoadThemedIcon(const wxString& name, int size = 24) {
     return wxNullBitmap;
 }
 
-enum class IconBase { Surface, Background };
-
-static wxButton* MakeIconButton(wxWindow* parent, const wxString& iconName,
-                                 IconBase base, int iconSize = 24) {
+wxButton* MainFrame::MakeIconButton(wxWindow* parent, const wxString& iconName,
+                                    IconBase base, int iconSize) {
     wxColour initBg = (base == IconBase::Surface) ? UIColors::Surface() : UIColors::Background();
     auto* btn = new wxButton(parent, wxID_ANY, wxEmptyString,
                               wxDefaultPosition, wxSize(iconSize + 16, iconSize + 12),
@@ -479,7 +444,7 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
 void MainFrame::ReloadThemedIcons() {
     auto reload = [](wxButton* btn, const wxString& name, int size) {
         if (!btn) return;
-        wxBitmap bmp = LoadThemedIcon(name, size);
+        wxBitmap bmp = MainFrame::LoadThemedIcon(name, size);
         if (bmp.IsOk()) btn->SetBitmap(bmp);
         btn->Refresh();
     };

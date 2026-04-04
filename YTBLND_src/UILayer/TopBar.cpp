@@ -11,25 +11,14 @@
 #include "TopBar.hpp"
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
+#include "ResourcePathUtils.hpp"
 #include <wx/font.h>
-#include <wx/filename.h>
 #include <wx/image.h>
 
-namespace {
-wxString FindResourcePath(const wxString& fileName) {
-    for (const auto& c : wxArrayString{
-             "YTBLND_src/resources/" + fileName,
-             "resources/" + fileName,
-             "../resources/" + fileName}) {
-        if (wxFileExists(c)) return c;
-    }
-    return wxEmptyString;
-}
-
-wxBitmap LoadBackIcon(int size = 24) {
+wxBitmap TopBar::LoadBackIcon(int size) {
     wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
     wxString folder = themeName.BeforeFirst(' ').Lower();
-    wxString path = FindResourcePath("icons/" + folder + "/back.png");
+    wxString path = UIResourcePaths::FindResourcePath("icons/" + folder + "/back.png");
     if (!path.empty()) {
         wxImage img(path, wxBITMAP_TYPE_PNG);
         if (img.IsOk()) {
@@ -38,7 +27,6 @@ wxBitmap LoadBackIcon(int size = 24) {
         }
     }
     return wxNullBitmap;
-}
 }
 
 TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page backDest)

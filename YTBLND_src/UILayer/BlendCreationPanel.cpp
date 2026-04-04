@@ -16,6 +16,7 @@
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
+#include "ResourcePathUtils.hpp"
 #include "UIPages.hpp"
 #include "OperationProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
@@ -48,17 +49,12 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
         // Load back icon
         wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
         wxString folder = themeName.BeforeFirst(' ').Lower();
-        for (const auto& c : wxArrayString{
-                 "YTBLND_src/resources/icons/" + folder + "/back.png",
-                 "resources/icons/" + folder + "/back.png",
-                 "../resources/icons/" + folder + "/back.png"}) {
-            if (wxFileExists(c)) {
-                wxImage img(c, wxBITMAP_TYPE_PNG);
-                if (img.IsOk()) {
-                    img.Rescale(24, 24, wxIMAGE_QUALITY_BILINEAR);
-                    backBtn->SetBitmap(wxBitmap(img));
-                }
-                break;
+        const wxString iconPath = UIResourcePaths::FindResourcePath("icons/" + folder + "/back.png");
+        if (!iconPath.empty()) {
+            wxImage img(iconPath, wxBITMAP_TYPE_PNG);
+            if (img.IsOk()) {
+                img.Rescale(24, 24, wxIMAGE_QUALITY_BILINEAR);
+                backBtn->SetBitmap(wxBitmap(img));
             }
         }
 
