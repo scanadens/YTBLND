@@ -282,13 +282,8 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
     const double  W  = sz.GetWidth();
     const double  H  = sz.GetHeight();
 
-<<<<<<< HEAD
-    // -- Card background --------------------------------------------------
-    gc->SetBrush(wxBrush(UIColors::Surface));
-=======
     // ── Card background ──────────────────────────────────────────────────
     gc->SetBrush(wxBrush(UIColors::Surface()));
->>>>>>> efc20814f9e995d8933c4888c5a8d80ccb25a7c4
     gc->SetPen(*wxTRANSPARENT_PEN);
     gc->DrawRoundedRectangle(0, 0, W, H, 10.0);
 
