@@ -1,104 +1,173 @@
-// UIColors.cpp
+/**
+ * \file UIColors.cpp
+ * \brief Logic for dynamic theme switching and UI recursion.
+ * \author Xavier Lusetti
+ */
+
 #include "UIColors.hpp"
+#include <fstream>
+#include <string>
+#include <algorithm>
 
-namespace {
-void ApplyPalette(const Palette& p) {
-    UIColors::Background = p.Background;
-    UIColors::Surface = p.Surface;
-    UIColors::SurfaceRaised = p.SurfaceRaised;
-    UIColors::Accent = p.Accent;
-    UIColors::AccentHover = p.AccentHover;
-    UIColors::TextPrimary = p.TextPrimary;
-    UIColors::TextSecondary = p.TextSecondary;
-    UIColors::TextMuted = p.TextMuted;
-    UIColors::Separator = p.Separator;
-    UIColors::Danger = p.Danger;
-}
-}
+// Initialize;
+// unordered map of palettes
+// vector of ordered themes 
+// and pointer to the current palette
+std::unordered_map<wxString, Palette> UIColors::ThemeMap;
+std::vector<wxString> UIColors::ThemeOrder;
+Palette* UIColors::Current = nullptr;
 
-Palette* UIColors::Current = &UIColors::DarkMode;
-
-Palette UIColors::DarkMode = { 
-    wxColour(13,13,13),     ///< #0D0D0D — window background.
-    wxColour(25,25,25),     ///< #191919 — panel / card background.
-    wxColour(38,38,38),     ///< #262626 — inputs, raised elements.
-
-    wxColour(138,0,255),    ///< #8A00FF — brand purple.
-    wxColour(160,40,255),   ///< #A028FF — lighter hover purple.
-
-    wxColour(255,255,255),  ///< #FFFFFF - Body text.
-    wxColour(160,160,160),  ///< #BDBDBD - Secondary text.
-    wxColour(100,100,100),  ///< #757575 - Placeholder text.
-
-    wxColour(50,50,50),     ///< #252525 - Rule-line colour.
-    wxColour(211, 47, 47)   ///< #D32F2F — red destructive-action color.
-};
-
-
-Palette UIColors::LightMode = { 
-    wxColour(245, 245, 245), ///< #F5F5F5 — window background.
-    wxColour(255, 255, 255), ///< #FFFFFF — card background.
-    wxColour(230, 230, 230), ///< #E6E6E6 — inputs, raised elements.
-
-    wxColour(0, 102, 204),   ///< #0066CC — blue brand accent.
-    wxColour(0, 120, 215),   ///< #0078D7 — blue hover feedback.
-
-    wxColour(33, 33, 33),    ///< #212121 — body text.
-    wxColour(117, 117, 117), ///< #757575 — secondary text.
-    wxColour(189, 189, 189), ///< #BDBDBD — placeholder text.
-
-    wxColour(224, 224, 224), ///< #E0E0E0 — rule-line color.
-    wxColour(211, 47, 47)    ///< #D32F2F — red destructive-action color.
-};
-
-
-Palette UIColors::NeonMode = { 
-    wxColour(0, 0, 0),       ///< #000000 — pure black background.
-    wxColour(15, 15, 15),    ///< #0F0F0F — card background.
-    wxColour(30, 30, 30),    ///< #1E1E1E — inputs, raised elements.
-
-    wxColour(57, 255, 20),   ///< #39FF14 — neon accent.
-    wxColour(102, 255, 0),   ///< #66FF00 — Hyper green for hover feedback.
-
-    wxColour(255, 255, 255), ///< #FFFFFF — body text.
-    wxColour(0, 255, 255),   ///< #00FFFF — secondary text.
-    wxColour(0, 138, 138),   ///< #008A8A — placeholder text.
-
-    wxColour(57, 255, 20),   ///< #39FF14 — rule-line color.
-    wxColour(255, 0, 153)    ///< #FF0099 — neon pink destructive-action color.
-};
-
-wxColour UIColors::Background = UIColors::DarkMode.Background;
-wxColour UIColors::Surface = UIColors::DarkMode.Surface;
-wxColour UIColors::SurfaceRaised = UIColors::DarkMode.SurfaceRaised;
-wxColour UIColors::Accent = UIColors::DarkMode.Accent;
-wxColour UIColors::AccentHover = UIColors::DarkMode.AccentHover;
-wxColour UIColors::TextPrimary = UIColors::DarkMode.TextPrimary;
-wxColour UIColors::TextSecondary = UIColors::DarkMode.TextSecondary;
-wxColour UIColors::TextMuted = UIColors::DarkMode.TextMuted;
-wxColour UIColors::Separator = UIColors::DarkMode.Separator;
-wxColour UIColors::Danger = UIColors::DarkMode.Danger;
-
-static ThemeType sCurrentTheme = ThemeType::Dark;
-
-ThemeType UIColors::GetCurrentTheme() {
-    return sCurrentTheme;
-}
-
-void UIColors::SetTheme(ThemeType theme) {
-    sCurrentTheme = theme;
-    switch (theme) {
-        case ThemeType::Light:
-            Current = &LightMode;
-            break;
-        case ThemeType::Neon:
-            Current = &NeonMode;
-            break;
-        case ThemeType::Dark:
-        default:
-            Current = &DarkMode;
-            break;
+bool UIColors::LoadThemesFromFile(const wxString& filepath) {
+    std::ifstream file(filepath.ToStdString());
+    if (!file.is_open()) {
+        return false;
     }
 
-    ApplyPalette(*Current);
+    std::string line;
+    while (std::getline(file, line)) {
+        // Clean up the line
+        wxString themeName = wxString::FromUTF8(line.c_str());
+        themeName.Trim(true).Trim(false);
+        if (themeName.IsEmpty()) continue;
+
+        Palette p;
+        p.Name = themeName;
+
+        // Helper to read and trim the next line from the file
+        auto readColor = [&]() -> wxColour {
+            std::string hex;
+            if (std::getline(file, hex)) {
+                wxString wxHex = wxString::FromUTF8(hex.c_str());
+                
+                // Remove whitespace
+                wxHex.Replace(" ", "");
+                wxHex.Replace("\r", "");
+                wxHex.Replace("\t", "");
+                wxHex.Trim(true).Trim(false);
+
+                if (wxHex.IsEmpty()) return *wxBLACK;
+                
+                wxColour col(wxHex);
+                if (!col.IsOk()) {
+                    wxLogError("Failed to parse color: '%s'", wxHex);
+                    return *wxBLACK;
+                }
+                return col;
+            }
+            return *wxBLACK;
+        };
+
+        // Order must be matching within the .txt file
+        p.Background    = readColor();
+        p.Surface       = readColor();
+        p.SurfaceRaised = readColor();
+        p.Accent        = readColor();
+        p.AccentHover   = readColor();
+        p.TextPrimary   = readColor();
+        p.TextSecondary = readColor();
+        p.TextMuted     = readColor();
+        p.Separator     = readColor();
+        p.Danger        = readColor();
+
+        ThemeMap[themeName] = p;
+
+        // Record the string name in order IF it isn't already there
+        if (std::find(ThemeOrder.begin(), ThemeOrder.end(), themeName) == ThemeOrder.end()) {
+            ThemeOrder.push_back(themeName);
+        }
+    }
+
+    // DEFAULT to the first theme loaded if nothing is set
+    if (ThemeMap.empty()) {
+        SetTheme("Dark Mode");
+    // SUCCESSFUL loading. Use the first loaded theme
+    } else if (Current == nullptr) {
+        Current = &ThemeMap[ThemeOrder[0]];
+    }
+
+    return true;
+}
+
+void UIColors::SetTheme(const wxString& themeName) {
+    auto it = ThemeMap.find(themeName);
+    
+    if (it != ThemeMap.end()) {
+        Current = &it->second;
+    } 
+    // DEFAULT fail safe
+    else if (themeName == "Dark Mode") {
+        // Record the details, update the map, update the pointer, update the ordered vector
+        Palette dark;
+        dark.Name = "Dark Mode";
+        dark.Background    = wxColour("#121212");
+        dark.Surface       = wxColour("#1E1E1E");
+        dark.SurfaceRaised = wxColour("#2C2C2C");
+        dark.Accent        = wxColour("#8A00FF");
+        dark.AccentHover   = wxColour("#A028FF");
+        dark.TextPrimary   = wxColour("#FFFFFF");
+        dark.TextSecondary = wxColour("#BDBDBD");
+        dark.TextMuted     = wxColour("#757575");
+        dark.Separator     = wxColour("#252525");
+        dark.Danger        = wxColour("#FF4C29");
+
+        ThemeMap["Dark Mode"] = dark;
+        Current = &ThemeMap["Dark Mode"];
+        if (std::find(ThemeOrder.begin(), ThemeOrder.end(), "Dark Mode") == ThemeOrder.end()) {
+            ThemeOrder.push_back("Dark Mode");
+        }
+    }
+}
+
+ColorRole UIColors::GetRoleFromColour(const wxColour& col) {
+    // Detect roles for current background and foreground by searching through the theme map
+    for (auto const& [name, p] : ThemeMap) {
+        if (col == p.Background)    return ColorRole::Background;
+        if (col == p.Surface)       return ColorRole::Surface;
+        if (col == p.SurfaceRaised) return ColorRole::SurfaceRaised;
+        if (col == p.Accent)        return ColorRole::Accent;
+        if (col == p.AccentHover)   return ColorRole::AccentHover;
+        if (col == p.TextPrimary)   return ColorRole::TextPrimary;
+        if (col == p.TextSecondary) return ColorRole::TextSecondary;
+        if (col == p.TextMuted)     return ColorRole::TextMuted;
+        if (col == p.Separator)     return ColorRole::Separator;
+        if (col == p.Danger)        return ColorRole::Danger;
+    }
+    return ColorRole::None;
+}
+
+void UIColors::UpdateUI(wxWindow* win) {
+    if (!win || !Current) return;
+
+    ColorRole bgRole = GetRoleFromColour(win->GetBackgroundColour());
+    ColorRole fgRole = GetRoleFromColour(win->GetForegroundColour());
+
+    // Background
+    switch (bgRole) {
+        case ColorRole::Background:    win->SetBackgroundColour(Current->Background); break;
+        case ColorRole::Surface:       win->SetBackgroundColour(Current->Surface); break;
+        case ColorRole::SurfaceRaised: win->SetBackgroundColour(Current->SurfaceRaised); break;
+        case ColorRole::Accent:        win->SetBackgroundColour(Current->Accent); break;
+        case ColorRole::AccentHover:   win->SetBackgroundColour(Current->AccentHover); break;
+        case ColorRole::Danger:        win->SetBackgroundColour(Current->Danger); break;
+        case ColorRole::Separator:     win->SetBackgroundColour(Current->Separator); break;
+        default: break; // Keep original color if no role matched
+    }
+
+    // Foreground
+    switch (fgRole) {
+        case ColorRole::TextPrimary:   win->SetForegroundColour(Current->TextPrimary); break;
+        case ColorRole::TextSecondary: win->SetForegroundColour(Current->TextSecondary); break;
+        case ColorRole::TextMuted:     win->SetForegroundColour(Current->TextMuted); break;
+        case ColorRole::Accent:        win->SetForegroundColour(Current->Accent); break;
+        case ColorRole::Danger:        win->SetForegroundColour(Current->Danger); break;
+        default: break;
+    }
+
+    win->Refresh();
+    win->Update(); 
+
+    // Recurse through children
+    for (auto* child : win->GetChildren()) {
+        UpdateUI(child);
+    }
 }
