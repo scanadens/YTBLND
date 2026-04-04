@@ -150,6 +150,11 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     m_registerTab->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ ShowTab(1); });
 
     ShowTab(0);  // start on Sign In
+
+    // Load the themed background and re-load on theme switch
+    LoadThemedBackground();
+    m_controller.getEventRouter().registerListener("theme_bg_login",
+        [this](const EventPayload&) { LoadThemedBackground(); Refresh(); });
 }
 
 // -- Form builders -------------------------------------------------------------
@@ -351,6 +356,37 @@ void LoginPanel::Reset()
     m_siError ->Hide();
     m_regError->Hide();
     ShowTab(0);
+}
+
+// -- Themed background --------------------------------------------------------
+
+void LoginPanel::LoadThemedBackground() {
+    // Map theme name to background image filename
+    wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
+    wxString imageFile;
+
+    if (themeName == "Light Mode")
+        imageFile = "checkered_wave_background.jpg";
+    else if (themeName == "Neon Mode")
+        imageFile = "purple_neon_synth.jpg";
+    else
+        imageFile = "dark_purple_stripes.jpg";
+
+    // Try to find the file
+    for (const auto& candidate : wxArrayString{
+             "YTBLND_src/resources/" + imageFile,
+             "resources/" + imageFile,
+             "../resources/" + imageFile}) {
+        if (wxFileExists(candidate)) {
+            wxImage img(candidate, wxBITMAP_TYPE_JPEG);
+            if (img.IsOk()) {
+                m_bgImage = img;
+                return;
+            }
+        }
+    }
+    // If not found, clear so OnPaint falls back to solid color
+    m_bgImage = wxNullImage;
 }
 
 // -- Background painting -------------------------------------------------------

@@ -37,19 +37,44 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     // -- TopBar (dynamic back: LOGIN if no blend yet, HOME otherwise) ---------
     auto* topBar = new wxPanel(this, wxID_ANY);
-    topBar->SetBackgroundColour(UIColors::Surface());
-    topBar->SetMinSize(wxSize(-1, 48));
+    topBar->SetBackgroundColour(UIColors::Background());
+    topBar->SetMinSize(wxSize(-1, 40));
     {
-        auto* backBtn = new wxButton(topBar, wxID_ANY, wxT("< Back"));
-        backBtn->SetBackgroundColour(UIColors::SurfaceRaised());
-        backBtn->SetForegroundColour(UIColors::TextPrimary());
-        UIButtons::ApplySizeBounds(backBtn, ButtonType::TopBarBack);
+        auto* backBtn = new wxButton(topBar, wxID_ANY, wxEmptyString,
+                                      wxDefaultPosition, wxSize(36, 32),
+                                      wxBORDER_NONE);
+        backBtn->SetBackgroundColour(UIColors::Background());
+
+        // Load back icon
+        wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
+        wxString folder = themeName.BeforeFirst(' ').Lower();
+        for (const auto& c : wxArrayString{
+                 "YTBLND_src/resources/icons/" + folder + "/back.png",
+                 "resources/icons/" + folder + "/back.png",
+                 "../resources/icons/" + folder + "/back.png"}) {
+            if (wxFileExists(c)) {
+                wxImage img(c, wxBITMAP_TYPE_PNG);
+                if (img.IsOk()) {
+                    img.Rescale(24, 24, wxIMAGE_QUALITY_BILINEAR);
+                    backBtn->SetBitmap(wxBitmap(img));
+                }
+                break;
+            }
+        }
 
         backBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
             if (AppState::getInstance().getActiveBlend() != nullptr)
                 m_nav(Page::HOME);
             else
                 m_nav(Page::LOGIN);
+        });
+        backBtn->Bind(wxEVT_ENTER_WINDOW, [backBtn](wxMouseEvent& e) {
+            backBtn->SetBackgroundColour(UIColors::SurfaceRaised());
+            backBtn->Refresh(); e.Skip();
+        });
+        backBtn->Bind(wxEVT_LEAVE_WINDOW, [backBtn](wxMouseEvent& e) {
+            backBtn->SetBackgroundColour(UIColors::Background());
+            backBtn->Refresh(); e.Skip();
         });
 
         auto* titleLabel = new wxStaticText(topBar, wxID_ANY, "New Blend",
@@ -62,14 +87,14 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
         titleLabel->SetFont(tf);
 
         auto* barSizer = new wxBoxSizer(wxHORIZONTAL);
-        barSizer->Add(backBtn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 10);
+        barSizer->Add(backBtn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 8);
         barSizer->AddStretchSpacer(1);
         barSizer->Add(titleLabel, 0, wxALIGN_CENTER_VERTICAL);
         barSizer->AddStretchSpacer(1);
-        barSizer->Add(UIButtons::GetSize(ButtonType::TopBarBack).GetWidth() + 10, 0);
+        barSizer->Add(36 + 8, 0);
 
         auto* outerBar = new wxBoxSizer(wxVERTICAL);
-        outerBar->Add(barSizer, 1, wxEXPAND | wxTOP | wxBOTTOM, 8);
+        outerBar->Add(barSizer, 1, wxEXPAND | wxTOP | wxBOTTOM, 4);
         topBar->SetSizer(outerBar);
     }
     root->Add(topBar, 0, wxEXPAND);

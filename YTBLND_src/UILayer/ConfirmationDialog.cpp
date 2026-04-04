@@ -24,7 +24,7 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
                wxDefaultPosition, wxDefaultSize,
                wxDEFAULT_DIALOG_STYLE | wxSTAY_ON_TOP)
 {
-    // ── Overall panel background ─────────────────────────────────────────────
+    // -- Overall panel background ---------------------------------------------
     SetBackgroundColour(UIColors::Background());
 
     // -- Message label --------------------------------------------------------

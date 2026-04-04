@@ -12,32 +12,59 @@
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
 #include <wx/font.h>
+#include <wx/filename.h>
+#include <wx/image.h>
+
+namespace {
+wxString FindResourcePath(const wxString& fileName) {
+    for (const auto& c : wxArrayString{
+             "YTBLND_src/resources/" + fileName,
+             "resources/" + fileName,
+             "../resources/" + fileName}) {
+        if (wxFileExists(c)) return c;
+    }
+    return wxEmptyString;
+}
+
+wxBitmap LoadBackIcon(int size = 24) {
+    wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
+    wxString folder = themeName.BeforeFirst(' ').Lower();
+    wxString path = FindResourcePath("icons/" + folder + "/back.png");
+    if (!path.empty()) {
+        wxImage img(path, wxBITMAP_TYPE_PNG);
+        if (img.IsOk()) {
+            img.Rescale(size, size, wxIMAGE_QUALITY_BILINEAR);
+            return wxBitmap(img);
+        }
+    }
+    return wxNullBitmap;
+}
+}
 
 TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page backDest)
     : wxPanel(parent, wxID_ANY)
     , m_nav(std::move(nav))
     , m_backDest(backDest)
 {
-    SetBackgroundColour(UIColors::Surface());
+    SetBackgroundColour(UIColors::Background());
 
-    // -- Back button ----------------------------------------------------------
-    wxButton* backBtn = new wxButton(this, wxID_ANY, wxT("< Back"));
-    backBtn->SetBackgroundColour(UIColors::SurfaceRaised());
-    backBtn->SetForegroundColour(UIColors::TextPrimary());
-    UIButtons::ApplySizeBounds(backBtn, ButtonType::TopBarBack);
+    // -- Back icon button (standalone on Background) --------------------------
+    auto* backBtn = new wxButton(this, wxID_ANY, wxEmptyString,
+                                  wxDefaultPosition, wxSize(36, 32),
+                                  wxBORDER_NONE);
+    backBtn->SetBackgroundColour(UIColors::Background());
+    wxBitmap backBmp = LoadBackIcon(24);
+    if (backBmp.IsOk()) backBtn->SetBitmap(backBmp);
+    else backBtn->SetLabel("< Back");
 
     backBtn->Bind(wxEVT_BUTTON, &TopBar::OnBack, this);
-
-    // Lighten on hover for subtle feedback
     backBtn->Bind(wxEVT_ENTER_WINDOW, [backBtn](wxMouseEvent& e) {
-        backBtn->SetBackgroundColour(wxColour(55, 55, 55));
-        backBtn->Refresh();
-        e.Skip();
+        backBtn->SetBackgroundColour(UIColors::SurfaceRaised());
+        backBtn->Refresh(); e.Skip();
     });
     backBtn->Bind(wxEVT_LEAVE_WINDOW, [backBtn](wxMouseEvent& e) {
-        backBtn->SetBackgroundColour(UIColors::SurfaceRaised());
-        backBtn->Refresh();
-        e.Skip();
+        backBtn->SetBackgroundColour(UIColors::Background());
+        backBtn->Refresh(); e.Skip();
     });
 
     // -- Title label ----------------------------------------------------------
@@ -55,19 +82,17 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     // Three-column sizer: [back btn | title (stretch) | right spacer]
     // The right spacer mirrors the back button width so the title stays centred.
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-
-    sizer->Add(backBtn,   0, wxALIGN_CENTER_VERTICAL | wxLEFT,  10);
+    sizer->Add(backBtn,    0, wxALIGN_CENTER_VERTICAL | wxLEFT, 8);
     sizer->AddStretchSpacer(1);
     sizer->Add(titleLabel, 0, wxALIGN_CENTER_VERTICAL);
     sizer->AddStretchSpacer(1);
-    // Invisible right-side spacer equal to back-button width + left margin
-    sizer->Add(UIButtons::GetSize(ButtonType::TopBarBack).GetWidth() + 10, 0);
+    sizer->Add(36 + 8, 0); // right spacer to balance the back icon
 
     wxBoxSizer* outerSizer = new wxBoxSizer(wxVERTICAL);
-    outerSizer->Add(sizer, 1, wxEXPAND | wxTOP | wxBOTTOM, 8);
+    outerSizer->Add(sizer, 1, wxEXPAND | wxTOP | wxBOTTOM, 4);
 
     SetSizer(outerSizer);
-    SetMinSize(wxSize(-1, 48));
+    SetMinSize(wxSize(-1, 40));
 }
 
 void TopBar::OnBack(wxCommandEvent& /*evt*/)

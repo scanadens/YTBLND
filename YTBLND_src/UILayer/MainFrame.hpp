@@ -84,10 +84,17 @@ private:
     SettingsPanel*         settingsPanel;
     BlendChatPanel*        chatPanel;
     ActiveBlendsPanel*     activeBlendsPanel;
-    // Home-page Refresh button reference so we can disable it during long refreshes.
+    // Home-page icon button references for theme-switch icon reloading.
     wxButton*              refreshBtn;
+    wxButton*              settingsIconBtn = nullptr;
+    wxButton*              userIconBtn     = nullptr;
+    wxButton*              blendsIconBtn   = nullptr;
+    wxButton*              chatIconBtn     = nullptr;
     // Guards against duplicate refresh dispatches from double-clicks.
     bool                   refreshInProgress;
+
+    /// Reloads all themed icon bitmaps after a theme switch.
+    void ReloadThemedIcons();
     std::unordered_map<int, wxImage> images; // images
 
     /**
