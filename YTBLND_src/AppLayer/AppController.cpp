@@ -315,7 +315,7 @@ std::list<User> AppController::loadParticipantsWithWatchLaterParallel(
 
 static const std::string kYouTubeAPIKey = "AIzaSyBDzH4_T9NSaAh_s59sFYrHtNnKvHmyARM";
 
-// ── Constructor / Destructor ──────────────────────────────────────────────────
+// -- Constructor / Destructor --------------------------------------------------
 
 AppController::AppController(): 
     appState(AppState::getInstance()),
@@ -348,7 +348,7 @@ AppController::~AppController() {
     eventRouter.deregisterAll();
 }
 
-// ── Event Registration ────────────────────────────────────────────────────────
+// -- Event Registration --------------------------------------------------------
 
 void AppController::registerEvents() {
     // Binds each named event to the corresponding handler on this controller.
@@ -367,7 +367,7 @@ void AppController::registerEvents() {
     eventRouter.registerListener("selectBlend", [this](const EventPayload& p){ handleSelectBlend(p); });
 }
 
-// ── Getter ────────────────────────────────────────────────────────────────────
+// -- Getter --------------------------------------------------------------------
 
 EventRouter& AppController::getEventRouter() {
     return eventRouter;
@@ -391,7 +391,7 @@ void AppController::reportProgress(double progress, const std::string& message) 
     progressReporter(progress, message);
 }
 
-// ── Event Handlers ────────────────────────────────────────────────────────────
+// -- Event Handlers ------------------------------------------------------------
 
 void AppController::handleRegister(const EventPayload& payload) {
     // verifying user data structure
@@ -960,7 +960,7 @@ bool AppController::lookupUser(const std::string& userID) {
     }
 }
 
-// ── Private helpers ───────────────────────────────────────────────────────────
+// -- Private helpers -----------------------------------------------------------
 
 bool AppController::registerBlendOnServer(const Blend& blend,
                                           const std::string& creatorID) {

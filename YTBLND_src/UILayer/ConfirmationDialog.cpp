@@ -6,9 +6,9 @@
 #include <wx/sizer.h>
 #include <wx/font.h>
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Constructor
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
                                        const wxString& title,
                                        const wxString& message,
@@ -18,10 +18,10 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
                wxDefaultPosition, wxDefaultSize,
                wxDEFAULT_DIALOG_STYLE | wxSTAY_ON_TOP)
 {
-    // ── Overall panel background ─────────────────────────────────────────────
+    // -- Overall panel background ---------------------------------------------
     SetBackgroundColour(UIColors::Background());
 
-    // ── Message label ────────────────────────────────────────────────────────
+    // -- Message label --------------------------------------------------------
     wxStaticText* msgLabel = new wxStaticText(this, wxID_ANY, message,
                                               wxDefaultPosition, wxDefaultSize,
                                               wxALIGN_CENTER_HORIZONTAL);
@@ -32,7 +32,7 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
     msgFont.SetPointSize(11);
     msgLabel->SetFont(msgFont);
 
-    // ── OK button (Accent colour) ─────────────────────────────────────────────
+    // -- OK button (Accent colour) ---------------------------------------------
     wxButton* okBtn = new wxButton(this, wxID_OK, okLabel,
                                    wxDefaultPosition, wxDefaultSize,
                                    wxBORDER_NONE);
@@ -51,7 +51,7 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
         e.Skip();
     });
 
-    // ── Cancel button (SurfaceRaised) ────────────────────────────────────────
+    // -- Cancel button (SurfaceRaised) ----------------------------------------
     wxButton* cancelBtn = new wxButton(this, wxID_CANCEL, cancelLabel,
                                        wxDefaultPosition, wxDefaultSize,
                                        wxBORDER_NONE);
@@ -70,12 +70,12 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
         e.Skip();
     });
 
-    // ── Button row ───────────────────────────────────────────────────────────
+    // -- Button row -----------------------------------------------------------
     wxBoxSizer* btnSizer = new wxBoxSizer(wxHORIZONTAL);
     btnSizer->Add(cancelBtn, 0, wxRIGHT, 12);
     btnSizer->Add(okBtn,     0);
 
-    // ── Root sizer with generous padding for "rounded" feel ──────────────────
+    // -- Root sizer with generous padding for "rounded" feel ------------------
     wxBoxSizer* rootSizer = new wxBoxSizer(wxVERTICAL);
     rootSizer->AddSpacer(24);
     rootSizer->Add(msgLabel,  0, wxEXPAND | wxLEFT | wxRIGHT, 32);
@@ -95,9 +95,9 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Static convenience helper
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 bool ConfirmationDialog::Confirm(wxWindow*       parent,
                                  const wxString& title,
                                  const wxString& message)

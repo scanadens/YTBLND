@@ -7,7 +7,7 @@ AppState::AppState():
     activeBlend(nullptr), 
     isBlendGenerating(false) {}
 
-// ── Singleton ─────────────────────────────────────────────────────────────────
+// -- Singleton -----------------------------------------------------------------
 
 AppState& AppState::getInstance() {
     // Constructed once on first call; guaranteed by C++11 to be thread-safe.
@@ -15,7 +15,7 @@ AppState& AppState::getInstance() {
     return instance;
 }
 
-// ── Current User ──────────────────────────────────────────────────────────────
+// -- Current User --------------------------------------------------------------
 
 User* AppState::getCurrentUser() const {
     return currentUser;
@@ -31,7 +31,7 @@ void AppState::setCurrentUser(User* user) {
     currentUser = user;
 }
 
-// ── Active Blend ──────────────────────────────────────────────────────────────
+// -- Active Blend --------------------------------------------------------------
 
 Blend* AppState::getActiveBlend() const {
     return activeBlend;
@@ -41,7 +41,7 @@ void AppState::setActiveBlend(Blend* blend) {
     activeBlend = blend;
 }
 
-// ── Blend Generation Flag ─────────────────────────────────────────────────────
+// -- Blend Generation Flag -----------------------------------------------------
 
 bool AppState::isGeneratingBlend() const {
     return isBlendGenerating;
@@ -51,7 +51,7 @@ void AppState::setIsBlendGenerating(bool flag) {
     isBlendGenerating = flag;
 }
 
-// ── Chat Rooms ────────────────────────────────────────────────────────────────
+// -- Chat Rooms ----------------------------------------------------------------
 
 ChatRoom* AppState::getActiveChatRoom() {
     if (activeBlend == nullptr) return nullptr;
@@ -79,7 +79,7 @@ ChatRoom* AppState::getChatRoom(const std::string& blendID) {
     return &it->second;
 }
 
-// ── Session Users ─────────────────────────────────────────────────────────────
+// -- Session Users -------------------------------------------------------------
 
 void AppState::addSessionUser(const User& user) {
     sessionUsers.insert_or_assign(user.getUserID(), user);
@@ -93,7 +93,7 @@ void AppState::clearSessionUsers() {
     sessionUsers.clear();
 }
 
-// ── Blend creation feedback ───────────────────────────────────────────────────
+// -- Blend creation feedback ---------------------------------------------------
 
 void AppState::setUsersWithoutData(const std::vector<std::string>& users) {
     usersWithoutData = users;
@@ -123,7 +123,7 @@ std::string AppState::takePendingUploadError() {
     return msg;
 }
 
-// ── Session ───────────────────────────────────────────────────────────────────
+// -- Session -------------------------------------------------------------------
 
 void AppState::clearSession() {
     currentUser       = nullptr;

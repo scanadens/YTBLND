@@ -13,7 +13,7 @@
 #include "../AppLayer/EventRouter.hpp"
 #include "../ModelLayer/User.hpp"
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 static wxTextCtrl* MakeField(wxWindow* parent,
                               const wxString& hint,
@@ -36,7 +36,7 @@ static wxStaticText* MakeError(wxWindow* parent)
     return lbl;
 }
 
-// ── Construction ──────────────────────────────────────────────────────────────
+// -- Construction --------------------------------------------------------------
 
 LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn nav)
     : wxPanel(parent, wxID_ANY)
@@ -45,10 +45,10 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
 {
     SetBackgroundColour(UIColors::Background);
 
-    // ── Outer centering sizer ─────────────────────────────────────────────────
+    // -- Outer centering sizer -------------------------------------------------
     auto* outer = new wxBoxSizer(wxVERTICAL);
 
-    // ── YTBLND title ──────────────────────────────────────────────────────────
+    // -- YTBLND title ----------------------------------------------------------
     auto* titleLabel = new wxStaticText(this, wxID_ANY, "YTBLND",
                                         wxDefaultPosition, wxDefaultSize,
                                         wxALIGN_CENTRE_HORIZONTAL);
@@ -67,7 +67,7 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     outer->Add(titleLabel, 0, wxALIGN_CENTER | wxBOTTOM, 4);
     outer->Add(subtitle,   0, wxALIGN_CENTER | wxBOTTOM, 32);
 
-    // ── Form card ─────────────────────────────────────────────────────────────
+    // -- Form card -------------------------------------------------------------
     auto* card = new wxPanel(this, wxID_ANY);
     card->SetBackgroundColour(UIColors::Surface);
     card->SetMinSize(wxSize(400, -1));
@@ -129,14 +129,14 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     outer->AddStretchSpacer(3);
     SetSizer(outer);
 
-    // ── Tab bindings ──────────────────────────────────────────────────────────
+    // -- Tab bindings ----------------------------------------------------------
     m_signinTab  ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ ShowTab(0); });
     m_registerTab->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ ShowTab(1); });
 
     ShowTab(0);  // start on Sign In
 }
 
-// ── Form builders ─────────────────────────────────────────────────────────────
+// -- Form builders -------------------------------------------------------------
 
 void LoginPanel::BuildSignInForm(wxWindow* parent, wxSizer* sizer)
 {
@@ -183,7 +183,7 @@ void LoginPanel::BuildRegisterForm(wxWindow* parent, wxSizer* sizer)
     btn->Bind(wxEVT_BUTTON, &LoginPanel::OnRegister, this);
 }
 
-// ── Tab switcher ──────────────────────────────────────────────────────────────
+// -- Tab switcher --------------------------------------------------------------
 
 void LoginPanel::ShowTab(int index)
 {
@@ -207,7 +207,7 @@ void LoginPanel::ShowTab(int index)
     Layout();
 }
 
-// ── Event handlers ────────────────────────────────────────────────────────────
+// -- Event handlers ------------------------------------------------------------
 
 void LoginPanel::OnSignIn(wxCommandEvent& /*evt*/)
 {
@@ -273,7 +273,7 @@ void LoginPanel::OnRegister(wxCommandEvent& /*evt*/)
     ProceedAfterLogin();
 }
 
-// ── Post-login routing ────────────────────────────────────────────────────────
+// -- Post-login routing --------------------------------------------------------
 
 void LoginPanel::ProceedAfterLogin()
 {
@@ -301,7 +301,7 @@ void LoginPanel::ProceedAfterLogin()
     m_nav(Page::BLEND_CREATION);
 }
 
-// ── Reset ─────────────────────────────────────────────────────────────────────
+// -- Reset ---------------------------------------------------------------------
 
 void LoginPanel::Reset()
 {

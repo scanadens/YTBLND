@@ -25,7 +25,7 @@ static const std::string WATCH_LATER_CSV =
 static const std::string WATCH_HISTORY_HTML =
     YTBLND_SRC_DIR "/tests/fixtures/shamar_sample_watch-history.html";
 
-// ── WatchLaterParser ──────────────────────────────────────────────────────────
+// -- WatchLaterParser ----------------------------------------------------------
 
 TEST(WatchLaterParserTest, ParsesNonEmptyList) {
     std::list<Video> videos = WatchLaterParser(WATCH_LATER_CSV).parse();
@@ -48,7 +48,7 @@ TEST(WatchLaterParserTest, NonIDFieldsAreEmpty) {
     EXPECT_EQ(0, first.getDuration());
 }
 
-// ── WatchHistoryParser ────────────────────────────────────────────────────────
+// -- WatchHistoryParser --------------------------------------------------------
 
 TEST(WatchHistoryParserTest, ParsesNonEmptyList) {
     std::list<Video> videos = WatchHistoryParser(WATCH_HISTORY_HTML).parse();
@@ -62,7 +62,7 @@ TEST(WatchHistoryParserTest, EachVideoHasNonEmptyID) {
     }
 }
 
-// ── YouTubeDataImporter ───────────────────────────────────────────────────────
+// -- YouTubeDataImporter -------------------------------------------------------
 
 TEST(YouTubeDataImporterTest, ImportsCsvAndHtmlFixtures) {
     YouTubeDataImporter importer;
@@ -79,7 +79,7 @@ TEST(YouTubeDataImporterTest, ThrowsOnUnsupportedExtension) {
     EXPECT_THROW(importer.import("fixtures/not_supported.txt"), std::invalid_argument);
 }
 
-// ── RandomBlendAlgorithm ──────────────────────────────────────────────────────
+// -- RandomBlendAlgorithm ------------------------------------------------------
 
 static User makeUserWithWatchLater(const std::string& userID, const std::string& csvPath) {
     std::list<Video> videos = WatchLaterParser(csvPath).parse();

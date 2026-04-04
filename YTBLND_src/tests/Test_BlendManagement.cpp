@@ -36,7 +36,7 @@
 #include <thread>
 #include <vector>
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// -- Helpers ------------------------------------------------------------------
 
 namespace {
 
@@ -91,9 +91,9 @@ void deleteUser(HttpClient& client, const std::string& userID) {
 
 }  // namespace
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // UNIT TESTS — Blend title
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 
 TEST(BlendTitleTest, ConstructorStoresTitle) {
     Blend b("id1", "My Blend", "random", {makeUser()}, {makeVideo()});
@@ -133,9 +133,9 @@ TEST(BlendTitleTest, AlgorithmDefaultsTitleToEmpty) {
     EXPECT_EQ(blend.getTitle(), "");
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // UNIT TESTS — RequestJsonBuilder blend title
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 
 TEST(BuildBlendJsonTitleTest, IncludesTitleField) {
     std::vector<std::string> participants = {"u1", "u2"};
@@ -156,10 +156,10 @@ TEST(BuildBlendJsonTitleTest, EmptyTitleProducesEmptyString) {
         << "JSON: " << json;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 // INTEGRATION TESTS — Blend management against live backend
 // (Gracefully skipped if server returns 404 or is unreachable)
-// ═══════════════════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------------------
 
 class BlendManagementIntegrationTest : public ::testing::Test {
 protected:

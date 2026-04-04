@@ -8,7 +8,7 @@
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 // Every test that uses SqliteDataManager gets a fresh in-memory DB.
 static SqliteDataManager makeDB() {
@@ -88,7 +88,7 @@ static void ensureDummyAccountExists(AppController& ctrl,
         << "Could not login with dummy account userID=" << userID;
 }
 
-// ── SqliteDataManager tests ───────────────────────────────────────────────────
+// -- SqliteDataManager tests ---------------------------------------------------
 
 TEST(SqliteDataManagerTest, CreateUser_Succeeds) {
     SqliteDataManager db = makeDB();
@@ -135,7 +135,7 @@ TEST(SqliteDataManagerTest, ValidatePassword_UnknownUser_ReturnsFalse) {
     EXPECT_FALSE(db.validatePassword("nobody", "anything"));
 }
 
-// ── AppController auth flow tests ─────────────────────────────────────────────
+// -- AppController auth flow tests ---------------------------------------------
 // These use the real AppController (which opens "ytblnd.db").
 // We reset AppState between tests to avoid cross-test pollution.
 

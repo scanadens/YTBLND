@@ -24,7 +24,7 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
 
     auto* outer = new wxBoxSizer(wxVERTICAL);
 
-    // ── Heading ───────────────────────────────────────────────────────────────
+    // -- Heading ---------------------------------------------------------------
     auto* heading = new wxStaticText(this, wxID_ANY,
                                      "Set Up Your YouTube Data",
                                      wxDefaultPosition, wxDefaultSize,
@@ -45,7 +45,7 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
     outer->Add(heading, 0, wxALIGN_CENTER | wxBOTTOM, 8);
     outer->Add(sub,     0, wxALIGN_CENTER | wxBOTTOM, 32);
 
-    // ── Steps card ────────────────────────────────────────────────────────────
+    // -- Steps card ------------------------------------------------------------
     auto* card = new wxPanel(this, wxID_ANY);
     card->SetBackgroundColour(UIColors::Surface);
     card->SetMinSize(wxSize(520, -1));

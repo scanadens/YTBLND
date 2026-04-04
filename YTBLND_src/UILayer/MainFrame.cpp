@@ -60,7 +60,7 @@ wxString ResolveResourcePath(const wxString& fileName)
 }
 }
 
-// ── Background Panel ─────────────────────────────────────────────────────────
+// -- Background Panel ---------------------------------------------------------
 class ImageBackgroundPanel : public wxPanel {
 public:
     ImageBackgroundPanel(wxWindow* parent,
@@ -96,7 +96,7 @@ private:
     }
 };
 
-// ── Construction ─────────────────────────────────────────────────────────────
+// -- Construction -------------------------------------------------------------
 MainFrame::MainFrame(AppController& controller)
     : wxFrame(nullptr, wxID_ANY, "YTBLND",
               wxDefaultPosition, wxSize(1280, 800),
@@ -224,7 +224,7 @@ MainFrame::MainFrame(AppController& controller)
     book->SetSelection(static_cast<int>(Page::LOGIN));
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────────
+// -- Navigation ----------------------------------------------------------------
 void MainFrame::NavigateTo(Page page) {
     if (page == Page::LOGIN)           loginPanel->Refresh();
     if (page == Page::BLEND_CREATION)  creationPanel->Refresh();
@@ -276,7 +276,7 @@ void MainFrame::TriggerFeedRefresh() {
     refreshInProgress = false;
 }
 
-// ── Icon helpers ─────────────────────────────────────────────────────────────
+// -- Icon helpers -------------------------------------------------------------
 
 static wxBitmap LoadThemedIcon(const wxString& name, int size = 24) {
     wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
@@ -318,12 +318,12 @@ static wxButton* MakeIconButton(wxWindow* parent, const wxString& iconName,
     return btn;
 }
 
-// ── Build Home Page ──────────────────────────────────────────────────────────
+// -- Build Home Page ----------------------------------------------------------
 wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     auto* page = new wxPanel(parent, wxID_ANY);
     auto* vbox = new wxBoxSizer(wxVERTICAL);
 
-    // ── Row 1: Top ribbon (Surface bg, left-aligned: settings + user icons) ──
+    // -- Row 1: Top ribbon (Surface bg, left-aligned: settings + user icons) --
     auto* ribbon = new wxPanel(page, wxID_ANY);
     ribbon->SetBackgroundColour(UIColors::Surface());
     ribbon->SetMinSize(wxSize(-1, 32));
@@ -342,7 +342,7 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     ribbonSizer->AddStretchSpacer(1);
     ribbon->SetSizer(ribbonSizer);
 
-    // ── Row 2: Title row (YTBLND centered-left, blends + chat icons right) ───
+    // -- Row 2: Title row (YTBLND centered-left, blends + chat icons right) ---
     auto* titlePanel = new wxPanel(page, wxID_ANY);
     auto* titleBox = new wxBoxSizer(wxHORIZONTAL);
 
@@ -373,10 +373,10 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     titleBox->Add(chatBtn,   0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 20);
     titlePanel->SetSizer(titleBox);
 
-    // ── Feed grid (unchanged) ────────────────────────────────────────────────
+    // -- Feed grid (unchanged) ------------------------------------------------
     feedPanel->Reparent(page);
 
-    // ── Refresh icon (centered, no text, no container) ───────────────────────
+    // -- Refresh icon (centered, no text, no container) -----------------------
     auto* refreshPanel = new wxPanel(page, wxID_ANY);
     auto* rbox = new wxBoxSizer(wxHORIZONTAL);
     refreshBtn = MakeIconButton(refreshPanel, "refresh", IconBase::Background, 40);

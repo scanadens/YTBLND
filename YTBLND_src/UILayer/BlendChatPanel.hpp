@@ -5,13 +5,13 @@
 // send new messages.
 //
 // LAYOUT
-// ──────
+// ------
 //   TopBar ("Blend Chat", back → HOME)
 //   [if no active blend] — "No active blend." label (full height)
 //   [if blend active]    — scrollable message list + input row
 //
 // MESSAGE LIST
-// ────────────
+// ------------
 // Reload() reads AppState::getActiveChatRoom()->getMessages() and rebuilds
 // all message rows from scratch.  Each row shows:
 //   "[userID]: message text"  (secondary + primary colour)
@@ -20,7 +20,7 @@
 // to the bottom after each rebuild.
 //
 // SENDING
-// ───────
+// -------
 // DoSend() dispatches "sendMessage" with the current user's ID and the
 // trimmed input text, then calls Reload() so the new message appears.
 // Both the Send button and pressing Enter in the input field call DoSend().
@@ -89,7 +89,7 @@ private:
     // Panel that wraps the input row (hidden when no blend active)
     wxPanel*          m_inputPanel;
 
-    // ── WebSocket / incoming message handling ─────────────────────────────────
+    // -- WebSocket / incoming message handling ---------------------------------
 
     // Timer that drains m_incoming on the main thread (~500 ms interval).
     wxTimer*          m_pollTimer;

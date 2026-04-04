@@ -276,12 +276,12 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
     const double  W  = sz.GetWidth();
     const double  H  = sz.GetHeight();
 
-    // ── Card background ──────────────────────────────────────────────────
+    // -- Card background --------------------------------------------------
     gc->SetBrush(wxBrush(UIColors::Surface));
     gc->SetPen(*wxTRANSPARENT_PEN);
     gc->DrawRoundedRectangle(0, 0, W, H, 10.0);
 
-    // ── Thumbnail area — 16:9 capped at 145 px so the text area never
+    // -- Thumbnail area — 16:9 capped at 145 px so the text area never
     //    gets squeezed out when the grid sizer stretches cards wider.
     const double thumbH = std::min(W * 9.0 / 16.0, 300.0);
 
@@ -311,7 +311,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
         }
     }
 
-    // ── Title ────────────────────────────────────────────────────────────
+    // -- Title ------------------------------------------------------------
     const double padX   = 8.0;
     const double textW  = W - padX * 2.0;
     double       curY   = thumbH + 8.0;
@@ -325,7 +325,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
         curY += 4.0;
     }
 
-    // ── Channel row: round logo  +  channel name ─────────────────────────
+    // -- Channel row: round logo  +  channel name -------------------------
     // Only render when we have at least a channel name or ID to show.
     // Avoids an orphaned grey circle for videos not yet enriched by the API.
     wxString chanLabel = m_channelName.IsEmpty() ? m_channelID : m_channelName;
@@ -380,7 +380,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
         }
     }
 
-    // ── Hover border ─────────────────────────────────────────────────────
+    // -- Hover border -----------------------------------------------------
     if (m_hovered) {
         gc->SetBrush(*wxTRANSPARENT_BRUSH);
         gc->SetPen(wxPen(UIColors::Accent, 3));

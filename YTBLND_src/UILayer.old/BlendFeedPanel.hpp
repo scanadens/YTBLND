@@ -5,14 +5,14 @@
 // one video from the active blend (AppState::getActiveBlend()).
 //
 // PAGING
-// ──────
+// ------
 // m_offset tracks which 6-video slice of the blend is currently shown.
 // NextPage() advances the offset by 6 (wrapping around), then calls
 // LoadFromBlend() to refresh the cards.  The Refresh button on the home
 // page calls MainFrame::TriggerFeedRefresh() → NextPage().
 //
 // LOADING
-// ───────
+// -------
 // LoadFromBlend() reads AppState directly (no parameter) so it always gets
 // the latest blend.  Call it after a blend is created/loaded to show the
 // first page, or from NextPage() to advance.

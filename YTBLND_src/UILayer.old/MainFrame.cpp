@@ -22,7 +22,7 @@
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 
-// ── Construction ─────────────────────────────────────────────────────────────
+// -- Construction -------------------------------------------------------------
 
 MainFrame::MainFrame(AppController& controller)
     : wxFrame(nullptr, wxID_ANY, "YTBLND",
@@ -39,7 +39,7 @@ MainFrame::MainFrame(AppController& controller)
     // NavigateFn passed to all sub-panels so they can switch pages
     NavigateFn nav = [this](Page p) { NavigateTo(p); };
 
-    // ── Build pages — MUST match Page enum values exactly ─────────────────────
+    // -- Build pages — MUST match Page enum values exactly ---------------------
 
     // Page::LOGIN (0) — first screen shown on launch
     loginPanel = new LoginPanel(book, controller, nav);
@@ -83,7 +83,7 @@ MainFrame::MainFrame(AppController& controller)
     chatPanel = new BlendChatPanel(book, controller, nav);
     book->AddPage(chatPanel, "BlendChat");
 
-    // ── Outer sizer wraps the book ────────────────────────────────────────────
+    // -- Outer sizer wraps the book --------------------------------------------
     auto* root = new wxBoxSizer(wxVERTICAL);
     root->Add(book, 1, wxEXPAND);
     SetSizer(root);
@@ -93,7 +93,7 @@ MainFrame::MainFrame(AppController& controller)
     book->SetSelection(static_cast<int>(Page::LOGIN));
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────────
+// -- Navigation ----------------------------------------------------------------
 
 void MainFrame::NavigateTo(Page page) {
     // Refresh / reset dynamic panels when navigating to them.
@@ -109,7 +109,7 @@ void MainFrame::TriggerFeedRefresh() {
     feedPanel->NextPage();
 }
 
-// ── Home page ────────────────────────────────────────────────────────────────
+// -- Home page ----------------------------------------------------------------
 
 wxPanel* MainFrame::BuildHomePage() {
     auto* page = new wxPanel(book, wxID_ANY);
@@ -117,7 +117,7 @@ wxPanel* MainFrame::BuildHomePage() {
 
     auto* vbox = new wxBoxSizer(wxVERTICAL);
 
-    // ── Top button bar ────────────────────────────────────────────────────────
+    // -- Top button bar --------------------------------------------------------
     auto* topBar = new wxPanel(page, wxID_ANY);
     topBar->SetBackgroundColour(UIColors::Surface);
     auto* hbox = new wxBoxSizer(wxHORIZONTAL);
@@ -144,7 +144,7 @@ wxPanel* MainFrame::BuildHomePage() {
     hbox->Add(blendBtn, 0, wxRIGHT | wxTOP | wxBOTTOM | wxALIGN_CENTER_VERTICAL, 8);
     topBar->SetSizer(hbox);
 
-    // ── Title ─────────────────────────────────────────────────────────────────
+    // -- Title -----------------------------------------------------------------
     auto* titlePanel = new wxPanel(page, wxID_ANY);
     titlePanel->SetBackgroundColour(UIColors::Background);
     auto* titleBox = new wxBoxSizer(wxHORIZONTAL);
@@ -161,11 +161,11 @@ wxPanel* MainFrame::BuildHomePage() {
     titleBox->AddStretchSpacer(1);
     titlePanel->SetSizer(titleBox);
 
-    // ── Blend feed ────────────────────────────────────────────────────────────
+    // -- Blend feed ------------------------------------------------------------
     // feedPanel was constructed with book as parent — reparent it to page
     feedPanel->Reparent(page);
 
-    // ── Refresh button ────────────────────────────────────────────────────────
+    // -- Refresh button --------------------------------------------------------
     auto* refreshPanel = new wxPanel(page, wxID_ANY);
     refreshPanel->SetBackgroundColour(UIColors::Background);
     auto* rbox = new wxBoxSizer(wxHORIZONTAL);
@@ -181,7 +181,7 @@ wxPanel* MainFrame::BuildHomePage() {
     rbox->AddStretchSpacer(1);
     refreshPanel->SetSizer(rbox);
 
-    // ── Assemble vertical layout ──────────────────────────────────────────────
+    // -- Assemble vertical layout ----------------------------------------------
     vbox->Add(topBar,       0, wxEXPAND);
     vbox->Add(titlePanel,   0, wxEXPAND);
     vbox->Add(feedPanel,    1, wxEXPAND | wxALL, 16);
@@ -191,7 +191,7 @@ wxPanel* MainFrame::BuildHomePage() {
     return page;
 }
 
-// ── Button handlers ───────────────────────────────────────────────────────────
+// -- Button handlers -----------------------------------------------------------
 
 void MainFrame::OnSettings(wxCommandEvent&) {
     NavigateTo(Page::SETTINGS);

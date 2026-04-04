@@ -5,21 +5,21 @@
 // and Register) rendered on top of the dark background with the YTBLND title.
 //
 // SIGN IN
-// ───────
+// -------
 //   Dispatches "login" with {userID, password}.  userID == username in this
 //   app.  Checks AppState::getCurrentUser() immediately after dispatch (the
 //   call is synchronous).  On success, calls ProceedAfterLogin().
 //   Displays an inline error label on failure (wrong credentials).
 //
 // REGISTER
-//   ─────────
+//   ---------
 //   Validates locally (non-empty, passwords match, ≥6 chars), then dispatches
 //   "register" with {userID, username, email, password}.  On success, calls
 //   ProceedAfterLogin().  Displays an inline error label if the username is
 //   already taken.
 //
 // POST-LOGIN ROUTING
-// ──────────────────
+// ------------------
 //   ProceedAfterLogin() checks whether the user's Watch Later list is empty.
 //   Empty → DATA_INSTRUCTIONS (upload CSV first).
 //   Non-empty → BLEND_CREATION (data already loaded, skip upload).
@@ -29,7 +29,7 @@
 //         User object before this check runs.
 //
 // RESET
-// ─────
+// -----
 //   Reset() is called by MainFrame::NavigateTo(LOGIN) (i.e. on logout).  It
 //   clears all fields and returns to the Sign In tab.
 // ============================================================================

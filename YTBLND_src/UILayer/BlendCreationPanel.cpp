@@ -16,7 +16,7 @@
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
 
-// ── Construction ──────────────────────────────────────────────────────────────
+// -- Construction --------------------------------------------------------------
 
 BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
                                        AppController& controller,
@@ -29,7 +29,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     auto* root = new wxBoxSizer(wxVERTICAL);
 
-    // ── TopBar (dynamic back: LOGIN if no blend yet, HOME otherwise) ─────────
+    // -- TopBar (dynamic back: LOGIN if no blend yet, HOME otherwise) ---------
     auto* topBar = new wxPanel(this, wxID_ANY);
     topBar->SetBackgroundColour(UIColors::Background());
     topBar->SetMinSize(wxSize(-1, 40));
@@ -93,7 +93,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
     }
     root->Add(topBar, 0, wxEXPAND);
 
-    // ── Blend name row ──────────────────────────────────────────────────────────
+    // -- Blend name row ----------------------------------------------------------
     auto* namePanel = new wxPanel(this, wxID_ANY);
     namePanel->SetBackgroundColour(UIColors::Surface());
     auto* nameSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -118,7 +118,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
     namePanel->SetMinSize(wxSize(-1, 48));
     root->Add(namePanel, 0, wxEXPAND);
 
-    // ── Action row ────────────────────────────────────────────────────────────
+    // -- Action row ------------------------------------------------------------
     auto* actionPanel = new wxPanel(this, wxID_ANY);
     actionPanel->SetBackgroundColour(UIColors::Surface());
     auto* actionSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -150,7 +150,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     root->Add(actionPanel, 0, wxEXPAND);
 
-    // ── User list area ────────────────────────────────────────────────────────
+    // -- User list area --------------------------------------------------------
     m_userListScroll = new wxScrolledWindow(this, wxID_ANY,
                                             wxDefaultPosition, wxDefaultSize,
                                             wxVSCROLL | wxBORDER_NONE);
@@ -179,7 +179,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     root->Add(m_userListScroll, 1, wxEXPAND | wxALL, 8);
 
-    // ── Count indicator ───────────────────────────────────────────────────────
+    // -- Count indicator -------------------------------------------------------
     m_countLabel = new wxStaticText(this, wxID_ANY, "0 / 8 users",
                                     wxDefaultPosition, wxDefaultSize,
                                     wxALIGN_CENTER_HORIZONTAL);
@@ -188,12 +188,12 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     SetSizer(root);
 
-    // ── Bindings ──────────────────────────────────────────────────────────────
+    // -- Bindings --------------------------------------------------------------
     addBtn->Bind(wxEVT_BUTTON,      &BlendCreationPanel::OnAdd,    this);
     m_createBtn->Bind(wxEVT_BUTTON, &BlendCreationPanel::OnCreate, this);
 }
 
-// ── Public ────────────────────────────────────────────────────────────────────
+// -- Public --------------------------------------------------------------------
 
 void BlendCreationPanel::Refresh()
 {
@@ -220,7 +220,7 @@ void BlendCreationPanel::Reload()
         m_createBtn->Disable();
 }
 
-// ── Private helpers ───────────────────────────────────────────────────────────
+// -- Private helpers -----------------------------------------------------------
 
 void BlendCreationPanel::RebuildUserList()
 {
@@ -288,7 +288,7 @@ void BlendCreationPanel::UpdateCountLabel()
     m_countLabel->SetLabel(txt);
 }
 
-// ── Event handlers ────────────────────────────────────────────────────────────
+// -- Event handlers ------------------------------------------------------------
 
 void BlendCreationPanel::OnAdd(wxCommandEvent& /*evt*/)
 {

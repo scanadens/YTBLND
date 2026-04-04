@@ -5,14 +5,14 @@
 // username) and then create a blend from their combined YouTube data.
 //
 // LAYOUT
-// ──────
+// ------
 //   TopBar  ("New Blend", back → HOME)
 //   Action row: "BLEND" label | Add button | Create Blend button
 //   Scrollable user list (wxScrolledWindow)
 //   "X / 8 users" count label
 //
 // USER-ADD FLOW
-// ─────────────
+// -------------
 //   1. User clicks Add → wxTextEntryDialog prompts for a username.
 //   2. Duplicate check against m_addedUsers.
 //   3. "lookupUser" event dispatched to AppController (optimistic — user is
@@ -22,14 +22,14 @@
 //   4. "Create Blend" button is enabled once ≥ 2 users are present.
 //
 // BLEND CREATION
-// ──────────────
+// --------------
 //   OnCreate builds a payload {"userID_0": ..., "userID_1": ..., ...} and
 //   dispatches "createBlend".  On return it navigates to BLEND_CHAT.
 //   TODO: If createBlend fails (e.g. one of the users has no data), display
 //         an error instead of navigating away.
 //
 // RELOAD
-// ──────
+// ------
 //   Reload() is called by MainFrame::NavigateTo(BLEND_CREATION).  It clears
 //   m_addedUsers so the panel starts fresh each time it is shown.
 //   TODO: Pre-populate the current user's own username so they don't have to

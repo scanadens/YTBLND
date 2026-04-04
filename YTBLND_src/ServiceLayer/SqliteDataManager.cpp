@@ -2,7 +2,7 @@
 #include <iostream>
 #include <ctime>
 
-// ── Constructor / Destructor ──────────────────────────────────────────────────
+// -- Constructor / Destructor --------------------------------------------------
 
 SqliteDataManager::SqliteDataManager(const std::string& dbPath) {
     int rc = sqlite3_open(dbPath.c_str(), &db);
@@ -20,11 +20,11 @@ SqliteDataManager::~SqliteDataManager() {
     if (db) sqlite3_close(db);
 }
 
-// ── Private helpers ───────────────────────────────────────────────────────────
+// -- Private helpers -----------------------------------------------------------
 
 void SqliteDataManager::initSchema() {
     const char* sql =
-        // ── Users ─────────────────────────────────────────────────────────────
+        // -- Users -------------------------------------------------------------
         "CREATE TABLE IF NOT EXISTS users ("
         "  user_id  TEXT PRIMARY KEY,"
         "  username TEXT NOT NULL,"
@@ -32,7 +32,7 @@ void SqliteDataManager::initSchema() {
         "  password TEXT NOT NULL"
         ");"
 
-        // ── Watch Later videos per user ────────────────────────────────────────
+        // -- Watch Later videos per user ----------------------------------------
         // Stores each parsed + API-enriched video as a row; replaced in bulk
         // on re-upload. position preserves original playlist order for display.
         "CREATE TABLE IF NOT EXISTS user_watch_later ("
@@ -47,7 +47,7 @@ void SqliteDataManager::initSchema() {
         "  PRIMARY KEY (user_id, video_id)"
         ");"
 
-        // ── Blend metadata ─────────────────────────────────────────────────────
+        // -- Blend metadata -----------------------------------------------------
         // creator_id kept separate for future delete/manage privileges.
         "CREATE TABLE IF NOT EXISTS blends ("
         "  blend_id   TEXT PRIMARY KEY,"
@@ -56,7 +56,7 @@ void SqliteDataManager::initSchema() {
         "  created_at TEXT NOT NULL"
         ");"
 
-        // ── Blend participants ─────────────────────────────────────────────────
+        // -- Blend participants -------------------------------------------------
         // One row per (blend, user) pair — enables fast lookup in both directions.
         "CREATE TABLE IF NOT EXISTS blend_participants ("
         "  blend_id TEXT NOT NULL,"
@@ -84,7 +84,7 @@ void SqliteDataManager::initSchema() {
     }
 }
 
-// ── DataManager interface ─────────────────────────────────────────────────────
+// -- DataManager interface -----------------------------------------------------
 
 bool SqliteDataManager::createUser(const User& user) {
     if (!db) return false;
@@ -153,7 +153,7 @@ bool SqliteDataManager::validatePassword(const std::string& userID,
     return user->getPassword() == password;
 }
 
-// ── Watch Later ───────────────────────────────────────────────────────────────
+// -- Watch Later ---------------------------------------------------------------
 
 bool SqliteDataManager::saveWatchLater(const std::string& userID,
                                        const std::list<Video>& videos) {
@@ -239,7 +239,7 @@ std::list<Video> SqliteDataManager::loadWatchLater(const std::string& userID) {
     return result;
 }
 
-// ── Blend persistence ─────────────────────────────────────────────────────────
+// -- Blend persistence ---------------------------------------------------------
 
 bool SqliteDataManager::saveBlend(const std::string& blendID,
                                   const std::string& creatorID,

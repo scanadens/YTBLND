@@ -5,7 +5,7 @@
 // Walks them through exporting from Google Takeout and loading the CSV.
 //
 // LAYOUT
-// ──────
+// ------
 //   "Set Up Your YouTube Data" heading
 //   Subtitle explaining why data is needed
 //   Steps card (Surface, centred):
@@ -15,7 +15,7 @@
 //     "Skip for now"       button (SurfaceRaised / muted)
 //
 // CSV UPLOAD
-// ──────────
+// ----------
 //   OnBrowse: opens wxFileDialog (CSV filter), dispatches "uploadData" with
 //   {filePath, userID} from AppState, then navigates to BLEND_CREATION.
 //   TODO: Display a loading indicator while parsing — large CSV files may
@@ -24,7 +24,7 @@
 //         malformed, rather than always navigating to BLEND_CREATION.
 //
 // SKIP
-// ────
+// ----
 //   OnSkip: navigates directly to BLEND_CREATION without uploading.
 //   The user can still create a blend (the algorithm will have less/no
 //   personal data to work with).

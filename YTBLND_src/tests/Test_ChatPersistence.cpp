@@ -31,7 +31,7 @@
 #include <string>
 #include <thread>
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// -- Helpers ------------------------------------------------------------------
 
 namespace {
 
@@ -70,7 +70,7 @@ void skipUnlessLiveBackendEnabled() {
 
 }  // namespace
 
-// ── parseChatHistory unit tests ───────────────────────────────────────────────
+// -- parseChatHistory unit tests -----------------------------------------------
 
 TEST(ParseChatHistoryTest, ParsesWellFormedHistoryCorrectly) {
     const std::string json =
@@ -144,7 +144,7 @@ TEST(ParseChatHistoryTest, FallsBackToCurrentTimeWhenSentAtAbsent) {
     EXPECT_LE(msgs.front().timestamp, after);
 }
 
-// ── ChatRoom::addMessage(const Message&) unit tests ───────────────────────────
+// -- ChatRoom::addMessage(const Message&) unit tests ---------------------------
 
 TEST(ChatRoomAddMessageOverloadTest, PreservesOriginalTimestamp) {
     ChatRoom room("blend-1", {"user-1"});
@@ -176,7 +176,7 @@ TEST(ChatRoomAddMessageOverloadTest, AppendsAfterExistingMessages) {
     EXPECT_EQ(it->timestamp, static_cast<std::time_t>(9999999999LL));
 }
 
-// ── Live backend integration test ────────────────────────────────────────────
+// -- Live backend integration test --------------------------------------------
 
 TEST(ChatHistoryIntegrationTest, MessageSentOverWebSocketAppearsInChatHistory) {
     skipUnlessLiveBackendEnabled();

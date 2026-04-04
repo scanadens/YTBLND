@@ -12,12 +12,12 @@
 
 using json = nlohmann::json;
 
-// ── Constructor ───────────────────────────────────────────────────────────────
+// -- Constructor ---------------------------------------------------------------
 
 YouTubeMetadataFetcher::YouTubeMetadataFetcher(std::string apiKey)
     : apiKey(std::move(apiKey)) {}
 
-// ── Public: enrich ────────────────────────────────────────────────────────────
+// -- Public: enrich ------------------------------------------------------------
 
 std::list<Video> YouTubeMetadataFetcher::enrich(const std::list<Video>& videos) {
     if (apiKey.empty()) {
@@ -100,7 +100,7 @@ std::list<Video> YouTubeMetadataFetcher::enrich(const std::list<Video>& videos) 
     return enriched;
 }
 
-// ── Private: fetchVideoBatch ──────────────────────────────────────────────────
+// -- Private: fetchVideoBatch --------------------------------------------------
 
 std::unordered_map<std::string, YouTubeMetadataFetcher::VideoMeta>
 YouTubeMetadataFetcher::fetchVideoBatch(const std::vector<std::string>& ids) {
@@ -151,7 +151,7 @@ YouTubeMetadataFetcher::fetchVideoBatch(const std::vector<std::string>& ids) {
     return result;
 }
 
-// ── Private: fetchChannelLogos ────────────────────────────────────────────────
+// -- Private: fetchChannelLogos ------------------------------------------------
 
 std::unordered_map<std::string, std::string>
 YouTubeMetadataFetcher::fetchChannelLogos(const std::vector<std::string>& channelIds) {
@@ -196,7 +196,7 @@ YouTubeMetadataFetcher::fetchChannelLogos(const std::vector<std::string>& channe
     return result;
 }
 
-// ── Private: httpGet ──────────────────────────────────────────────────────────
+// -- Private: httpGet ----------------------------------------------------------
 
 std::string YouTubeMetadataFetcher::httpGet(const std::string& url) {
     CURL* curl = curl_easy_init();

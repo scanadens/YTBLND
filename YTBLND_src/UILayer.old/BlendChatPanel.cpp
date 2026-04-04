@@ -21,7 +21,7 @@
 #include "../ModelLayer/Message.hpp"
 #include "../ModelLayer/Blend.hpp"
 
-// ── Helper: format a Unix timestamp as HH:MM ─────────────────────────────────
+// -- Helper: format a Unix timestamp as HH:MM ---------------------------------
 
 static wxString FormatTimestamp(std::time_t ts)
 {
@@ -32,7 +32,7 @@ static wxString FormatTimestamp(std::time_t ts)
     return wxString::FromAscii(buf);
 }
 
-// ── Construction ──────────────────────────────────────────────────────────────
+// -- Construction --------------------------------------------------------------
 
 BlendChatPanel::BlendChatPanel(wxWindow* parent,
                                AppController& controller,
@@ -45,18 +45,18 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
 
     auto* root = new wxBoxSizer(wxVERTICAL);
 
-    // ── TopBar (title updated in Reload) ──────────────────────────────────────
+    // -- TopBar (title updated in Reload) --------------------------------------
     auto* topBar = new TopBar(this, "Blend Chat", m_nav, Page::HOME);
     root->Add(topBar, 0, wxEXPAND);
 
-    // ── "No active blend." placeholder ───────────────────────────────────────
+    // -- "No active blend." placeholder ---------------------------------------
     m_noBlendLabel = new wxStaticText(this, wxID_ANY, "No active blend.",
                                       wxDefaultPosition, wxDefaultSize,
                                       wxALIGN_CENTER_HORIZONTAL);
     m_noBlendLabel->SetForegroundColour(UIColors::TextMuted);
     root->Add(m_noBlendLabel, 1, wxALIGN_CENTER | wxALL, 20);
 
-    // ── Message scroll area ───────────────────────────────────────────────────
+    // -- Message scroll area ---------------------------------------------------
     m_msgScroll = new wxScrolledWindow(this, wxID_ANY,
                                        wxDefaultPosition, wxDefaultSize,
                                        wxVSCROLL | wxBORDER_NONE);
@@ -74,7 +74,7 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
 
     root->Add(m_msgScroll, 1, wxEXPAND);
 
-    // ── Input panel ───────────────────────────────────────────────────────────
+    // -- Input panel -----------------------------------------------------------
     m_inputPanel = new wxPanel(this, wxID_ANY);
     m_inputPanel->SetBackgroundColour(UIColors::Surface);
     m_inputPanel->SetMinSize(wxSize(-1, 60));
@@ -101,12 +101,12 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
 
     SetSizer(root);
 
-    // ── Bindings ──────────────────────────────────────────────────────────────
+    // -- Bindings --------------------------------------------------------------
     sendBtn->Bind(wxEVT_BUTTON,     &BlendChatPanel::OnSend,        this);
     m_inputCtrl->Bind(wxEVT_TEXT_ENTER, &BlendChatPanel::OnInputEnter, this);
 }
 
-// ── Public ────────────────────────────────────────────────────────────────────
+// -- Public --------------------------------------------------------------------
 
 void BlendChatPanel::Reload()
 {
@@ -125,7 +125,7 @@ void BlendChatPanel::Reload()
         return;
     }
 
-    // ── Rebuild message list ──────────────────────────────────────────────────
+    // -- Rebuild message list --------------------------------------------------
     m_msgSizer->Clear(true /* delete_windows */);
 
     const std::list<Message>& msgs = room->getMessages();
@@ -199,7 +199,7 @@ void BlendChatPanel::Reload()
     Layout();
 }
 
-// ── Private ───────────────────────────────────────────────────────────────────
+// -- Private -------------------------------------------------------------------
 
 void BlendChatPanel::DoSend()
 {

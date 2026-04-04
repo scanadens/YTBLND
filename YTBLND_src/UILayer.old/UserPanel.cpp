@@ -15,7 +15,7 @@
 #include "../AppLayer/EventRouter.hpp"
 #include "../ModelLayer/User.hpp"
 
-// ── Construction ──────────────────────────────────────────────────────────────
+// -- Construction --------------------------------------------------------------
 
 UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav)
     : wxPanel(parent, wxID_ANY)
@@ -26,11 +26,11 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
 
     auto* root = new wxBoxSizer(wxVERTICAL);
 
-    // ── TopBar ────────────────────────────────────────────────────────────────
+    // -- TopBar ----------------------------------------------------------------
     auto* topBar = new TopBar(this, "My Account", m_nav, Page::HOME);
     root->Add(topBar, 0, wxEXPAND);
 
-    // ── User info section ─────────────────────────────────────────────────────
+    // -- User info section -----------------------------------------------------
     auto* infoPanel = new wxPanel(this, wxID_ANY);
     infoPanel->SetBackgroundColour(UIColors::Surface);
     auto* infoSizer = new wxBoxSizer(wxVERTICAL);
@@ -49,15 +49,15 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     infoPanel->SetSizer(infoSizer);
     root->Add(infoPanel, 0, wxEXPAND);
 
-    // ── Divider ───────────────────────────────────────────────────────────────
+    // -- Divider ---------------------------------------------------------------
     auto* divider = new wxStaticLine(this, wxID_ANY);
     divider->SetBackgroundColour(UIColors::Separator);
     root->Add(divider, 0, wxEXPAND);
 
-    // ── Spacer pushes logout to bottom ────────────────────────────────────────
+    // -- Spacer pushes logout to bottom ----------------------------------------
     root->AddStretchSpacer(1);
 
-    // ── Logout ────────────────────────────────────────────────────────────────
+    // -- Logout ----------------------------------------------------------------
     auto* logoutBtn = new wxButton(this, wxID_ANY, "Log Out",
                                    wxDefaultPosition, wxSize(-1, 40));
     logoutBtn->SetBackgroundColour(UIColors::Danger);
@@ -70,7 +70,7 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     Bind(wxEVT_SHOW,              &UserPanel::OnShow,   this);
 }
 
-// ── Private helpers ───────────────────────────────────────────────────────────
+// -- Private helpers -----------------------------------------------------------
 
 void UserPanel::RefreshUserInfo()
 {
@@ -87,7 +87,7 @@ void UserPanel::RefreshUserInfo()
     Layout();
 }
 
-// ── Event handlers ────────────────────────────────────────────────────────────
+// -- Event handlers ------------------------------------------------------------
 
 void UserPanel::OnShow(wxShowEvent& evt)
 {

@@ -22,7 +22,7 @@
 #include "../ModelLayer/Blend.hpp"
 #include "../ModelLayer/User.hpp"
 
-// ── Helper: format a Unix timestamp as HH:MM ─────────────────────────────────
+// -- Helper: format a Unix timestamp as HH:MM ---------------------------------
 
 static wxString FormatTimestamp(std::time_t ts)
 {
@@ -33,7 +33,7 @@ static wxString FormatTimestamp(std::time_t ts)
     return wxString::FromAscii(buf);
 }
 
-// ── Construction ──────────────────────────────────────────────────────────────
+// -- Construction --------------------------------------------------------------
 
 BlendChatPanel::BlendChatPanel(wxWindow* parent,
                                AppController& controller,
@@ -46,18 +46,18 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
 
     auto* root = new wxBoxSizer(wxVERTICAL);
 
-    // ── TopBar (title updated in Reload) ──────────────────────────────────────
+    // -- TopBar (title updated in Reload) --------------------------------------
     auto* topBar = new TopBar(this, "Blend Chat", m_nav, Page::HOME);
     root->Add(topBar, 0, wxEXPAND);
 
-    // ── "No active blend." placeholder ───────────────────────────────────────
+    // -- "No active blend." placeholder ---------------------------------------
     m_noBlendLabel = new wxStaticText(this, wxID_ANY, "No active blend.",
                                       wxDefaultPosition, wxDefaultSize,
                                       wxALIGN_CENTER_HORIZONTAL);
     m_noBlendLabel->SetForegroundColour(UIColors::TextMuted());
     root->Add(m_noBlendLabel, 1, wxALIGN_CENTER | wxALL, 20);
 
-    // ── Participants toggle button + dropdown ─────────────────────────────────
+    // -- Participants toggle button + dropdown ---------------------------------
     m_participantsBtn = new wxButton(this, wxID_ANY, "  Participants",
                                      wxDefaultPosition, wxSize(-1, 48),
                                      wxBU_LEFT);
@@ -81,7 +81,7 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
 
     m_participantsBtn->Bind(wxEVT_BUTTON, &BlendChatPanel::OnParticipantsToggle, this);
 
-    // ── Message scroll area ───────────────────────────────────────────────────
+    // -- Message scroll area ---------------------------------------------------
     m_msgScroll = new wxScrolledWindow(this, wxID_ANY,
                                        wxDefaultPosition, wxDefaultSize,
                                        wxVSCROLL | wxBORDER_NONE);
@@ -99,7 +99,7 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
 
     root->Add(m_msgScroll, 1, wxEXPAND);
 
-    // ── Input panel ───────────────────────────────────────────────────────────
+    // -- Input panel -----------------------------------------------------------
     m_inputPanel = new wxPanel(this, wxID_ANY);
     m_inputPanel->SetBackgroundColour(UIColors::Surface());
     m_inputPanel->SetMinSize(wxSize(-1, 60));
@@ -126,16 +126,16 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
 
     SetSizer(root);
 
-    // ── Bindings ──────────────────────────────────────────────────────────────
+    // -- Bindings --------------------------------------------------------------
     sendBtn->Bind(wxEVT_BUTTON,     &BlendChatPanel::OnSend,        this);
     m_inputCtrl->Bind(wxEVT_TEXT_ENTER, &BlendChatPanel::OnInputEnter, this);
 
-    // ── Poll timer — drains incoming WebSocket messages on the main thread ────
+    // -- Poll timer — drains incoming WebSocket messages on the main thread ----
     m_pollTimer = new wxTimer(this);
     Bind(wxEVT_TIMER, &BlendChatPanel::OnPollTimer, this, m_pollTimer->GetId());
     m_pollTimer->Start(500 /* ms */);
 
-    // ── Logout listener — close WebSocket immediately when user logs out ───────
+    // -- Logout listener — close WebSocket immediately when user logs out -------
     m_controller.getEventRouter().registerListener("logout",
         [this](const EventPayload&) {
             m_ws.reset();
@@ -143,7 +143,7 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
         });
 }
 
-// ── Public ────────────────────────────────────────────────────────────────────
+// -- Public --------------------------------------------------------------------
 
 void BlendChatPanel::Refresh()
 {
@@ -171,7 +171,7 @@ void BlendChatPanel::Reload()
         return;
     }
 
-    // ── Connect WebSocket if blend changed or not yet connected ───────────────
+    // -- Connect WebSocket if blend changed or not yet connected ---------------
     User* currentUser = state.getCurrentUser();
     if (currentUser && room->getBlendID() != m_wsBlendID) {
         // Load history first (synchronous — ChatRoom is populated before UI rebuild)
@@ -181,7 +181,7 @@ void BlendChatPanel::Reload()
         ConnectWebSocket(room->getBlendID(), currentUser->getUserID());
     }
 
-    // ── Populate participants dropdown ────────────────────────────────────────
+    // -- Populate participants dropdown ----------------------------------------
     m_participantsBtn->Show();
     m_participantsSizer->Clear(true /* delete_windows */);
 
@@ -220,7 +220,7 @@ void BlendChatPanel::Reload()
 
     m_participantsDropdown->Layout();
 
-    // ── Rebuild message list ──────────────────────────────────────────────────
+    // -- Rebuild message list --------------------------------------------------
     m_msgSizer->Clear(true /* delete_windows */);
 
     const std::list<Message>& msgs = room->getMessages();
@@ -242,7 +242,7 @@ void BlendChatPanel::Reload()
 
             auto* rowSizer = new wxBoxSizer(wxVERTICAL);
 
-            // ── Header line: [username bold]  [spacer]  [HH:MM AM/PM small grey] ──
+            // -- Header line: [username bold]  [spacer]  [HH:MM AM/PM small grey] --
             auto* headerLine = new wxBoxSizer(wxHORIZONTAL);
 
             auto* userLabel = new wxStaticText(rowPanel, wxID_ANY,
@@ -264,7 +264,7 @@ void BlendChatPanel::Reload()
             headerLine->Add(tsLabel,   0, wxALIGN_CENTER_VERTICAL);
             rowSizer->Add(headerLine, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 8);
 
-            // ── Message text below the header ─────────────────────────────────────
+            // -- Message text below the header -------------------------------------
             auto* textLabel = new wxStaticText(rowPanel, wxID_ANY,
                                                wxString::FromUTF8(msg.text));
             textLabel->SetForegroundColour(UIColors::TextPrimary());
@@ -274,7 +274,7 @@ void BlendChatPanel::Reload()
             rowPanel->SetSizer(rowSizer);
             m_msgSizer->Add(rowPanel, 0, wxEXPAND | wxLEFT | wxRIGHT, 4);
 
-            // ── Hover highlight ───────────────────────────────────────────────────
+            // -- Hover highlight ---------------------------------------------------
             auto applyHover = [=](bool hover) {
                 wxColour bg = hover ? kHoverBg : UIColors::Surface();
                 rowPanel ->SetBackgroundColour(bg);
@@ -306,7 +306,7 @@ void BlendChatPanel::Reload()
     Layout();
 }
 
-// ── Private ───────────────────────────────────────────────────────────────────
+// -- Private -------------------------------------------------------------------
 
 void BlendChatPanel::DoSend()
 {
@@ -357,7 +357,7 @@ void BlendChatPanel::OnParticipantsToggle(wxCommandEvent& /*evt*/)
     Layout();
 }
 
-// ── WebSocket ─────────────────────────────────────────────────────────────────
+// -- WebSocket -----------------------------------------------------------------
 
 void BlendChatPanel::ConnectWebSocket(const std::string& blendID,
                                       const std::string& userID)

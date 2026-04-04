@@ -42,7 +42,7 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
 {
     SetBackgroundColour(UIColors::Background());
 
-    // ── Back icon button (standalone on Background) ──────────────────────────
+    // -- Back icon button (standalone on Background) --------------------------
     auto* backBtn = new wxButton(this, wxID_ANY, wxEmptyString,
                                   wxDefaultPosition, wxSize(36, 32),
                                   wxBORDER_NONE);
@@ -61,7 +61,7 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
         backBtn->Refresh(); e.Skip();
     });
 
-    // ── Title label ──────────────────────────────────────────────────────────
+    // -- Title label ----------------------------------------------------------
     wxStaticText* titleLabel = new wxStaticText(this, wxID_ANY, title,
                                                 wxDefaultPosition, wxDefaultSize,
                                                 wxALIGN_CENTER_HORIZONTAL);
@@ -72,7 +72,7 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     titleFont.SetWeight(wxFONTWEIGHT_BOLD);
     titleLabel->SetFont(titleFont);
 
-    // ── Layout: [back icon | stretch | title | stretch | spacer] ─────────────
+    // -- Layout: [back icon | stretch | title | stretch | spacer] -------------
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     sizer->Add(backBtn,    0, wxALIGN_CENTER_VERTICAL | wxLEFT, 8);
     sizer->AddStretchSpacer(1);

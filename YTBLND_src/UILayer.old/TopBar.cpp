@@ -13,7 +13,7 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
 {
     SetBackgroundColour(UIColors::Surface);
 
-    // ── Back button ──────────────────────────────────────────────────────────
+    // -- Back button ----------------------------------------------------------
     wxButton* backBtn = new wxButton(this, wxID_ANY, wxT("< Back"),
                                      wxDefaultPosition, wxDefaultSize,
                                      wxBORDER_NONE);
@@ -35,7 +35,7 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
         e.Skip();
     });
 
-    // ── Title label ──────────────────────────────────────────────────────────
+    // -- Title label ----------------------------------------------------------
     wxStaticText* titleLabel = new wxStaticText(this, wxID_ANY, title,
                                                 wxDefaultPosition, wxDefaultSize,
                                                 wxALIGN_CENTER_HORIZONTAL);
@@ -46,7 +46,7 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     titleFont.SetWeight(wxFONTWEIGHT_BOLD);
     titleLabel->SetFont(titleFont);
 
-    // ── Layout ───────────────────────────────────────────────────────────────
+    // -- Layout ---------------------------------------------------------------
     // Three-column sizer: [back btn | title (stretch) | right spacer]
     // The right spacer mirrors the back button width so the title stays centred.
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);

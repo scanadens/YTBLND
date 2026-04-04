@@ -5,7 +5,7 @@
 // Log Out button at the bottom.
 //
 // LAYOUT
-// ──────
+// ------
 //   TopBar    ("My Account", back → HOME)
 //   Info panel (Surface background):
 //     Username: <value>   (12pt, TextPrimary)
@@ -15,19 +15,19 @@
 //   Log Out button (Danger colour, full width)
 //
 // REFRESH ON SHOW
-// ───────────────
+// ---------------
 //   RefreshUserInfo() is called every time the panel becomes visible (via
 //   wxEVT_SHOW) so it always reflects the current AppState.
 //
 // LOGOUT
-// ──────
+// ------
 //   OnLogout: ConfirmationDialog → dispatch("logout") → nav(LOGIN).
 //   TODO: If logout clears AppState but not any cached local state (e.g. the
 //         active blend), ensure those are also reset here or in the "logout"
 //         event handler in AppController.
 //
 // FUTURE FEATURES
-// ───────────────
+// ---------------
 //   TODO: Add a "Change Password" form.
 //   TODO: Show the user's YouTube data status (# of Watch Later videos loaded)
 //         and an "Update CSV" button to re-upload fresh data.

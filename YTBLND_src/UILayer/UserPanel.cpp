@@ -18,7 +18,7 @@
 #include "../AppLayer/EventRouter.hpp"
 #include "../ModelLayer/User.hpp"
 
-// ── Construction ──────────────────────────────────────────────────────────────
+// -- Construction --------------------------------------------------------------
 
 UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTRANSPARENT_WINDOW)
@@ -27,11 +27,11 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
 {
     auto* root = new wxBoxSizer(wxVERTICAL);
 
-    // ── TopBar ────────────────────────────────────────────────────────────────
+    // -- TopBar ----------------------------------------------------------------
     auto* topBar = new TopBar(this, "My Account", m_nav, Page::HOME);
     root->Add(topBar, 0, wxEXPAND);
 
-    // ── User info section ─────────────────────────────────────────────────────
+    // -- User info section -----------------------------------------------------
     auto* infoPanel = new wxPanel(this, wxID_ANY);
     infoPanel->SetBackgroundColour(UIColors::Surface());
     auto* infoSizer = new wxBoxSizer(wxVERTICAL);
@@ -48,12 +48,12 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     uf.SetPointSize(16);
     m_emailLabel->SetFont(uf);
 
-    // ── Divider ───────────────────────────────────────────────────────────────
+    // -- Divider ---------------------------------------------------------------
     auto* divider = new wxStaticLine(this, wxID_ANY);
     divider->SetBackgroundColour(UIColors::Separator());
     root->Add(divider, 0, wxEXPAND);
 
-    // ── Spacer pushes buttons to bottom ───────────────────────────────────────
+    // -- Spacer pushes buttons to bottom ---------------------------------------
     root->AddStretchSpacer(2);
 
     infoSizer->Add(m_usernameLabel, 0, wxCENTER | wxTOP, 16);
@@ -94,7 +94,7 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     m_deleteErrorLabel->SetForegroundColour(UIColors::Danger());
     root->Add(m_deleteErrorLabel, 0, wxEXPAND | wxCENTER | wxBOTTOM, 12);
 
-    // ── Logout ────────────────────────────────────────────────────────────────
+    // -- Logout ----------------------------------------------------------------
     auto* logoutBtn = new wxButton(this, wxID_ANY, "Log Out");
     UIButtons::ApplySizeBounds(logoutBtn, ButtonType::Large);
     logoutBtn->SetBackgroundColour(UIColors::Danger());
@@ -117,7 +117,7 @@ UserPanel::UserPanel(wxWindow* parent, AppController& controller, NavigateFn nav
     SetDeleteReauthVisible(false);
 }
 
-// ── Private helpers ───────────────────────────────────────────────────────────
+// -- Private helpers -----------------------------------------------------------
 
 void UserPanel::Refresh()
 {
@@ -161,7 +161,7 @@ void UserPanel::SetDeleteReauthVisible(bool isVisible)
     Layout();
 }
 
-// ── Event handlers ────────────────────────────────────────────────────────────
+// -- Event handlers ------------------------------------------------------------
 
 void UserPanel::OnShow(wxShowEvent& evt)
 {
