@@ -25,19 +25,36 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
     , m_controller(controller)
     , m_nav(std::move(nav))
 {
-    SetBackgroundColour(UIColors::Background);
+    SetBackgroundColour(UIColors::Background());
 
     auto* root = new wxBoxSizer(wxVERTICAL);
 
     // ── TopBar (dynamic back: LOGIN if no blend yet, HOME otherwise) ─────────
     auto* topBar = new wxPanel(this, wxID_ANY);
-    topBar->SetBackgroundColour(UIColors::Surface);
-    topBar->SetMinSize(wxSize(-1, 48));
+    topBar->SetBackgroundColour(UIColors::Background());
+    topBar->SetMinSize(wxSize(-1, 40));
     {
-        auto* backBtn = new wxButton(topBar, wxID_ANY, wxT("< Back"));
-        backBtn->SetBackgroundColour(UIColors::SurfaceRaised);
-        backBtn->SetForegroundColour(UIColors::TextPrimary);
-        UIButtons::ApplySizeBounds(backBtn, ButtonType::TopBarBack);
+        auto* backBtn = new wxButton(topBar, wxID_ANY, wxEmptyString,
+                                      wxDefaultPosition, wxSize(36, 32),
+                                      wxBORDER_NONE);
+        backBtn->SetBackgroundColour(UIColors::Background());
+
+        // Load back icon
+        wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
+        wxString folder = themeName.BeforeFirst(' ').Lower();
+        for (const auto& c : wxArrayString{
+                 "YTBLND_src/resources/icons/" + folder + "/back.png",
+                 "resources/icons/" + folder + "/back.png",
+                 "../resources/icons/" + folder + "/back.png"}) {
+            if (wxFileExists(c)) {
+                wxImage img(c, wxBITMAP_TYPE_PNG);
+                if (img.IsOk()) {
+                    img.Rescale(24, 24, wxIMAGE_QUALITY_BILINEAR);
+                    backBtn->SetBitmap(wxBitmap(img));
+                }
+                break;
+            }
+        }
 
         backBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
             if (AppState::getInstance().getActiveBlend() != nullptr)
@@ -45,36 +62,44 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
             else
                 m_nav(Page::LOGIN);
         });
+        backBtn->Bind(wxEVT_ENTER_WINDOW, [backBtn](wxMouseEvent& e) {
+            backBtn->SetBackgroundColour(UIColors::SurfaceRaised());
+            backBtn->Refresh(); e.Skip();
+        });
+        backBtn->Bind(wxEVT_LEAVE_WINDOW, [backBtn](wxMouseEvent& e) {
+            backBtn->SetBackgroundColour(UIColors::Background());
+            backBtn->Refresh(); e.Skip();
+        });
 
         auto* titleLabel = new wxStaticText(topBar, wxID_ANY, "New Blend",
                                             wxDefaultPosition, wxDefaultSize,
                                             wxALIGN_CENTER_HORIZONTAL);
-        titleLabel->SetForegroundColour(UIColors::TextPrimary);
+        titleLabel->SetForegroundColour(UIColors::TextPrimary());
         wxFont tf = titleLabel->GetFont();
         tf.SetPointSize(14);
         tf.SetWeight(wxFONTWEIGHT_BOLD);
         titleLabel->SetFont(tf);
 
         auto* barSizer = new wxBoxSizer(wxHORIZONTAL);
-        barSizer->Add(backBtn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 10);
+        barSizer->Add(backBtn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 8);
         barSizer->AddStretchSpacer(1);
         barSizer->Add(titleLabel, 0, wxALIGN_CENTER_VERTICAL);
         barSizer->AddStretchSpacer(1);
-        barSizer->Add(UIButtons::GetSize(ButtonType::TopBarBack).GetWidth() + 10, 0);
+        barSizer->Add(36 + 8, 0);
 
         auto* outerBar = new wxBoxSizer(wxVERTICAL);
-        outerBar->Add(barSizer, 1, wxEXPAND | wxTOP | wxBOTTOM, 8);
+        outerBar->Add(barSizer, 1, wxEXPAND | wxTOP | wxBOTTOM, 4);
         topBar->SetSizer(outerBar);
     }
     root->Add(topBar, 0, wxEXPAND);
 
     // ── Blend name row ──────────────────────────────────────────────────────────
     auto* namePanel = new wxPanel(this, wxID_ANY);
-    namePanel->SetBackgroundColour(UIColors::Surface);
+    namePanel->SetBackgroundColour(UIColors::Surface());
     auto* nameSizer = new wxBoxSizer(wxHORIZONTAL);
 
     auto* nameLabel = new wxStaticText(namePanel, wxID_ANY, "Blend Name:");
-    nameLabel->SetForegroundColour(UIColors::TextPrimary);
+    nameLabel->SetForegroundColour(UIColors::TextPrimary());
     wxFont nlf = nameLabel->GetFont();
     nlf.SetWeight(wxFONTWEIGHT_BOLD);
     nlf.SetPointSize(11);
@@ -84,8 +109,8 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
                                      wxDefaultPosition, wxSize(-1, 36),
                                      wxTE_PROCESS_ENTER);
     m_blendNameCtrl->SetHint("Enter a name for your blend...");
-    m_blendNameCtrl->SetBackgroundColour(UIColors::SurfaceRaised);
-    m_blendNameCtrl->SetForegroundColour(UIColors::TextPrimary);
+    m_blendNameCtrl->SetBackgroundColour(UIColors::SurfaceRaised());
+    m_blendNameCtrl->SetForegroundColour(UIColors::TextPrimary());
 
     nameSizer->Add(nameLabel,       0, wxALIGN_CENTER_VERTICAL | wxLEFT, 16);
     nameSizer->Add(m_blendNameCtrl, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 12);
@@ -95,11 +120,11 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     // ── Action row ────────────────────────────────────────────────────────────
     auto* actionPanel = new wxPanel(this, wxID_ANY);
-    actionPanel->SetBackgroundColour(UIColors::Surface);
+    actionPanel->SetBackgroundColour(UIColors::Surface());
     auto* actionSizer = new wxBoxSizer(wxHORIZONTAL);
 
     auto* blendLabel = new wxStaticText(actionPanel, wxID_ANY, "PARTICIPANTS");
-    blendLabel->SetForegroundColour(UIColors::TextPrimary);
+    blendLabel->SetForegroundColour(UIColors::TextPrimary());
     wxFont lf = blendLabel->GetFont();
     lf.SetWeight(wxFONTWEIGHT_BOLD);
     lf.SetPointSize(13);
@@ -107,13 +132,13 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     auto* addBtn = new wxButton(actionPanel, wxID_ANY, "Add");
     UIButtons::ApplySizeBounds(addBtn, ButtonType::Compact);
-    addBtn->SetBackgroundColour(UIColors::SurfaceRaised);
-    addBtn->SetForegroundColour(UIColors::TextPrimary);
+    addBtn->SetBackgroundColour(UIColors::SurfaceRaised());
+    addBtn->SetForegroundColour(UIColors::TextPrimary());
 
     m_createBtn = new wxButton(actionPanel, wxID_ANY, "Create Blend");
     UIButtons::ApplySizeBounds(m_createBtn, ButtonType::Medium);
-    m_createBtn->SetBackgroundColour(UIColors::Accent);
-    m_createBtn->SetForegroundColour(UIColors::TextPrimary);
+    m_createBtn->SetBackgroundColour(UIColors::Accent());
+    m_createBtn->SetForegroundColour(UIColors::TextPrimary());
     m_createBtn->Disable();
 
     actionSizer->Add(blendLabel, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 16);
@@ -129,11 +154,11 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
     m_userListScroll = new wxScrolledWindow(this, wxID_ANY,
                                             wxDefaultPosition, wxDefaultSize,
                                             wxVSCROLL | wxBORDER_NONE);
-    m_userListScroll->SetBackgroundColour(UIColors::Background);
+    m_userListScroll->SetBackgroundColour(UIColors::Background());
     m_userListScroll->SetScrollRate(0, 12);
 
     m_userListInner = new wxPanel(m_userListScroll, wxID_ANY);
-    m_userListInner->SetBackgroundColour(UIColors::Background);
+    m_userListInner->SetBackgroundColour(UIColors::Background());
     m_userListSizer = new wxBoxSizer(wxVERTICAL);
 
     // "No users added" placeholder
@@ -141,7 +166,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
                                     "No users added",
                                     wxDefaultPosition, wxDefaultSize,
                                     wxALIGN_CENTER_HORIZONTAL);
-    m_emptyLabel->SetForegroundColour(UIColors::TextMuted);
+    m_emptyLabel->SetForegroundColour(UIColors::TextMuted());
     m_userListSizer->Add(m_emptyLabel, 0,
                          wxALIGN_CENTER_HORIZONTAL | wxTOP, 24);
 
@@ -158,7 +183,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
     m_countLabel = new wxStaticText(this, wxID_ANY, "0 / 8 users",
                                     wxDefaultPosition, wxDefaultSize,
                                     wxALIGN_CENTER_HORIZONTAL);
-    m_countLabel->SetForegroundColour(UIColors::TextSecondary);
+    m_countLabel->SetForegroundColour(UIColors::TextSecondary());
     root->Add(m_countLabel, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 12);
 
     SetSizer(root);
@@ -208,7 +233,7 @@ void BlendCreationPanel::RebuildUserList()
                                     "No users added",
                                     wxDefaultPosition, wxDefaultSize,
                                     wxALIGN_CENTER_HORIZONTAL);
-    m_emptyLabel->SetForegroundColour(UIColors::TextMuted);
+    m_emptyLabel->SetForegroundColour(UIColors::TextMuted());
 
     if (m_addedUsers.empty()) {
         m_emptyLabel->Show(true);
@@ -221,19 +246,19 @@ void BlendCreationPanel::RebuildUserList()
         for (const auto& username : m_addedUsers) {
             // Row panel
             auto* row = new wxPanel(m_userListInner, wxID_ANY);
-            row->SetBackgroundColour(UIColors::SurfaceRaised);
+            row->SetBackgroundColour(UIColors::SurfaceRaised());
             row->SetMinSize(wxSize(-1, 44));
 
             auto* rowSizer = new wxBoxSizer(wxHORIZONTAL);
 
             auto* nameLabel = new wxStaticText(row, wxID_ANY,
                                                wxString::FromUTF8(username));
-            nameLabel->SetForegroundColour(UIColors::TextPrimary);
+            nameLabel->SetForegroundColour(UIColors::TextPrimary());
 
             auto* removeBtn = new wxButton(row, wxID_ANY, wxT("\xc3\x97"));
             UIButtons::ApplySizeBounds(removeBtn, ButtonType::Icon);
-            removeBtn->SetBackgroundColour(UIColors::SurfaceRaised);
-            removeBtn->SetForegroundColour(UIColors::Danger);
+            removeBtn->SetBackgroundColour(UIColors::SurfaceRaised());
+            removeBtn->SetForegroundColour(UIColors::Danger());
 
             // Capture username by value for the lambda
             std::string cap = username;
@@ -274,7 +299,7 @@ void BlendCreationPanel::OnAdd(wxCommandEvent& /*evt*/)
     }
 
     wxTextEntryDialog dlg(this, "Enter username:", "Add User");
-    dlg.SetBackgroundColour(UIColors::Surface);
+    dlg.SetBackgroundColour(UIColors::Surface());
     if (dlg.ShowModal() != wxID_OK) return;
 
     std::string entered = dlg.GetValue().Trim().ToStdString();
