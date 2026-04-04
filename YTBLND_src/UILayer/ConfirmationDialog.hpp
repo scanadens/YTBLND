@@ -17,8 +17,8 @@
 //   if (dlg.ShowModal() == wxID_OK) { ... }
 //
 // Styling notes:
-//   - OK button uses UIColors::Accent (purple)
-//   - Cancel button uses UIColors::SurfaceRaised (grey)
+//   - OK button uses UIColors::Accent() (purple)
+//   - Cancel button uses UIColors::SurfaceRaised() (grey)
 //   - Both buttons lighten slightly on hover
 //
 // TODO: Add a wxIcon / warning symbol to the left of the message for

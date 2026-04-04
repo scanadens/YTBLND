@@ -48,7 +48,7 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
     , m_controller(controller)
     , m_nav(std::move(nav))
 {
-    SetBackgroundColour(UIColors::Background);
+    SetBackgroundColour(UIColors::Background());
 
     auto* root = new wxBoxSizer(wxVERTICAL);
 
@@ -60,14 +60,14 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
     m_noBlendLabel = new wxStaticText(this, wxID_ANY, "No active blend.",
                                       wxDefaultPosition, wxDefaultSize,
                                       wxALIGN_CENTER_HORIZONTAL);
-    m_noBlendLabel->SetForegroundColour(UIColors::TextMuted);
+    m_noBlendLabel->SetForegroundColour(UIColors::TextMuted());
     root->Add(m_noBlendLabel, 1, wxALIGN_CENTER | wxALL, 20);
 
     // -- Participants toggle button + dropdown ---------------------------------
     m_participantsBtn = new wxButton(this, wxID_ANY, "  Participants",
                                      wxDefaultPosition, wxSize(-1, 48),
                                      wxBU_LEFT);
-    m_participantsBtn->SetBackgroundColour(UIColors::Accent);
+    m_participantsBtn->SetBackgroundColour(UIColors::Accent());
     m_participantsBtn->SetForegroundColour(*wxWHITE);
     {
         wxFont f = m_participantsBtn->GetFont();
@@ -79,7 +79,7 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
     root->Add(m_participantsBtn, 0, wxEXPAND);
 
     m_participantsDropdown = new wxPanel(this, wxID_ANY);
-    m_participantsDropdown->SetBackgroundColour(UIColors::SurfaceRaised);
+    m_participantsDropdown->SetBackgroundColour(UIColors::SurfaceRaised());
     m_participantsSizer = new wxBoxSizer(wxVERTICAL);
     m_participantsDropdown->SetSizer(m_participantsSizer);
     m_participantsDropdown->Hide();
@@ -91,11 +91,11 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
     m_msgScroll = new wxScrolledWindow(this, wxID_ANY,
                                        wxDefaultPosition, wxDefaultSize,
                                        wxVSCROLL | wxBORDER_NONE);
-    m_msgScroll->SetBackgroundColour(UIColors::Surface);
+    m_msgScroll->SetBackgroundColour(UIColors::Surface());
     m_msgScroll->SetScrollRate(0, 12);
 
     m_msgInner = new wxPanel(m_msgScroll, wxID_ANY);
-    m_msgInner->SetBackgroundColour(UIColors::Surface);
+    m_msgInner->SetBackgroundColour(UIColors::Surface());
     m_msgSizer = new wxBoxSizer(wxVERTICAL);
     m_msgInner->SetSizer(m_msgSizer);
 
@@ -107,7 +107,7 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
 
     // -- Input panel -----------------------------------------------------------
     m_inputPanel = new wxPanel(this, wxID_ANY);
-    m_inputPanel->SetBackgroundColour(UIColors::Surface);
+    m_inputPanel->SetBackgroundColour(UIColors::Surface());
     m_inputPanel->SetMinSize(wxSize(-1, 60));
 
     auto* inputSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -115,14 +115,14 @@ BlendChatPanel::BlendChatPanel(wxWindow* parent,
     m_inputCtrl = new wxTextCtrl(m_inputPanel, wxID_ANY, wxEmptyString,
                                  wxDefaultPosition, wxDefaultSize,
                                  wxTE_PROCESS_ENTER | wxBORDER_SIMPLE);
-    m_inputCtrl->SetBackgroundColour(UIColors::SurfaceRaised);
-    m_inputCtrl->SetForegroundColour(UIColors::TextPrimary);
+    m_inputCtrl->SetBackgroundColour(UIColors::SurfaceRaised());
+    m_inputCtrl->SetForegroundColour(UIColors::TextPrimary());
     m_inputCtrl->SetHint("Type a message...");
 
     auto* sendBtn = new wxButton(m_inputPanel, wxID_ANY, "Send");
     UIButtons::ApplySizeBounds(sendBtn, ButtonType::Nav);
-    sendBtn->SetBackgroundColour(UIColors::Accent);
-    sendBtn->SetForegroundColour(UIColors::TextPrimary);
+    sendBtn->SetBackgroundColour(UIColors::Accent());
+    sendBtn->SetForegroundColour(UIColors::TextPrimary());
 
     inputSizer->Add(m_inputCtrl, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxTOP | wxBOTTOM, 10);
     inputSizer->Add(sendBtn,     0, wxALIGN_CENTER_VERTICAL | wxALL,  10);
@@ -193,12 +193,12 @@ void BlendChatPanel::Reload()
 
     for (const User& p : blend->getParticipants()) {
         auto* row = new wxPanel(m_participantsDropdown, wxID_ANY);
-        row->SetBackgroundColour(UIColors::SurfaceRaised);
+        row->SetBackgroundColour(UIColors::SurfaceRaised());
 
         // Username - bold, slightly larger
         auto* nameLbl = new wxStaticText(row, wxID_ANY,
                                          wxString::FromUTF8(p.getUsername()));
-        nameLbl->SetForegroundColour(UIColors::TextPrimary);
+        nameLbl->SetForegroundColour(UIColors::TextPrimary());
         {
             wxFont f = nameLbl->GetFont();
             f.SetPointSize(11);
@@ -209,7 +209,7 @@ void BlendChatPanel::Reload()
         // User ID - normal weight, smaller
         auto* idLbl = new wxStaticText(row, wxID_ANY,
                                        wxString::FromUTF8("  (" + p.getUserID() + ")"));
-        idLbl->SetForegroundColour(UIColors::TextSecondary);
+        idLbl->SetForegroundColour(UIColors::TextSecondary());
         {
             wxFont f = idLbl->GetFont();
             f.SetPointSize(9);
@@ -236,7 +236,7 @@ void BlendChatPanel::Reload()
                                              "No messages yet.",
                                              wxDefaultPosition, wxDefaultSize,
                                              wxALIGN_CENTER_HORIZONTAL);
-        placeholder->SetForegroundColour(UIColors::TextMuted);
+        placeholder->SetForegroundColour(UIColors::TextMuted());
         m_msgSizer->Add(placeholder, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP, 20);
     } else {
         static const wxColour kHoverBg(50, 50, 50);
@@ -244,7 +244,7 @@ void BlendChatPanel::Reload()
         for (const Message& msg : msgs) {
             // Message row container
             auto* rowPanel = new wxPanel(m_msgInner, wxID_ANY);
-            rowPanel->SetBackgroundColour(UIColors::Surface);
+            rowPanel->SetBackgroundColour(UIColors::Surface());
 
             auto* rowSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -253,14 +253,14 @@ void BlendChatPanel::Reload()
 
             auto* userLabel = new wxStaticText(rowPanel, wxID_ANY,
                                                wxString::FromUTF8(msg.userID));
-            userLabel->SetForegroundColour(UIColors::TextSecondary);
+            userLabel->SetForegroundColour(UIColors::TextSecondary());
             wxFont uf = userLabel->GetFont();
             uf.SetWeight(wxFONTWEIGHT_BOLD);
             userLabel->SetFont(uf);
 
             auto* tsLabel = new wxStaticText(rowPanel, wxID_ANY,
                                              FormatTimestamp(msg.timestamp));
-            tsLabel->SetForegroundColour(UIColors::TextMuted);
+            tsLabel->SetForegroundColour(UIColors::TextMuted());
             wxFont tf = tsLabel->GetFont();
             tf.SetPointSize(tf.GetPointSize() - 1);
             tsLabel->SetFont(tf);
@@ -273,7 +273,7 @@ void BlendChatPanel::Reload()
             // -- Message text below the header -------------------------------------
             auto* textLabel = new wxStaticText(rowPanel, wxID_ANY,
                                                wxString::FromUTF8(msg.text));
-            textLabel->SetForegroundColour(UIColors::TextPrimary);
+            textLabel->SetForegroundColour(UIColors::TextPrimary());
             textLabel->Wrap(600);
             rowSizer->Add(textLabel, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 8);
 
@@ -282,7 +282,7 @@ void BlendChatPanel::Reload()
 
             // -- Hover highlight ---------------------------------------------------
             auto applyHover = [=](bool hover) {
-                wxColour bg = hover ? kHoverBg : UIColors::Surface;
+                wxColour bg = hover ? kHoverBg : UIColors::Surface();
                 rowPanel ->SetBackgroundColour(bg);
                 userLabel->SetBackgroundColour(bg);
                 tsLabel  ->SetBackgroundColour(bg);

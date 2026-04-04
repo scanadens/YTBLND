@@ -31,7 +31,7 @@ OperationProgressDialog::OperationProgressDialog(wxWindow* parent, const wxStrin
     wxFont messageFont = messageLabel->GetFont();
     messageFont.SetPointSize(10);
     messageLabel->SetFont(messageFont);
-    messageLabel->SetForegroundColour(UIColors::TextPrimary);
+    messageLabel->SetForegroundColour(UIColors::TextPrimary());
     mainSizer->Add(messageLabel, 0, wxEXPAND | wxLEFT | wxRIGHT, 20);
     mainSizer->AddSpacer(8);
 
@@ -39,7 +39,7 @@ OperationProgressDialog::OperationProgressDialog(wxWindow* parent, const wxStrin
     progressTrack = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 14));
     progressTrack->SetMinSize(wxSize(-1, 14));
     progressTrack->SetBackgroundStyle(wxBG_STYLE_PAINT);
-    progressTrack->SetBackgroundColour(UIColors::SurfaceRaised);
+    progressTrack->SetBackgroundColour(UIColors::SurfaceRaised());
 
     // Paint a consistent border for visibility in all themes.
     progressTrack->Bind(wxEVT_PAINT, [this](wxPaintEvent&) {
@@ -47,17 +47,17 @@ OperationProgressDialog::OperationProgressDialog(wxWindow* parent, const wxStrin
         const wxSize sz = progressTrack->GetClientSize();
 
         dc.SetPen(*wxTRANSPARENT_PEN);
-        dc.SetBrush(wxBrush(UIColors::Separator));
+        dc.SetBrush(wxBrush(UIColors::Separator()));
         dc.DrawRectangle(0, 0, sz.GetWidth(), sz.GetHeight());
 
         const int innerW = std::max(0, sz.GetWidth() - (2 * kProgressBorderPx));
         const int innerH = std::max(0, sz.GetHeight() - (2 * kProgressBorderPx));
-        dc.SetBrush(wxBrush(UIColors::SurfaceRaised));
+        dc.SetBrush(wxBrush(UIColors::SurfaceRaised()));
         dc.DrawRectangle(kProgressBorderPx, kProgressBorderPx, innerW, innerH);
     });
 
     progressFill = new wxPanel(progressTrack, wxID_ANY, wxDefaultPosition, wxSize(0, 14));
-    progressFill->SetBackgroundColour(UIColors::Accent);
+    progressFill->SetBackgroundColour(UIColors::Accent());
 
     progressTrack->Bind(wxEVT_SIZE, [this](wxSizeEvent& evt) {
         UpdateProgressFill();
@@ -73,13 +73,13 @@ OperationProgressDialog::OperationProgressDialog(wxWindow* parent, const wxStrin
     wxFont percentFont = percentLabel->GetFont();
     percentFont.SetPointSize(9);
     percentLabel->SetFont(percentFont);
-    percentLabel->SetForegroundColour(UIColors::TextSecondary);
+    percentLabel->SetForegroundColour(UIColors::TextSecondary());
     mainSizer->AddSpacer(6);
     mainSizer->Add(percentLabel, 0, wxALIGN_CENTER_HORIZONTAL);
     mainSizer->AddStretchSpacer(1);
 
     SetSizer(mainSizer);
-    SetBackgroundColour(UIColors::Surface);
+    SetBackgroundColour(UIColors::Surface());
     SetWindowStyle(wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
     UpdateProgressFill();
 

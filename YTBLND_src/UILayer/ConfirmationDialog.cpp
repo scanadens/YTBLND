@@ -24,15 +24,15 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
                wxDefaultPosition, wxDefaultSize,
                wxDEFAULT_DIALOG_STYLE | wxSTAY_ON_TOP)
 {
-    // -- Overall panel background ---------------------------------------------
-    SetBackgroundColour(UIColors::Background);
+    // ── Overall panel background ─────────────────────────────────────────────
+    SetBackgroundColour(UIColors::Background());
 
     // -- Message label --------------------------------------------------------
     wxStaticText* msgLabel = new wxStaticText(this, wxID_ANY, message,
                                               wxDefaultPosition, wxDefaultSize,
                                               wxALIGN_CENTER_HORIZONTAL);
-    msgLabel->SetForegroundColour(UIColors::TextPrimary);
-    msgLabel->SetBackgroundColour(UIColors::Background);
+    msgLabel->SetForegroundColour(UIColors::TextPrimary());
+    msgLabel->SetBackgroundColour(UIColors::Background());
 
     wxFont msgFont = msgLabel->GetFont();
     msgFont.SetPointSize(11);
@@ -43,16 +43,16 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
                                    wxDefaultPosition, wxDefaultSize,
                                    wxBORDER_NONE);
     UIButtons::ApplySizeBounds(okBtn, ButtonType::Small);
-    okBtn->SetBackgroundColour(UIColors::Accent);
-    okBtn->SetForegroundColour(UIColors::TextPrimary);
+    okBtn->SetBackgroundColour(UIColors::Accent());
+    okBtn->SetForegroundColour(UIColors::TextPrimary());
 
     okBtn->Bind(wxEVT_ENTER_WINDOW, [okBtn](wxMouseEvent& e) {
-        okBtn->SetBackgroundColour(UIColors::AccentHover);
+        okBtn->SetBackgroundColour(UIColors::AccentHover());
         okBtn->Refresh();
         e.Skip();
     });
     okBtn->Bind(wxEVT_LEAVE_WINDOW, [okBtn](wxMouseEvent& e) {
-        okBtn->SetBackgroundColour(UIColors::Accent);
+        okBtn->SetBackgroundColour(UIColors::Accent());
         okBtn->Refresh();
         e.Skip();
     });
@@ -62,8 +62,8 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
                                        wxDefaultPosition, wxDefaultSize,
                                        wxBORDER_NONE);
     UIButtons::ApplySizeBounds(cancelBtn, ButtonType::Small);
-    cancelBtn->SetBackgroundColour(UIColors::SurfaceRaised);
-    cancelBtn->SetForegroundColour(UIColors::TextPrimary);
+    cancelBtn->SetBackgroundColour(UIColors::SurfaceRaised());
+    cancelBtn->SetForegroundColour(UIColors::TextPrimary());
 
     cancelBtn->Bind(wxEVT_ENTER_WINDOW, [cancelBtn](wxMouseEvent& e) {
         cancelBtn->SetBackgroundColour(wxColour(55, 55, 55));
@@ -71,7 +71,7 @@ ConfirmationDialog::ConfirmationDialog(wxWindow*       parent,
         e.Skip();
     });
     cancelBtn->Bind(wxEVT_LEAVE_WINDOW, [cancelBtn](wxMouseEvent& e) {
-        cancelBtn->SetBackgroundColour(UIColors::SurfaceRaised);
+        cancelBtn->SetBackgroundColour(UIColors::SurfaceRaised());
         cancelBtn->Refresh();
         e.Skip();
     });

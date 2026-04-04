@@ -73,7 +73,7 @@ VideoCard::VideoCard(wxWindow* parent, AppController& controller)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(260, 250))
     , m_controller(controller)
 {
-    SetBackgroundColour(UIColors::Surface);
+    SetBackgroundColour(UIColors::Surface());
     SetBackgroundStyle(wxBG_STYLE_PAINT);
 
     Bind(wxEVT_PAINT,        &VideoCard::OnPaint,           this);
@@ -282,8 +282,13 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
     const double  W  = sz.GetWidth();
     const double  H  = sz.GetHeight();
 
+<<<<<<< HEAD
     // -- Card background --------------------------------------------------
     gc->SetBrush(wxBrush(UIColors::Surface));
+=======
+    // ── Card background ──────────────────────────────────────────────────
+    gc->SetBrush(wxBrush(UIColors::Surface()));
+>>>>>>> efc20814f9e995d8933c4888c5a8d80ccb25a7c4
     gc->SetPen(*wxTRANSPARENT_PEN);
     gc->DrawRoundedRectangle(0, 0, W, H, 10.0);
 
@@ -298,7 +303,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
                                            wxIMAGE_QUALITY_BILINEAR);
         gc->DrawBitmap(wxBitmap(scaled), 0, 0, W, thumbH);
     } else {
-        gc->SetBrush(wxBrush(UIColors::SurfaceRaised));
+        gc->SetBrush(wxBrush(UIColors::SurfaceRaised()));
         gc->SetPen(*wxTRANSPARENT_PEN);
         gc->DrawRectangle(0, 0, W, thumbH);
 
@@ -310,7 +315,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
         if (!label.IsEmpty()) {
             wxFont lf = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
             lf.SetPointSize(m_thumbFailed ? 26 : 11);
-            gc->SetFont(lf, UIColors::TextMuted);
+            gc->SetFont(lf, UIColors::TextMuted());
             double tw, th, td, tex;
             gc->GetTextExtent(label, &tw, &th, &td, &tex);
             gc->DrawText(label, (W - tw) / 2.0, (thumbH - th) / 2.0);
@@ -326,7 +331,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
         wxFont titleFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
         titleFont.SetPointSize(10);
         titleFont.SetWeight(wxFONTWEIGHT_SEMIBOLD);
-        gc->SetFont(titleFont, UIColors::TextPrimary);
+        gc->SetFont(titleFont, UIColors::TextPrimary());
         curY = DrawWrappedText(gc, m_title, 2, padX, curY, textW);
         curY += 4.0;
     }
@@ -359,7 +364,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
             gc->DrawBitmap(wxBitmap(scaled), padX, curY, logoSize, logoSize);
         } else {
             // Placeholder circle (shown while logo is loading)
-            gc->SetBrush(wxBrush(UIColors::SurfaceRaised));
+            gc->SetBrush(wxBrush(UIColors::SurfaceRaised()));
             gc->SetPen(*wxTRANSPARENT_PEN);
             gc->DrawEllipse(padX, curY, logoSize, logoSize);
         }
@@ -367,7 +372,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
         if (!chanLabel.IsEmpty()) {
             wxFont chanFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
             chanFont.SetPointSize(9);
-            gc->SetFont(chanFont, UIColors::TextSecondary);
+            gc->SetFont(chanFont, UIColors::TextSecondary());
 
             const double textX     = padX + logoSize + 5.0;
             const double chanTextW = W - textX - padX;
@@ -389,7 +394,7 @@ void VideoCard::OnPaint(wxPaintEvent& /*evt*/) {
     // -- Hover border -----------------------------------------------------
     if (m_hovered) {
         gc->SetBrush(*wxTRANSPARENT_BRUSH);
-        gc->SetPen(wxPen(UIColors::Accent, 3));
+        gc->SetPen(wxPen(UIColors::Accent(), 3));
         gc->DrawRoundedRectangle(1.5, 1.5, W - 3.0, H - 3.0, 14.0);
     }
 

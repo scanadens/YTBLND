@@ -22,7 +22,7 @@ ActiveBlendsPanel::ActiveBlendsPanel(wxWindow* parent,
     , m_controller(controller)
     , m_nav(std::move(nav))
 {
-    SetBackgroundColour(UIColors::Background);
+    SetBackgroundColour(UIColors::Background());
 
     auto* root = new wxBoxSizer(wxVERTICAL);
 
@@ -33,11 +33,11 @@ ActiveBlendsPanel::ActiveBlendsPanel(wxWindow* parent,
     m_listScroll = new wxScrolledWindow(this, wxID_ANY,
                                          wxDefaultPosition, wxDefaultSize,
                                          wxVSCROLL | wxBORDER_NONE);
-    m_listScroll->SetBackgroundColour(UIColors::Background);
+    m_listScroll->SetBackgroundColour(UIColors::Background());
     m_listScroll->SetScrollRate(0, 12);
 
     m_listInner = new wxPanel(m_listScroll, wxID_ANY);
-    m_listInner->SetBackgroundColour(UIColors::Background);
+    m_listInner->SetBackgroundColour(UIColors::Background());
     m_listSizer = new wxBoxSizer(wxVERTICAL);
     m_listInner->SetSizer(m_listSizer);
 
@@ -52,7 +52,7 @@ ActiveBlendsPanel::ActiveBlendsPanel(wxWindow* parent,
                                     "No active blends.",
                                     wxDefaultPosition, wxDefaultSize,
                                     wxALIGN_CENTER_HORIZONTAL);
-    m_emptyLabel->SetForegroundColour(UIColors::TextMuted);
+    m_emptyLabel->SetForegroundColour(UIColors::TextMuted());
     m_listSizer->Add(m_emptyLabel, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP, 24);
 
     SetSizer(root);
@@ -72,7 +72,7 @@ void ActiveBlendsPanel::RebuildList()
                                     "No active blends.",
                                     wxDefaultPosition, wxDefaultSize,
                                     wxALIGN_CENTER_HORIZONTAL);
-    m_emptyLabel->SetForegroundColour(UIColors::TextMuted);
+    m_emptyLabel->SetForegroundColour(UIColors::TextMuted());
 
     auto blends = m_controller.fetchUserBlends();
 
@@ -85,7 +85,7 @@ void ActiveBlendsPanel::RebuildList()
 
         for (const auto& blend : blends) {
             auto* row = new wxPanel(m_listInner, wxID_ANY);
-            row->SetBackgroundColour(UIColors::SurfaceRaised);
+            row->SetBackgroundColour(UIColors::SurfaceRaised());
             row->SetMinSize(wxSize(-1, 52));
 
             auto* rowSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -93,7 +93,7 @@ void ActiveBlendsPanel::RebuildList()
             // Blend title label
             auto* titleLabel = new wxStaticText(row, wxID_ANY,
                                                  wxString::FromUTF8(blend.title));
-            titleLabel->SetForegroundColour(UIColors::TextPrimary);
+            titleLabel->SetForegroundColour(UIColors::TextPrimary());
             wxFont f = titleLabel->GetFont();
             f.SetPointSize(12);
             f.SetWeight(wxFONTWEIGHT_BOLD);
@@ -102,14 +102,14 @@ void ActiveBlendsPanel::RebuildList()
             // Open button
             auto* openBtn = new wxButton(row, wxID_ANY, "Open");
             UIButtons::ApplySizeBounds(openBtn, ButtonType::Compact);
-            openBtn->SetBackgroundColour(UIColors::Accent);
-            openBtn->SetForegroundColour(UIColors::TextPrimary);
+            openBtn->SetBackgroundColour(UIColors::Accent());
+            openBtn->SetForegroundColour(UIColors::TextPrimary());
 
             // Leave button
             auto* leaveBtn = new wxButton(row, wxID_ANY, "Leave");
             UIButtons::ApplySizeBounds(leaveBtn, ButtonType::Compact);
-            leaveBtn->SetBackgroundColour(UIColors::Danger);
-            leaveBtn->SetForegroundColour(UIColors::TextPrimary);
+            leaveBtn->SetBackgroundColour(UIColors::Danger());
+            leaveBtn->SetForegroundColour(UIColors::TextPrimary());
 
             std::string capID = blend.blendID;
             std::string capTitle = blend.title;
