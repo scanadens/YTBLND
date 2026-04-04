@@ -17,7 +17,7 @@ BlendFeedPanel::BlendFeedPanel(wxWindow* parent, AppController& controller)
     , m_controller(controller)
     , m_offset(0)
 {
-    SetBackgroundColour(UIColors::Background);
+    SetBackgroundColour(UIColors::Background());
 
     // 2 rows × 3 cols, 16 px gaps in both directions
     wxGridSizer* grid = new wxGridSizer(2, 3, 16, 16);

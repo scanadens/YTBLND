@@ -21,7 +21,7 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
     , m_controller(controller)
     , m_nav(std::move(nav))
 {
-    SetBackgroundColour(UIColors::Background);
+    SetBackgroundColour(UIColors::Background());
 
     auto* outer = new wxBoxSizer(wxVERTICAL);
 
@@ -35,12 +35,12 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
         f.SetPointSize(22); f.SetWeight(wxFONTWEIGHT_BOLD);
         heading->SetFont(f);
     }
-    heading->SetForegroundColour(UIColors::TextPrimary);
+    heading->SetForegroundColour(UIColors::TextPrimary());
 
     auto* sub = new wxStaticText(this, wxID_ANY,
         "YTBLND needs your YouTube export data to create a blend.",
         wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
-    sub->SetForegroundColour(UIColors::TextSecondary);
+    sub->SetForegroundColour(UIColors::TextSecondary());
 
     outer->AddStretchSpacer(1);
     outer->Add(heading, 0, wxALIGN_CENTER | wxBOTTOM, 8);
@@ -48,7 +48,7 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
 
     // ── Steps card ────────────────────────────────────────────────────────────
     auto* card = new wxPanel(this, wxID_ANY);
-    card->SetBackgroundColour(UIColors::Surface);
+    card->SetBackgroundColour(UIColors::Surface());
     card->SetMinSize(wxSize(520, -1));
     auto* cardSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -62,19 +62,19 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
         "5.  Click \"Browse for Data File...\" below and select that file";
 
     auto* stepsLabel = new wxStaticText(card, wxID_ANY, steps);
-    stepsLabel->SetForegroundColour(UIColors::TextPrimary);
+    stepsLabel->SetForegroundColour(UIColors::TextPrimary());
     {
         wxFont f = stepsLabel->GetFont(); f.SetPointSize(11);
         stepsLabel->SetFont(f);
     }
 
     auto* div = new wxStaticLine(card, wxID_ANY);
-    div->SetBackgroundColour(UIColors::Separator);
+    div->SetBackgroundColour(UIColors::Separator());
 
     auto* browseBtn = new wxButton(card, wxID_ANY, "Browse for Data File...");
     UIButtons::ApplySizeBounds(browseBtn, ButtonType::FullWidthPrimary);
-    browseBtn->SetBackgroundColour(UIColors::Accent);
-    browseBtn->SetForegroundColour(UIColors::TextPrimary);
+    browseBtn->SetBackgroundColour(UIColors::Accent());
+    browseBtn->SetForegroundColour(UIColors::TextPrimary());
 
     cardSizer->Add(stepsLabel, 0, wxALL, 24);
     cardSizer->Add(div,        0, wxEXPAND | wxLEFT | wxRIGHT, 0);
