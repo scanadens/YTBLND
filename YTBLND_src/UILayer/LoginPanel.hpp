@@ -89,6 +89,9 @@ private:
     void OnRegister(wxCommandEvent&);
     void OnPaint   (wxPaintEvent&);
 
+    /// Loads the background image matching the current theme.
+    void LoadThemedBackground();
+
     // After a successful login, decide which page comes next.
     void ProceedAfterLogin();
 };

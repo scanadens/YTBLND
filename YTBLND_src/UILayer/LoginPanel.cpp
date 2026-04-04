@@ -26,8 +26,8 @@ static wxTextCtrl* MakeField(wxWindow* parent,
     auto* ctrl = new wxTextCtrl(parent, wxID_ANY, "", wxDefaultPosition,
                                 wxSize(-1, 36), style);
     ctrl->SetHint(hint);
-    ctrl->SetBackgroundColour(UIColors::SurfaceRaised);
-    ctrl->SetForegroundColour(UIColors::TextPrimary);
+    ctrl->SetBackgroundColour(UIColors::SurfaceRaised());
+    ctrl->SetForegroundColour(UIColors::TextPrimary());
     return ctrl;
 }
 
@@ -36,7 +36,7 @@ static wxStaticText* MakeError(wxWindow* parent)
     auto* lbl = new wxStaticText(parent, wxID_ANY, "",
                                  wxDefaultPosition, wxDefaultSize,
                                  wxALIGN_CENTER_HORIZONTAL);
-    lbl->SetForegroundColour(UIColors::Danger);
+    lbl->SetForegroundColour(UIColors::Danger());
     lbl->Hide();
     return lbl;
 }
@@ -64,12 +64,12 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     tf.SetPointSize(42);
     tf.SetWeight(wxFONTWEIGHT_BOLD);
     titleLabel->SetFont(tf);
-    titleLabel->SetForegroundColour(UIColors::Accent);
+    titleLabel->SetForegroundColour(UIColors::Accent());
 
     auto* subtitle = new wxStaticText(this, wxID_ANY, "Your blend, your music.",
                                       wxDefaultPosition, wxDefaultSize,
                                       wxALIGN_CENTRE_HORIZONTAL);
-    subtitle->SetForegroundColour(UIColors::TextSecondary);
+    subtitle->SetForegroundColour(UIColors::TextSecondary());
 
     outer->AddStretchSpacer(2);
     outer->Add(titleLabel, 0, wxALIGN_CENTER | wxBOTTOM, 4);
@@ -77,7 +77,7 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
 
     // ── Form card ─────────────────────────────────────────────────────────────
     auto* card = new wxPanel(this, wxID_ANY);
-    card->SetBackgroundColour(UIColors::Surface);
+    card->SetBackgroundColour(UIColors::Surface());
     card->SetMinSize(wxSize(400, -1));
     auto* cardSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -89,8 +89,8 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
                                   wxDefaultPosition, wxDefaultSize);
     for (auto* btn : {m_signinTab, m_registerTab}) {
         UIButtons::ApplySizeBounds(btn, ButtonType::FormTab);
-        btn->SetBackgroundColour(UIColors::SurfaceRaised);
-        btn->SetForegroundColour(UIColors::TextSecondary);
+        btn->SetBackgroundColour(UIColors::SurfaceRaised());
+        btn->SetForegroundColour(UIColors::TextSecondary());
     }
     tabRow->Add(m_signinTab,   1, wxEXPAND);
     tabRow->Add(m_registerTab, 1, wxEXPAND);
@@ -98,17 +98,17 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
 
     // Divider below tabs
     auto* div = new wxStaticLine(card, wxID_ANY);
-    div->SetBackgroundColour(UIColors::Separator);
+    div->SetBackgroundColour(UIColors::Separator());
     cardSizer->Add(div, 0, wxEXPAND);
 
     // Form pages
     m_formBook = new wxSimplebook(card, wxID_ANY);
-    m_formBook->SetBackgroundColour(UIColors::Surface);
+    m_formBook->SetBackgroundColour(UIColors::Surface());
 
     // Page 0: Sign In
     {
         auto* page  = new wxPanel(m_formBook, wxID_ANY);
-        page->SetBackgroundColour(UIColors::Surface);
+        page->SetBackgroundColour(UIColors::Surface());
         auto* sz = new wxBoxSizer(wxVERTICAL);
         BuildSignInForm(page, sz);
         page->SetSizer(sz);
@@ -118,7 +118,7 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     // Page 1: Register
     {
         auto* page  = new wxPanel(m_formBook, wxID_ANY);
-        page->SetBackgroundColour(UIColors::Surface);
+        page->SetBackgroundColour(UIColors::Surface());
         auto* sz = new wxBoxSizer(wxVERTICAL);
         BuildRegisterForm(page, sz);
         page->SetSizer(sz);
@@ -143,6 +143,11 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     m_registerTab->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ ShowTab(1); });
 
     ShowTab(0);  // start on Sign In
+
+    // Load the themed background and re-load on theme switch
+    LoadThemedBackground();
+    m_controller.getEventRouter().registerListener("theme_bg_login",
+        [this](const EventPayload&) { LoadThemedBackground(); Refresh(); });
 }
 
 // ── Form builders ─────────────────────────────────────────────────────────────
@@ -156,8 +161,8 @@ void LoginPanel::BuildSignInForm(wxWindow* parent, wxSizer* sizer)
     auto* btn = new wxButton(parent, wxID_ANY, "Sign In",
                               wxDefaultPosition, wxDefaultSize);
     UIButtons::ApplySizeBounds(btn, ButtonType::FormSubmit);
-    btn->SetBackgroundColour(UIColors::Accent);
-    btn->SetForegroundColour(UIColors::TextPrimary);
+    btn->SetBackgroundColour(UIColors::Accent());
+    btn->SetForegroundColour(UIColors::TextPrimary());
 
     sizer->Add(m_siUsername, 0, wxEXPAND | wxCENTRE | wxALL, 8);
     sizer->Add(m_siPassword, 0, wxEXPAND | wxCENTRE | wxALL, 8);
@@ -181,8 +186,8 @@ void LoginPanel::BuildRegisterForm(wxWindow* parent, wxSizer* sizer)
     auto* btn = new wxButton(parent, wxID_ANY, "Create Account",
                               wxDefaultPosition, wxDefaultSize);
     UIButtons::ApplySizeBounds(btn, ButtonType::FormSubmit);
-    btn->SetBackgroundColour(UIColors::Accent);
-    btn->SetForegroundColour(UIColors::TextPrimary);
+    btn->SetBackgroundColour(UIColors::Accent());
+    btn->SetForegroundColour(UIColors::TextPrimary());
 
     sizer->Add(m_regUsername, 0, wxEXPAND | wxALL, 8);
     sizer->Add(m_regEmail,    0, wxEXPAND | wxALL, 8);
@@ -202,12 +207,12 @@ void LoginPanel::ShowTab(int index)
 
     // Active tab: accent colour; inactive: muted
     auto styleActive = [](wxButton* btn) {
-        btn->SetBackgroundColour(UIColors::Accent);
-        btn->SetForegroundColour(UIColors::TextPrimary);
+        btn->SetBackgroundColour(UIColors::Accent());
+        btn->SetForegroundColour(UIColors::TextPrimary());
     };
     auto styleInactive = [](wxButton* btn) {
-        btn->SetBackgroundColour(UIColors::SurfaceRaised);
-        btn->SetForegroundColour(UIColors::TextSecondary);
+        btn->SetBackgroundColour(UIColors::SurfaceRaised());
+        btn->SetForegroundColour(UIColors::TextSecondary());
     };
 
     if (index == 0) { styleActive(m_signinTab);   styleInactive(m_registerTab); }
@@ -346,6 +351,37 @@ void LoginPanel::Reset()
     ShowTab(0);
 }
 
+// ── Themed background ────────────────────────────────────────────────────────
+
+void LoginPanel::LoadThemedBackground() {
+    // Map theme name to background image filename
+    wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
+    wxString imageFile;
+
+    if (themeName == "Light Mode")
+        imageFile = "checkered_wave_background.jpg";
+    else if (themeName == "Neon Mode")
+        imageFile = "purple_neon_synth.jpg";
+    else
+        imageFile = "dark_purple_stripes.jpg";
+
+    // Try to find the file
+    for (const auto& candidate : wxArrayString{
+             "YTBLND_src/resources/" + imageFile,
+             "resources/" + imageFile,
+             "../resources/" + imageFile}) {
+        if (wxFileExists(candidate)) {
+            wxImage img(candidate, wxBITMAP_TYPE_JPEG);
+            if (img.IsOk()) {
+                m_bgImage = img;
+                return;
+            }
+        }
+    }
+    // If not found, clear so OnPaint falls back to solid color
+    m_bgImage = wxNullImage;
+}
+
 // ── Background painting ───────────────────────────────────────────────────────
 
 void LoginPanel::OnPaint(wxPaintEvent&)
@@ -359,6 +395,6 @@ void LoginPanel::OnPaint(wxPaintEvent&)
             return;
         }
     }
-    dc.SetBackground(wxBrush(UIColors::Background));
+    dc.SetBackground(wxBrush(UIColors::Background()));
     dc.Clear();
 }
