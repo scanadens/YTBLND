@@ -5,6 +5,7 @@
  */
 
 #include "UIColors.hpp"
+#include "TopBar.hpp"
 #include <fstream>
 #include <string>
 #include <algorithm>
@@ -164,7 +165,12 @@ void UIColors::UpdateUI(wxWindow* win) {
     }
 
     win->Refresh();
-    win->Update(); 
+    win->Update();
+
+    // If this window is a TopBar, reload its back icon for the new theme
+    if (auto* topBar = dynamic_cast<TopBar*>(win)) {
+        topBar->ReloadBackIcon();
+    }
 
     // Recurse through children
     for (auto* child : win->GetChildren()) {
