@@ -1,3 +1,11 @@
+/**
+ * \file MainFrame.cpp
+ * \brief Logic for root application window containing the full-window page switcher.
+ * \author Jasmine Kumar
+ * \author Shamar Pennant
+ * \author Xavier Lusetti
+ *
+ */
 #include "MainFrame.hpp"
 #include <wx/wx.h>
 #include <wx/simplebook.h>
@@ -97,6 +105,9 @@ MainFrame::MainFrame(AppController& controller)
     refreshBtn(nullptr),
     refreshInProgress(false)
 {
+    // Resolve the path to the theme.txt containing the UI colour themes
+    UIColors::LoadThemesFromFile(ResolveResourcePath("theme.txt"));
+
     // resolve the path to the background image and load it as a wxImage
     const wxString bgPath = ResolveResourcePath("checkered_wave_background.jpg");
     if (bgPath.empty() || !LoadImage(BG_MAIN, bgPath)) {
@@ -105,7 +116,7 @@ MainFrame::MainFrame(AppController& controller)
     
     // create the outer container panel with the app background colour
     auto* bgPanel = new wxPanel(this);
-    bgPanel->SetBackgroundColour(UIColors::Background);
+    bgPanel->SetBackgroundColour(UIColors::Background());
     
     // placing our new background panel in the book
     book = new wxSimplebook(bgPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
@@ -119,7 +130,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(loginPanel, "Login");
 
     auto* dataPageBg = new wxPanel(book);
-    dataPageBg->SetBackgroundColour(UIColors::Background);
+    dataPageBg->SetBackgroundColour(UIColors::Background());
     dataInstrPanel = new DataInstructionsPanel(dataPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -129,7 +140,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(dataPageBg, "DataInstructions");
 
     auto* creationPageBg = new wxPanel(book);
-    creationPageBg->SetBackgroundColour(UIColors::Background);
+    creationPageBg->SetBackgroundColour(UIColors::Background());
     creationPanel = new BlendCreationPanel(creationPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -139,7 +150,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(creationPageBg, "BlendCreation");
 
     auto* homePageBg = new wxPanel(book);
-    homePageBg->SetBackgroundColour(UIColors::Background);
+    homePageBg->SetBackgroundColour(UIColors::Background());
     feedPanel = new BlendFeedPanel(homePageBg, controller);
     {
         auto* homePage = BuildHomePage(homePageBg);
@@ -150,7 +161,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(homePageBg, "Home");
 
     auto* userPageBg = new wxPanel(book);
-    userPageBg->SetBackgroundColour(UIColors::Background);
+    userPageBg->SetBackgroundColour(UIColors::Background());
     userPanel = new UserPanel(userPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -160,7 +171,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(userPageBg, "User");
 
     auto* settingsPageBg = new wxPanel(book);
-    settingsPageBg->SetBackgroundColour(UIColors::Background);
+    settingsPageBg->SetBackgroundColour(UIColors::Background());
     settingsPanel = new SettingsPanel(settingsPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -170,7 +181,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(settingsPageBg, "Settings");
 
     auto* chatPageBg = new wxPanel(book);
-    chatPageBg->SetBackgroundColour(UIColors::Background);
+    chatPageBg->SetBackgroundColour(UIColors::Background());
     chatPanel = new BlendChatPanel(chatPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -180,7 +191,7 @@ MainFrame::MainFrame(AppController& controller)
     book->AddPage(chatPageBg, "BlendChat");
 
     auto* activeBlendsPageBg = new wxPanel(book);
-    activeBlendsPageBg->SetBackgroundColour(UIColors::Background);
+    activeBlendsPageBg->SetBackgroundColour(UIColors::Background());
     activeBlendsPanel = new ActiveBlendsPanel(activeBlendsPageBg, controller, nav);
     {
         auto* s = new wxBoxSizer(wxVERTICAL);
@@ -199,18 +210,13 @@ MainFrame::MainFrame(AppController& controller)
     frameSizer->Add(bgPanel, 1, wxEXPAND);
     SetSizer(frameSizer);
 
-    // ── Theme-change listener ──────────────────────────────────────────────────
-    controller.getEventRouter().registerListener("theme_updated",
-        [this](const EventPayload& payload) {
-            auto it = payload.find("old_theme_index");
-            if (it == payload.end()) return;
-
-            int oldIdx = std::stoi(it->second);
-            const Palette* palettes[] = { &UIColors::DarkMode, &UIColors::LightMode, &UIColors::NeonMode };
-            if (oldIdx < 0 || oldIdx > 2) return;
-
-            RecolorAll(*palettes[oldIdx]);
-        });
+    // Theme change listener
+        controller.getEventRouter().registerListener("theme_updated",
+            [this, &controller](const EventPayload& /*payload*/) {
+                UIColors::UpdateUI(this);
+                ReloadThemedIcons();
+                controller.getEventRouter().dispatch("theme_bg_login", {});
+            });
 
     Maximize(true);
     book->SetSelection(static_cast<int>(Page::HOME));
@@ -270,151 +276,138 @@ void MainFrame::TriggerFeedRefresh() {
     refreshInProgress = false;
 }
 
+// ── Icon helpers ─────────────────────────────────────────────────────────────
+
+static wxBitmap LoadThemedIcon(const wxString& name, int size = 24) {
+    wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
+    wxString folder = themeName.BeforeFirst(' ').Lower();
+    wxString path = ResolveResourcePath("icons/" + folder + "/" + name + ".png");
+    if (!path.empty()) {
+        wxImage img(path, wxBITMAP_TYPE_PNG);
+        if (img.IsOk()) {
+            img.Rescale(size, size, wxIMAGE_QUALITY_BILINEAR);
+            return wxBitmap(img);
+        }
+    }
+    return wxNullBitmap;
+}
+
+enum class IconBase { Surface, Background };
+
+static wxButton* MakeIconButton(wxWindow* parent, const wxString& iconName,
+                                 IconBase base, int iconSize = 24) {
+    wxColour initBg = (base == IconBase::Surface) ? UIColors::Surface() : UIColors::Background();
+    auto* btn = new wxButton(parent, wxID_ANY, wxEmptyString,
+                              wxDefaultPosition, wxSize(iconSize + 16, iconSize + 12),
+                              wxBORDER_NONE);
+    btn->SetBackgroundColour(initBg);
+    wxBitmap bmp = LoadThemedIcon(iconName, iconSize);
+    if (bmp.IsOk()) btn->SetBitmap(bmp);
+
+    // Look up the CURRENT palette color on each hover/leave so it stays
+    // correct after theme switches
+    btn->Bind(wxEVT_ENTER_WINDOW, [btn](wxMouseEvent& e) {
+        btn->SetBackgroundColour(UIColors::SurfaceRaised());
+        btn->Refresh(); e.Skip();
+    });
+    btn->Bind(wxEVT_LEAVE_WINDOW, [btn, base](wxMouseEvent& e) {
+        btn->SetBackgroundColour(
+            (base == IconBase::Surface) ? UIColors::Surface() : UIColors::Background());
+        btn->Refresh(); e.Skip();
+    });
+    return btn;
+}
+
 // ── Build Home Page ──────────────────────────────────────────────────────────
 wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     auto* page = new wxPanel(parent, wxID_ANY);
-
     auto* vbox = new wxBoxSizer(wxVERTICAL);
 
-    auto* topBar = new wxPanel(page, wxID_ANY);
-    auto* hbox = new wxBoxSizer(wxHORIZONTAL);
+    // ── Row 1: Top ribbon (Surface bg, left-aligned: settings + user icons) ──
+    auto* ribbon = new wxPanel(page, wxID_ANY);
+    ribbon->SetBackgroundColour(UIColors::Surface());
+    ribbon->SetMinSize(wxSize(-1, 32));
+    auto* ribbonSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    auto makeBtn = [&](wxPanel* parent, const wxString& label) {
-        auto* btn = new wxButton(parent, wxID_ANY, label);
-        UIButtons::ApplySizeBounds(btn, ButtonType::Nav);
-        btn->SetBackgroundColour(UIColors::SurfaceRaised);
-        btn->SetForegroundColour(UIColors::TextPrimary);
-        return btn;
-    };
-
-    auto* settingsBtn    = makeBtn(topBar, "Settings");
-    auto* userBtn        = makeBtn(topBar, "User");
-    auto* activeBlendsBtn = makeBtn(topBar, "My Blends");
-    auto* chatBtn        = makeBtn(topBar, "Chat");
-    auto* newBlendBtn    = makeBtn(topBar, "New Blend");
+    settingsIconBtn = MakeIconButton(ribbon, "settings", IconBase::Surface);
+    userIconBtn     = MakeIconButton(ribbon, "user",     IconBase::Surface);
+    auto* settingsBtn = settingsIconBtn;
+    auto* userBtn     = userIconBtn;
 
     settingsBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::SETTINGS); });
     userBtn    ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::USER); });
-    activeBlendsBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::ACTIVE_BLENDS); });
-    chatBtn    ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){
+
+    ribbonSizer->Add(settingsBtn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 8);
+    ribbonSizer->Add(userBtn,     0, wxALIGN_CENTER_VERTICAL | wxLEFT, 4);
+    ribbonSizer->AddStretchSpacer(1);
+    ribbon->SetSizer(ribbonSizer);
+
+    // ── Row 2: Title row (YTBLND centered-left, blends + chat icons right) ───
+    auto* titlePanel = new wxPanel(page, wxID_ANY);
+    auto* titleBox = new wxBoxSizer(wxHORIZONTAL);
+
+    auto* titleLabel = new wxStaticText(titlePanel, wxID_ANY, "YTBLND");
+    wxFont titleFont = titleLabel->GetFont();
+    titleFont.SetPointSize(38);
+    titleFont.SetWeight(wxFONTWEIGHT_BOLD);
+    titleLabel->SetFont(titleFont);
+    titleLabel->SetForegroundColour(UIColors::Accent());
+
+    blendsIconBtn = MakeIconButton(titlePanel, "blends", IconBase::Background, 32);
+    chatIconBtn   = MakeIconButton(titlePanel, "chat",   IconBase::Background, 32);
+    auto* blendsBtn = blendsIconBtn;
+    auto* chatBtn   = chatIconBtn;
+
+    blendsBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::ACTIVE_BLENDS); });
+    chatBtn  ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){
         if (AppState::getInstance().getActiveBlend() != nullptr)
             NavigateTo(Page::BLEND_CHAT);
         else
             NavigateTo(Page::BLEND_CREATION);
     });
-    newBlendBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::BLEND_CREATION); });
 
-    hbox->Add(settingsBtn, 1, wxALL|wxEXPAND, 8);
-    hbox->AddStretchSpacer(1);
-    hbox->Add(userBtn, 1, wxALL|wxEXPAND, 8);
-    hbox->Add(activeBlendsBtn, 1, wxALL|wxEXPAND, 8);
-    hbox->Add(chatBtn, 1, wxALL|wxEXPAND, 8);
-    hbox->Add(newBlendBtn, 1, wxALL|wxEXPAND, 8);
-    topBar->SetSizer(hbox);
-
-    auto* titlePanel = new wxPanel(page, wxID_ANY);
-    auto* titleBox = new wxBoxSizer(wxHORIZONTAL);
-    auto* titleLabel = new wxStaticText(titlePanel, wxID_ANY, "YTBLND");
-    wxFont titleFont = titleLabel->GetFont();
-    titleFont.SetPointSize(32);
-    titleFont.SetWeight(wxFONTWEIGHT_BOLD);
-    titleLabel->SetFont(titleFont);
-    titleLabel->SetForegroundColour(UIColors::Accent);
     titleBox->AddStretchSpacer(1);
-    titleBox->Add(titleLabel, 0, wxALL|wxALIGN_CENTER_VERTICAL, 12);
+    titleBox->Add(titleLabel, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 24);
     titleBox->AddStretchSpacer(1);
+    titleBox->Add(blendsBtn, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 12);
+    titleBox->Add(chatBtn,   0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 20);
     titlePanel->SetSizer(titleBox);
 
+    // ── Feed grid (unchanged) ────────────────────────────────────────────────
     feedPanel->Reparent(page);
 
+    // ── Refresh icon (centered, no text, no container) ───────────────────────
     auto* refreshPanel = new wxPanel(page, wxID_ANY);
     auto* rbox = new wxBoxSizer(wxHORIZONTAL);
-    // Store this button on MainFrame so TriggerFeedRefresh can disable/enable it.
-    refreshBtn = new wxButton(refreshPanel, wxID_ANY, "Refresh");
-    UIButtons::ApplySizeBounds(refreshBtn, ButtonType::Nav);
-    const wxString refreshPath = ResolveResourcePath("refresh.png");
-    if (!refreshPath.empty()) {
-        wxBitmap refreshBmp(refreshPath, wxBITMAP_TYPE_PNG);
-        if (refreshBmp.IsOk()) {
-            refreshBmp = wxBitmap(refreshBmp.ConvertToImage().Rescale(18, 18));
-            refreshBtn->SetBitmap(refreshBmp);
-        }
-    } else {
-        wxLogWarning("Refresh icon not found; using text-only button.");
-    }
+    refreshBtn = MakeIconButton(refreshPanel, "refresh", IconBase::Background, 40);
     refreshBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ TriggerFeedRefresh(); });
     rbox->AddStretchSpacer(1);
-    rbox->Add(refreshBtn, 0, wxALL, 12);
+    rbox->Add(refreshBtn, 0, wxALL, 8);
     rbox->AddStretchSpacer(1);
     refreshPanel->SetSizer(rbox);
 
-    vbox->Add(topBar, 0, wxEXPAND);
+    vbox->Add(ribbon, 0, wxEXPAND);
     vbox->Add(titlePanel, 0, wxEXPAND);
     vbox->Add(feedPanel, 1, wxEXPAND | wxALL, 16);
     vbox->Add(refreshPanel, 0, wxEXPAND);
+    vbox->AddSpacer(16);
     page->SetSizer(vbox);
 
     return page;
 }
 
-// ── Theme recoloring ─────────────────────────────────────────────────────────
-
-void MainFrame::RecolorAll(const Palette& oldPalette)
-{
-    RecolorWidget(this, oldPalette);
-    Refresh();
-    Update();
-}
-
-void MainFrame::RecolorWidget(wxWindow* w, const Palette& oldPalette)
-{
-    if (!w) return;
-
-    // Map old palette bg colours to new palette equivalents
-    struct ColourMapping {
-        wxColour old_col;
-        wxColour new_col;
+void MainFrame::ReloadThemedIcons() {
+    auto reload = [](wxButton* btn, const wxString& name, int size) {
+        if (!btn) return;
+        wxBitmap bmp = LoadThemedIcon(name, size);
+        if (bmp.IsOk()) btn->SetBitmap(bmp);
+        btn->Refresh();
     };
-
-    const Palette& np = *UIColors::Current;
-    const ColourMapping bgMap[] = {
-        { oldPalette.Background,    np.Background },
-        { oldPalette.Surface,       np.Surface },
-        { oldPalette.SurfaceRaised, np.SurfaceRaised },
-        { oldPalette.Accent,        np.Accent },
-        { oldPalette.AccentHover,   np.AccentHover },
-        { oldPalette.Danger,        np.Danger },
-        { oldPalette.Separator,     np.Separator },
-    };
-
-    const ColourMapping fgMap[] = {
-        { oldPalette.TextPrimary,   np.TextPrimary },
-        { oldPalette.TextSecondary, np.TextSecondary },
-        { oldPalette.TextMuted,     np.TextMuted },
-        { oldPalette.Accent,        np.Accent },
-        { oldPalette.Danger,        np.Danger },
-    };
-
-    wxColour bg = w->GetBackgroundColour();
-    for (const auto& m : bgMap) {
-        if (bg == m.old_col) {
-            w->SetBackgroundColour(m.new_col);
-            break;
-        }
-    }
-
-    wxColour fg = w->GetForegroundColour();
-    for (const auto& m : fgMap) {
-        if (fg == m.old_col) {
-            w->SetForegroundColour(m.new_col);
-            break;
-        }
-    }
-
-    // Recurse into children
-    for (wxWindow* child : w->GetChildren()) {
-        RecolorWidget(child, oldPalette);
-    }
+    reload(settingsIconBtn, "settings", 24);
+    reload(userIconBtn,     "user",     24);
+    reload(blendsIconBtn,   "blends",   32);
+    reload(chatIconBtn,     "chat",     32);
+    reload(refreshBtn,      "refresh",  40);
 }
 
 bool MainFrame::LoadImage(int key, const wxString& path)
