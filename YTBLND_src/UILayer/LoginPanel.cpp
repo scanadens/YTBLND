@@ -1,5 +1,12 @@
+/**
+ * \file LoginPanel.cpp
+ * \brief Implementation for LoginPanel.
+ * \author Jasmine Kumar
+ * \author Shamar Pennant
+ */
+
 // ============================================================================
-// LoginPanel.cpp — Sign In / Register screen implementation
+// LoginPanel.cpp - Sign In / Register screen implementation
 // ============================================================================
 
 #include "LoginPanel.hpp"
@@ -10,13 +17,13 @@
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
-#include "UploadProgressDialog.hpp"
+#include "OperationProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
 #include "../ModelLayer/User.hpp"
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 static wxTextCtrl* MakeField(wxWindow* parent,
                               const wxString& hint,
@@ -41,7 +48,7 @@ static wxStaticText* MakeError(wxWindow* parent)
     return lbl;
 }
 
-// ── Construction ──────────────────────────────────────────────────────────────
+// -- Construction --------------------------------------------------------------
 
 LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn nav,
                        const wxImage& bgImage)
@@ -53,10 +60,10 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     SetBackgroundStyle(wxBG_STYLE_PAINT);
     Bind(wxEVT_PAINT, &LoginPanel::OnPaint, this);
 
-    // ── Outer centering sizer ─────────────────────────────────────────────────
+    // -- Outer centering sizer -------------------------------------------------
     auto* outer = new wxBoxSizer(wxVERTICAL);
 
-    // ── YTBLND title ──────────────────────────────────────────────────────────
+    // -- YTBLND title ----------------------------------------------------------
     auto* titleLabel = new wxStaticText(this, wxID_ANY, "YTBLND",
                                         wxDefaultPosition, wxDefaultSize,
                                         wxALIGN_CENTRE_HORIZONTAL);
@@ -75,7 +82,7 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     outer->Add(titleLabel, 0, wxALIGN_CENTER | wxBOTTOM, 4);
     outer->Add(subtitle,   0, wxALIGN_CENTER | wxBOTTOM, 32);
 
-    // ── Form card ─────────────────────────────────────────────────────────────
+    // -- Form card -------------------------------------------------------------
     auto* card = new wxPanel(this, wxID_ANY);
     card->SetBackgroundColour(UIColors::Surface);
     card->SetMinSize(wxSize(400, -1));
@@ -138,14 +145,14 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     outer->AddStretchSpacer(3);
     SetSizer(outer);
 
-    // ── Tab bindings ──────────────────────────────────────────────────────────
+    // -- Tab bindings ----------------------------------------------------------
     m_signinTab  ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ ShowTab(0); });
     m_registerTab->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ ShowTab(1); });
 
     ShowTab(0);  // start on Sign In
 }
 
-// ── Form builders ─────────────────────────────────────────────────────────────
+// -- Form builders -------------------------------------------------------------
 
 void LoginPanel::BuildSignInForm(wxWindow* parent, wxSizer* sizer)
 {
@@ -194,7 +201,7 @@ void LoginPanel::BuildRegisterForm(wxWindow* parent, wxSizer* sizer)
     btn->Bind(wxEVT_BUTTON, &LoginPanel::OnRegister, this);
 }
 
-// ── Tab switcher ──────────────────────────────────────────────────────────────
+// -- Tab switcher --------------------------------------------------------------
 
 void LoginPanel::ShowTab(int index)
 {
@@ -218,7 +225,7 @@ void LoginPanel::ShowTab(int index)
     Layout();
 }
 
-// ── Event handlers ────────────────────────────────────────────────────────────
+// -- Event handlers ------------------------------------------------------------
 
 void LoginPanel::OnSignIn(wxCommandEvent& /*evt*/)
 {
@@ -233,7 +240,7 @@ void LoginPanel::OnSignIn(wxCommandEvent& /*evt*/)
         return;
     }
 
-    UploadProgressDialog progress(this, "Signing In");
+    OperationProgressDialog progress(this, "Signing In");
     progress.ShowModal();
     progress.UpdateProgress(0.02, "Preparing login...");
 
@@ -241,7 +248,7 @@ void LoginPanel::OnSignIn(wxCommandEvent& /*evt*/)
         progress.UpdateProgress(ratio, wxString::FromUTF8(message));
     });
 
-    // Dispatch uses userID — username IS the userID in this app
+    // Dispatch uses userID - username IS the userID in this app
     m_controller.getEventRouter().dispatch("login",
         {{"userID", username}, {"password", password}});
     m_controller.clearProgressReporter();
@@ -298,7 +305,7 @@ void LoginPanel::OnRegister(wxCommandEvent& /*evt*/)
     ProceedAfterLogin();
 }
 
-// ── Post-login routing ────────────────────────────────────────────────────────
+// -- Post-login routing --------------------------------------------------------
 
 void LoginPanel::ProceedAfterLogin()
 {
@@ -322,11 +329,11 @@ void LoginPanel::ProceedAfterLogin()
         return;
     }
 
-    // Has data but no blend yet — let them create one
+    // Has data but no blend yet - let them create one
     m_nav(Page::BLEND_CREATION);
 }
 
-// ── Reset ─────────────────────────────────────────────────────────────────────
+// -- Reset ---------------------------------------------------------------------
 
 void LoginPanel::Refresh()
 {
@@ -346,7 +353,7 @@ void LoginPanel::Reset()
     ShowTab(0);
 }
 
-// ── Background painting ───────────────────────────────────────────────────────
+// -- Background painting -------------------------------------------------------
 
 void LoginPanel::OnPaint(wxPaintEvent&)
 {

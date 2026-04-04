@@ -15,11 +15,15 @@
  * and structure as defined in the route_layer/
  */
 
+/**
+ * \class HttpClient
+ * \brief HttpClient class declaration.
+ */
 class HttpClient {
 	public:
-		// Constant for posting to eleminate typinig errors
+		// Constant for posting to eliminate typing errors
 		const std::string P = "POST";
-		// Constant for getting to eleminate typing errors
+		// Constant for getting to eliminate typing errors
 		const std::string G = "GET";
 		// Constant for deleting to eliminate typing errors
 		const std::string D = "DELETE";
@@ -42,7 +46,7 @@ class HttpClient {
 		const int SUCC = 200; // success
 		const int ALT_SUCC = 201; // alt success
 		const int MAL_REQ_ERR = 400; // malformed request error
-		const int INV_USR_LOG_ERR = 401; // invalid login creditionals
+		const int INV_USR_LOG_ERR = 401; // invalid login credentials
 		const int UNAUTH_RES_REQ_ERR = 403; // user not authorized for request resource
 		const int MISS_RM_CNTXT = 404; // missing user or blend room context
 		const int DUPLICATE = 409; // duplicate entry

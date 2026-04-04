@@ -13,7 +13,14 @@
  * Converts list<Dict<str,str>> structured data into format-specific string
  * representation (e.g., CSV, HTML, JSON). Subclasses implement format-specific
  * formatting logic for different file types.
- *//// Abstract interface for formatting structured data to file format.class FileFormatter {
+ * Abstract interface for formatting structured data to file format.
+ */
+
+/**
+ * \class FileFormatter
+ * \brief FileFormatter class declaration.
+ */
+class FileFormatter {
 	public:
 		/** Virtual destructor for proper cleanup in derived classes. */
 		virtual ~FileFormatter() = default;

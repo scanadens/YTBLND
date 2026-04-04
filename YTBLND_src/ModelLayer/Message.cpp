@@ -1,3 +1,9 @@
+/**
+ * \file Message.cpp
+ * \brief Implementation for Message.
+ * \author Jasmine Kumar
+ */
+
 #include "Message.hpp"
 #include "JsonUtils.hpp"
 

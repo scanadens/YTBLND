@@ -1,13 +1,13 @@
 /**
  * \file UIPages.hpp
  * \brief Page enum and NavigateFn callback type for the MainFrame page switcher.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
  *
  * Defines every top-level page hosted in the MainFrame wxSimplebook and the
  * NavigateFn callback type passed to sub-panels for page switching.
  *
  * Pages must be added to the wxSimplebook in the same order as the Page enum
- * values (0, 1, 2, …).  Sub-panels call \c m_nav(Page::TARGET) to navigate
+ * values (0, 1, 2, ...).  Sub-panels call \c m_nav(Page::TARGET) to navigate
  * without depending on MainFrame directly.
  *
  * ### Adding a new page
@@ -30,9 +30,9 @@ enum class Page {
     LOGIN             = 0,  ///< Sign-in / register screen.
     DATA_INSTRUCTIONS = 1,  ///< Shown after login when the user has no YouTube data.
     BLEND_CREATION    = 2,  ///< Add participants and create a new blend.
-    HOME              = 3,  ///< Blend feed (3×2 grid + refresh).
+    HOME              = 3,  ///< Blend feed (3x2 grid + refresh).
     USER              = 4,  ///< Account info and logout.
-    SETTINGS          = 5,  ///< Settings (stub — back button only).
+    SETTINGS          = 5,  ///< Settings (stub - back button only).
     BLEND_CHAT        = 6,  ///< Chat tied to the active blend.
     ACTIVE_BLENDS     = 7   ///< List of blends the user participates in.
 };

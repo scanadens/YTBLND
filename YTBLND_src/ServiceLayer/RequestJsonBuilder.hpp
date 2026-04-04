@@ -1,3 +1,9 @@
+/**
+ * \file RequestJsonBuilder.hpp
+ * \brief JSON request body builders used by ServiceLayer HTTP calls.
+ * \author Shamar Pennant
+ */
+
 #pragma once
 
 #include "../ModelLayer/Video.hpp"

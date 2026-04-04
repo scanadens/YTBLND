@@ -1,3 +1,9 @@
+/**
+ * \file VideoEntry.cpp
+ * \brief Implementation for VideoEntry.
+ * \author Jasmine Kumar
+ */
+
 #include "VideoEntry.hpp"
 
 VideoEntry::VideoEntry(const Video& video, int watchCount, int lastWatched)

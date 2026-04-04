@@ -1,3 +1,9 @@
+/**
+ * \file EventRouter.cpp
+ * \brief Implementation for EventRouter.
+ * \author Jasmine Kumar
+ */
+
 #include "EventRouter.hpp"
 #include <iostream>
 

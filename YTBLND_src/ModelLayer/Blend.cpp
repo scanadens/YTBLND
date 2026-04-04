@@ -1,3 +1,9 @@
+/**
+ * \file Blend.cpp
+ * \brief Implementation for Blend.
+ * \author Jasmine Kumar
+ */
+
 #include "Blend.hpp"
 #include "JsonUtils.hpp"
 
@@ -52,7 +58,7 @@ void Blend::setBlendID(const std::string& blendID) {
 
 Video Blend::getVideo(int index) const {
     if (index < 0 || index >= static_cast<int>(videoList.size())) {
-        throw std::out_of_range("Blend::getVideo — index " + std::to_string(index) +
+        throw std::out_of_range("Blend::getVideo - index " + std::to_string(index) +
                                 " is out of range (size = " + std::to_string(videoList.size()) + ")");
     }
     auto it = videoList.begin();

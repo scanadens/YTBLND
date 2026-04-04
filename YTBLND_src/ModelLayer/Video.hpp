@@ -4,7 +4,7 @@
 /**
  * \file Video.hpp
  * \brief Immutable data model for a single YouTube video.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
  *
  * Populated initially with only a videoID from the Watch Later CSV; the
  * remaining fields are filled in by YouTubeMetadataFetcher after an API call.
@@ -13,17 +13,21 @@
 #include <string>
 #include <list>
 
-/// Immutable data model for a single YouTube video.
+/** Immutable data model for a single YouTube video. */
+/**
+ * \class Video
+ * \brief Video class declaration.
+ */
 class Video {
     private:
-        std::string videoID;
-        std::string title;
-        std::string channelID;
-        std::string thumbnailURL;
-        int         duration;
-        std::list<std::string> tags;
-        std::string channelName;
-        std::string channelLogoURL;
+        std::string videoID;            // YouTube video id
+        std::string title;              // YouTube video title
+        std::string channelID;          // YouTube channel ID
+        std::string thumbnailURL;       // URL to video thumbnail
+        int         duration;           // length of video
+        std::list<std::string> tags;    // tags associated with video themes/categories -- to be implemented later on
+        std::string channelName;        // YouTube channel name
+        std::string channelLogoURL;     // YouTube channel icon/logo
 
     public:
         /**
@@ -46,24 +50,24 @@ class Video {
             const std::string& channelName    = "",
             const std::string& channelLogoURL = "");
 
-        /// \return YouTube video ID string.
+        /** \return YouTube video ID string. */
         std::string getVideoID()        const;
-        /// \return Video title (empty if not yet enriched by the API).
+        /** \return Video title (empty if not yet enriched by the API). */
         std::string getTitle()          const;
-        /// \return YouTube channel ID of the uploader.
+        /** \return YouTube channel ID of the uploader. */
         std::string getChannelID()      const;
-        /// \return URL of the video thumbnail (empty if not yet enriched).
+        /** \return URL of the video thumbnail (empty if not yet enriched). */
         std::string getThumbnailURL()   const;
-        /// \return Duration in seconds (0 if unknown).
+        /** \return Duration in seconds (0 if unknown). */
         int         getDuration()       const;
-        /// \return List of tags associated with the video.
+        /** \return List of tags associated with the video. */
         std::list<std::string> getTags() const;
-        /// \return Display name of the uploading channel.
+        /** \return Display name of the uploading channel. */
         std::string getChannelName()    const;
-        /// \return URL of the channel's profile picture.
+        /** \return URL of the channel's profile picture. */
         std::string getChannelLogoURL() const;
 
-        /// \return JSON string representation of this video.
+        /** \return JSON string representation of this video. */
         std::string toString() const;
 };
 

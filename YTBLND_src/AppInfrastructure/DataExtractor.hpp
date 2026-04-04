@@ -27,7 +27,11 @@
  * auto data = extractor.extract();
  * \endcode
  */
-/// Coordinates FileSource and Parser to extract and parse file data.
+/** Coordinates FileSource and Parser to extract and parse file data. */
+/**
+ * \class DataExtractor
+ * \brief DataExtractor class declaration.
+ */
 class DataExtractor {
 	public:
 		/** Constructs a DataExtractor with FileSource and Parser.

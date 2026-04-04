@@ -1,3 +1,17 @@
+/**
+ * \file Test_BlendCreationPanel.cpp
+ * \brief Unit tests for BlendCreationPanel UI state and interactions.
+ * \author Jasmine Kumar
+ *
+ * \details
+ * Verifies BlendCreationPanel behavior for:
+ * - Initial widget state (empty list, disabled create button, count label).
+ * - User add/remove workflows and related UI updates.
+ * - lookupUser and createBlend event payload construction and dispatch.
+ * - Navigation behavior after successful blend creation.
+ * - Reload/reset behavior and full multi-step panel workflows.
+ */
+
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <wx/app.h>
@@ -49,7 +63,7 @@ protected:
 
     void SetUp() override {
         parentFrame = new wxFrame(nullptr, wxID_ANY, "Test");
-        
+
         EXPECT_CALL(mockController, getEventRouter)
             .WillRepeatedly(::testing::ReturnRef(mockRouter));
 
@@ -71,9 +85,7 @@ protected:
 
 wxAppConsole* BlendCreationPanelTest::app = nullptr;
 
-// ============================================================================
 // UI STATE TESTS
-// ============================================================================
 
 TEST_F(BlendCreationPanelTest, InitializesWithCreateButtonDisabled) {
     ASSERT_NE(panel, nullptr);
@@ -90,9 +102,7 @@ TEST_F(BlendCreationPanelTest, CountLabelInitializesToZeroUsers) {
     EXPECT_EQ(panel->m_countLabel->GetLabel(), "0 / 8 users");
 }
 
-// ============================================================================
 // USER ADDITION TESTS
-// ============================================================================
 
 TEST_F(BlendCreationPanelTest, AddingUserUpdatesInternalList) {
     panel->m_addedUsers.push_back("alice");
@@ -121,7 +131,7 @@ TEST_F(BlendCreationPanelTest, AddingSecondUserEnablesCreateButton) {
     panel->m_addedUsers.push_back("alice");
     panel->m_addedUsers.push_back("bob");
     panel->UpdateCountLabel();
-    
+
     // Simulate the enable logic from OnAdd
     if (panel->m_addedUsers.size() >= 2)
         panel->m_createBtn->Enable();
@@ -131,7 +141,7 @@ TEST_F(BlendCreationPanelTest, AddingSecondUserEnablesCreateButton) {
 
 TEST_F(BlendCreationPanelTest, SingleUserKeepsCreateButtonDisabled) {
     panel->m_addedUsers.push_back("alice");
-    
+
     // Simulate the enable logic from OnAdd
     if (panel->m_addedUsers.size() >= 2)
         panel->m_createBtn->Enable();
@@ -151,13 +161,11 @@ TEST_F(BlendCreationPanelTest, AddingMultipleUsersUpdatesCount) {
     EXPECT_EQ(panel->m_addedUsers.size(), 3);
 }
 
-// ============================================================================
 // USER LOOKUP DISPATCH TESTS
-// ============================================================================
 
 TEST_F(BlendCreationPanelTest, AddingUserDispatchesLookupEvent) {
     EXPECT_CALL(mockRouter, dispatch("lookupUser", _)).Times(1);
-    
+
     panel->m_addedUsers.push_back("alice");
     m_controller.getEventRouter().dispatch("lookupUser", {{"username", "alice"}});
 }
@@ -171,14 +179,12 @@ TEST_F(BlendCreationPanelTest, LookupEventContainsCorrectUsername) {
                 capturedUsername = it->second;
             }
         });
-    
+
     m_controller.getEventRouter().dispatch("lookupUser", {{"username", "alice"}});
     EXPECT_EQ(capturedUsername, "alice");
 }
 
-// ============================================================================
 // USER REMOVAL TESTS
-// ============================================================================
 
 TEST_F(BlendCreationPanelTest, RemovingUserUpdatesInternalList) {
     panel->m_addedUsers.push_back("alice");
@@ -221,9 +227,7 @@ TEST_F(BlendCreationPanelTest, RemovingAllUsersShowsEmptyLabel) {
     EXPECT_EQ(panel->m_addedUsers.size(), 0);
 }
 
-// ============================================================================
 // RELOAD TESTS
-// ============================================================================
 
 TEST_F(BlendCreationPanelTest, ReloadClearsAllUsers) {
     panel->m_addedUsers.push_back("alice");
@@ -250,9 +254,7 @@ TEST_F(BlendCreationPanelTest, ReloadDisablesCreateButton) {
     EXPECT_FALSE(panel->m_createBtn->IsEnabled());
 }
 
-// ============================================================================
 // BLEND CREATION & DISPATCH TESTS
-// ============================================================================
 
 TEST_F(BlendCreationPanelTest, CreateBlendDispatchesEventWithCorrectPayload) {
     panel->m_addedUsers.push_back("alice");
@@ -307,7 +309,7 @@ TEST_F(BlendCreationPanelTest, CreateBlendNavigatesToBlendChat) {
 
 TEST_F(BlendCreationPanelTest, CreateBlendWithLessThanTwoUsersDoesNotProceed) {
     panel->m_addedUsers.push_back("alice");
-    
+
     EXPECT_CALL(mockRouter, dispatch("createBlend", _)).Times(0);
     panel->OnCreate(wxCommandEvent());
 
@@ -331,9 +333,7 @@ TEST_F(BlendCreationPanelTest, CreateBlendWithMaxUsers) {
     EXPECT_EQ(capturedPayload["userID_7"], "user7");
 }
 
-// ============================================================================
 // FULL WORKFLOW TESTS
-// ============================================================================
 
 TEST_F(BlendCreationPanelTest, CompleteBlendCreationWorkflow) {
     // Step 1: Add first user

@@ -1,3 +1,9 @@
+/**
+ * \file User.cpp
+ * \brief Implementation for User.
+ * \author Jasmine Kumar
+ */
+
 #include "User.hpp"
 
 #include "JsonUtils.hpp"

@@ -11,7 +11,10 @@
 
 #include "FileSource.hpp"
 
-/// CSV file reader implementing the FileSource interface.
+/**
+ * \class CsvSource
+ * \brief CsvSource class declaration.
+ */
 class CsvSource : public FileSource {
     public:
         /**
@@ -33,7 +36,7 @@ class CsvSource : public FileSource {
          */
         void setSource(std::string src) override;
 
-        /// \return File_ID::CSV
+        /** \return File_ID::CSV */
         int getSourceId() override;
 
     private:

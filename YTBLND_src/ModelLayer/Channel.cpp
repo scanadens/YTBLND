@@ -1,3 +1,9 @@
+/**
+ * \file Channel.cpp
+ * \brief Implementation for Channel.
+ * \author Jasmine Kumar
+ */
+
 #include "Channel.hpp"
 #include "JsonUtils.hpp"
 

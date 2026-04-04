@@ -15,7 +15,10 @@
 #include <memory>
 #include "File_ID.hpp"
 
-/// Coordinates FileFormatter and FileBin to save structured data to files.
+/**
+ * \class DataSaver
+ * \brief DataSaver class declaration.
+ */
 class DataSaver {
     public:
         /**

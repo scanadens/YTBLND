@@ -1,5 +1,11 @@
+/**
+ * \file BlendCreationPanel.cpp
+ * \brief Implementation for BlendCreationPanel.
+ * \author Jasmine Kumar
+ */
+
 // ============================================================================
-// BlendCreationPanel.cpp — New-blend setup screen implementation
+// BlendCreationPanel.cpp - New-blend setup screen implementation
 // ============================================================================
 
 #include "BlendCreationPanel.hpp"
@@ -11,12 +17,12 @@
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
 #include "UIPages.hpp"
-#include "UploadProgressDialog.hpp"
+#include "OperationProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
 
-// ── Construction ──────────────────────────────────────────────────────────────
+// -- Construction --------------------------------------------------------------
 
 BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
                                        AppController& controller,
@@ -29,7 +35,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     auto* root = new wxBoxSizer(wxVERTICAL);
 
-    // ── TopBar (dynamic back: LOGIN if no blend yet, HOME otherwise) ─────────
+    // -- TopBar (dynamic back: LOGIN if no blend yet, HOME otherwise) ---------
     auto* topBar = new wxPanel(this, wxID_ANY);
     topBar->SetBackgroundColour(UIColors::Surface);
     topBar->SetMinSize(wxSize(-1, 48));
@@ -68,7 +74,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
     }
     root->Add(topBar, 0, wxEXPAND);
 
-    // ── Blend name row ──────────────────────────────────────────────────────────
+    // -- Blend name row ----------------------------------------------------------
     auto* namePanel = new wxPanel(this, wxID_ANY);
     namePanel->SetBackgroundColour(UIColors::Surface);
     auto* nameSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -93,7 +99,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
     namePanel->SetMinSize(wxSize(-1, 48));
     root->Add(namePanel, 0, wxEXPAND);
 
-    // ── Action row ────────────────────────────────────────────────────────────
+    // -- Action row ------------------------------------------------------------
     auto* actionPanel = new wxPanel(this, wxID_ANY);
     actionPanel->SetBackgroundColour(UIColors::Surface);
     auto* actionSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -125,7 +131,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     root->Add(actionPanel, 0, wxEXPAND);
 
-    // ── User list area ────────────────────────────────────────────────────────
+    // -- User list area --------------------------------------------------------
     m_userListScroll = new wxScrolledWindow(this, wxID_ANY,
                                             wxDefaultPosition, wxDefaultSize,
                                             wxVSCROLL | wxBORDER_NONE);
@@ -154,7 +160,7 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     root->Add(m_userListScroll, 1, wxEXPAND | wxALL, 8);
 
-    // ── Count indicator ───────────────────────────────────────────────────────
+    // -- Count indicator -------------------------------------------------------
     m_countLabel = new wxStaticText(this, wxID_ANY, "0 / 8 users",
                                     wxDefaultPosition, wxDefaultSize,
                                     wxALIGN_CENTER_HORIZONTAL);
@@ -163,12 +169,12 @@ BlendCreationPanel::BlendCreationPanel(wxWindow* parent,
 
     SetSizer(root);
 
-    // ── Bindings ──────────────────────────────────────────────────────────────
+    // -- Bindings --------------------------------------------------------------
     addBtn->Bind(wxEVT_BUTTON,      &BlendCreationPanel::OnAdd,    this);
     m_createBtn->Bind(wxEVT_BUTTON, &BlendCreationPanel::OnCreate, this);
 }
 
-// ── Public ────────────────────────────────────────────────────────────────────
+// -- Public --------------------------------------------------------------------
 
 void BlendCreationPanel::Refresh()
 {
@@ -195,7 +201,7 @@ void BlendCreationPanel::Reload()
         m_createBtn->Disable();
 }
 
-// ── Private helpers ───────────────────────────────────────────────────────────
+// -- Private helpers -----------------------------------------------------------
 
 void BlendCreationPanel::RebuildUserList()
 {
@@ -263,7 +269,7 @@ void BlendCreationPanel::UpdateCountLabel()
     m_countLabel->SetLabel(txt);
 }
 
-// ── Event handlers ────────────────────────────────────────────────────────────
+// -- Event handlers ------------------------------------------------------------
 
 void BlendCreationPanel::OnAdd(wxCommandEvent& /*evt*/)
 {
@@ -325,7 +331,7 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
     for (std::size_t i = 0; i < m_addedUsers.size(); ++i)
         payload["userID_" + std::to_string(i)] = m_addedUsers[i];
 
-    UploadProgressDialog progress(this, "Creating Blend");
+    OperationProgressDialog progress(this, "Creating Blend");
     progress.ShowModal();
     progress.UpdateProgress(0.02, "Preparing...");
 
@@ -348,12 +354,12 @@ void BlendCreationPanel::OnCreate(wxCommandEvent& /*evt*/)
             msg += "  \u2022 " + uid + "\n";
 
         if (AppState::getInstance().getActiveBlend() != nullptr) {
-            // Blend was still created from whoever had data — warn and continue
+            // Blend was still created from whoever had data - warn and continue
             msg += "\nTheir videos were not included. The blend was created with the remaining users.";
             wxMessageBox(msg, "Some Users Missing Data", wxOK | wxICON_WARNING, this);
             m_nav(Page::HOME);
         } else {
-            // No one had data — cannot create a blend at all
+            // No one had data - cannot create a blend at all
             msg += "\nNo blend could be created. Please ensure at least one user has uploaded their data.";
             wxMessageBox(msg, "Cannot Create Blend", wxOK | wxICON_ERROR, this);
         }

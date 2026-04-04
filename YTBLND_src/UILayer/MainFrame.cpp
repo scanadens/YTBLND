@@ -1,3 +1,10 @@
+/**
+ * \file MainFrame.cpp
+ * \brief Implementation for MainFrame.
+ * \author Jasmine Kumar
+ * \author Shamar Pennant
+ */
+
 #include "MainFrame.hpp"
 #include <wx/wx.h>
 #include <wx/simplebook.h>
@@ -15,7 +22,7 @@
 #include "BlendCreationPanel.hpp"
 #include "BlendChatPanel.hpp"
 #include "ActiveBlendsPanel.hpp"
-#include "UploadProgressDialog.hpp"
+#include "OperationProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 
@@ -51,7 +58,7 @@ wxString ResolveResourcePath(const wxString& fileName)
 }
 }
 
-// ── Background Panel ─────────────────────────────────────────────────────────
+// -- Background Panel ---------------------------------------------------------
 class ImageBackgroundPanel : public wxPanel {
 public:
     ImageBackgroundPanel(wxWindow* parent,
@@ -87,7 +94,7 @@ private:
     }
 };
 
-// ── Construction ─────────────────────────────────────────────────────────────
+// -- Construction -------------------------------------------------------------
 MainFrame::MainFrame(AppController& controller)
     : wxFrame(nullptr, wxID_ANY, "YTBLND",
               wxDefaultPosition, wxSize(1280, 800),
@@ -114,7 +121,7 @@ MainFrame::MainFrame(AppController& controller)
 
     // --- Initialize pages and wrap each in a panel that paints the background image --
 
-    // the login panel — paints its own background image
+    // the login panel - paints its own background image
     loginPanel = new LoginPanel(book, controller, nav, images[BG_MAIN]);
     book->AddPage(loginPanel, "Login");
 
@@ -199,7 +206,7 @@ MainFrame::MainFrame(AppController& controller)
     frameSizer->Add(bgPanel, 1, wxEXPAND);
     SetSizer(frameSizer);
 
-    // ── Theme-change listener ──────────────────────────────────────────────────
+    // -- Theme-change listener --------------------------------------------------
     controller.getEventRouter().registerListener("theme_updated",
         [this](const EventPayload& payload) {
             auto it = payload.find("old_theme_index");
@@ -218,7 +225,7 @@ MainFrame::MainFrame(AppController& controller)
     book->SetSelection(static_cast<int>(Page::LOGIN));
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────────
+// -- Navigation ----------------------------------------------------------------
 void MainFrame::NavigateTo(Page page) {
     if (page == Page::LOGIN)           loginPanel->Refresh();
     if (page == Page::BLEND_CREATION)  creationPanel->Refresh();
@@ -239,7 +246,7 @@ void MainFrame::TriggerFeedRefresh() {
         refreshBtn->Disable();
     }
 
-    UploadProgressDialog progress(this, "Refreshing Feed");
+    OperationProgressDialog progress(this, "Refreshing Feed");
     progress.ShowModal();
     progress.UpdateProgress(0.08, "Preparing refresh...");
 
@@ -270,7 +277,7 @@ void MainFrame::TriggerFeedRefresh() {
     refreshInProgress = false;
 }
 
-// ── Build Home Page ──────────────────────────────────────────────────────────
+// -- Build Home Page ----------------------------------------------------------
 wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     auto* page = new wxPanel(parent, wxID_ANY);
 
@@ -357,7 +364,7 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     return page;
 }
 
-// ── Theme recoloring ─────────────────────────────────────────────────────────
+// -- Theme recoloring ---------------------------------------------------------
 
 void MainFrame::RecolorAll(const Palette& oldPalette)
 {

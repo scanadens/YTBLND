@@ -1,3 +1,10 @@
+/**
+ * \file AppController.cpp
+ * \brief Implementation for AppController.
+ * \author Jasmine Kumar
+ * \author Shamar Pennant
+ */
+
 #include "AppController.hpp"
 #include "../ServerConfig.hpp"
 #include "../AppInfrastructure/YouTubeDataImporter.hpp"
@@ -315,7 +322,7 @@ std::list<User> AppController::loadParticipantsWithWatchLaterParallel(
 
 static const std::string kYouTubeAPIKey = "AIzaSyBDzH4_T9NSaAh_s59sFYrHtNnKvHmyARM";
 
-// ── Constructor / Destructor ──────────────────────────────────────────────────
+// -- Constructor / Destructor --------------------------------------------------
 
 AppController::AppController(): 
     appState(AppState::getInstance()),
@@ -368,7 +375,7 @@ AppController::~AppController() {
     eventRouter.deregisterAll();
 }
 
-// ── Event Registration ────────────────────────────────────────────────────────
+// -- Event Registration --------------------------------------------------------
 
 void AppController::registerEvents() {
     // Binds each named event to the corresponding handler on this controller.
@@ -387,7 +394,7 @@ void AppController::registerEvents() {
     eventRouter.registerListener("selectBlend", [this](const EventPayload& p){ handleSelectBlend(p); });
 }
 
-// ── Getter ────────────────────────────────────────────────────────────────────
+// -- Getter --------------------------------------------------------------------
 
 EventRouter& AppController::getEventRouter() {
     return eventRouter;
@@ -411,7 +418,7 @@ void AppController::reportProgress(double progress, const std::string& message) 
     progressReporter(progress, message);
 }
 
-// ── Event Handlers ────────────────────────────────────────────────────────────
+// -- Event Handlers ------------------------------------------------------------
 
 void AppController::handleRegister(const EventPayload& payload) {
     // verifying user data structure
@@ -457,7 +464,7 @@ void AppController::handleRegister(const EventPayload& payload) {
                 return;
             }
 
-            // success — keep pendingRegistration_ so we can delete it if upload never happens
+            // success - keep pendingRegistration_ so we can delete it if upload never happens
             pendingRegistration_ = newUser;
             pendingAccountCreated_ = true;
             std::cout << "[AppController] Account created on server for '" << newUser.getUserID()
@@ -583,7 +590,7 @@ void AppController::handleLogin(const EventPayload& payload) {
         kLoginParticipantLoadWorkerThreads
     );
 
-    if (participants.empty()) return; // no one has data yet — nothing to show
+    if (participants.empty()) return; // no one has data yet - nothing to show
 
     // Try to recover the blend title from the server
     std::string restoredTitle;
@@ -738,7 +745,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
                 pendingRegistration_.reset();
                 return;
             }
-            // success — clear pendingRegistration_
+            // success - clear pendingRegistration_
             pendingRegistration_.reset();
             std::cout << "[AppController] Account created on server for '" << userID << "'\n";
         } catch (const std::exception& ex) {
@@ -789,7 +796,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
     // Smart metadata enrichment strategy:
     // - On upload, enrich ONLY the first kMaxUploadEnrichmentCount videos to keep upload fast.
     // - CSV: always enrich first 50
-    // - HTML ≤500 videos: enrich all
+    // - HTML <=500 videos: enrich all
     // - HTML >500 videos: enrich first 50, rest at display time
     //
     // This avoids blocking the UI while still providing good metadata for the most important videos.
@@ -833,7 +840,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
         } catch (const std::exception& ex) {
             std::cerr << "[AppController] handleUploadData: metadata fetch failed: "
                       << ex.what() << "\n";
-            // Non-fatal — continue with whatever data we have
+            // Non-fatal - continue with whatever data we have
         }
     }
 
@@ -841,7 +848,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
     videosToEnrich.splice(videosToEnrich.end(), videosNotEnriched);
     watchLater = videosToEnrich;
 
-    // Drop videos the API couldn't find — they are deleted, private, or unavailable.
+    // Drop videos the API couldn't find - they are deleted, private, or unavailable.
     if (enriched) {
         watchLater.remove_if([](const Video& v) { return v.getTitle().empty(); });
         std::cout << "[AppController] " << watchLater.size()
@@ -933,7 +940,7 @@ void AppController::handleUploadData(const EventPayload& payload) {
     appState.createChatRoom(*currentBlend);
 
     std::cout << "[AppController] Re-generated blend '" << *blendID
-              << "' after data upload — now " << currentBlend->size() << " videos\n";
+              << "' after data upload - now " << currentBlend->size() << " videos\n";
 }
 
 void AppController::handleCreateBlend(const EventPayload& payload) {
@@ -960,13 +967,13 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
         loadParticipantsWithWatchLater(allParticipantIDs, &missingData, false);
 
     // Report users without uploaded data back to the UI via AppState
-    // (non-existent users are excluded — they should have been rejected at the UI level)
+    // (non-existent users are excluded - they should have been rejected at the UI level)
     appState.setUsersWithoutData(missingData);
 
     // Enforce upload: if any participant is missing Watch Later data, refuse to create the blend.
     if (!missingData.empty()) {
         appState.setIsBlendGenerating(false);
-        std::cerr << "[AppController] handleCreateBlend: cannot create blend — the following participants have not uploaded Watch Later data:\n";
+        std::cerr << "[AppController] handleCreateBlend: cannot create blend - the following participants have not uploaded Watch Later data:\n";
         for (const auto& uid : missingData) std::cerr << "  " << uid << "\n";
         // UI should show users without data via appState; do not proceed.
         return;
@@ -986,7 +993,7 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
 
     // Persist the blend and all valid participants (existing users, even those
     // without data yet, so they are found on their next login).
-    // Non-existent users (notFound) are excluded — they have no DB row.
+    // Non-existent users (notFound) are excluded - they have no DB row.
     std::vector<std::string> validParticipantIDs;
     for (const auto& uid : allParticipantIDs) {
         if (lookupUser(uid)) {
@@ -1045,7 +1052,7 @@ bool AppController::lookupUser(const std::string& userID) {
     }
 }
 
-// ── Private helpers ───────────────────────────────────────────────────────────
+// -- Private helpers -----------------------------------------------------------
 
 bool AppController::registerBlendOnServer(const Blend& blend,
                                           const std::string& creatorID) {
@@ -1075,7 +1082,7 @@ bool AppController::registerBlendOnServer(const Blend& blend,
                       << blend.getBlendID() << "' registered\n";
             return true;
         }
-        // 409 Conflict means it already exists — treat as success.
+        // 409 Conflict means it already exists - treat as success.
         if (http.getLastStatusCode() == http.DUPLICATE) {
             std::cout << "[AppController] registerBlendOnServer: blend '"
                       << blend.getBlendID() << "' already on server\n";
@@ -1084,7 +1091,7 @@ bool AppController::registerBlendOnServer(const Blend& blend,
         std::cerr << "[AppController] registerBlendOnServer: server returned "
                   << http.getLastStatusCode() << "\n";
     } catch (const std::exception& e) {
-        std::cerr << "[AppController] registerBlendOnServer: HTTP failed — "
+        std::cerr << "[AppController] registerBlendOnServer: HTTP failed - "
                   << e.what() << "\n";
     }
     return false;
@@ -1106,7 +1113,7 @@ void AppController::enrichIfMissingMetadata(const std::string& userID,
               << videos.size() << " videos for '" << userID << "'\n";
     try {
         videos = YouTubeMetadataFetcher(kYouTubeAPIKey).enrich(videos);
-        // Drop any video still missing a title — confirmed unavailable on YouTube
+        // Drop any video still missing a title - confirmed unavailable on YouTube
         if (!kYouTubeAPIKey.empty())
             videos.remove_if([](const Video& v) { return v.getTitle().empty(); });
 
@@ -1277,7 +1284,7 @@ void AppController::enrichActiveBlendFeedIfMissingMetadata() {
 
 void AppController::handlePlayVideo(const EventPayload& payload) {
     // TODO: read "videoID" from payload
-    // TODO: open the video — exact mechanism (browser, in-app) TBD
+    // TODO: open the video - exact mechanism (browser, in-app) TBD
     std::cout << "[AppController] handlePlayVideo called (stub)\n";
 }
 
@@ -1387,7 +1394,7 @@ void AppController::handleOpenChat(const EventPayload& payload) {
     }
 
     if (!isConnected) {
-        std::cout << "[AppController] handleOpenChat: offline — skipping history fetch\n";
+        std::cout << "[AppController] handleOpenChat: offline - skipping history fetch\n";
         return;
     }
 
@@ -1397,7 +1404,7 @@ void AppController::handleOpenChat(const EventPayload& payload) {
         std::string response = http.get(endpoint);
 
         if (http.getLastStatusCode() == http.MISS_RM_CNTXT) {
-            // Blend not registered on server yet — provision it now and retry.
+            // Blend not registered on server yet - provision it now and retry.
             Blend* blend = appState.getActiveBlend();
             if (blend) {
                 User* creator = appState.getCurrentUser();
@@ -1410,7 +1417,7 @@ void AppController::handleOpenChat(const EventPayload& payload) {
 
         if (!http.wasLastRequestSuccessful(http.G)) {
             std::cerr << "[AppController] handleOpenChat: server returned "
-                      << http.getLastStatusCode() << " — leaving ChatRoom empty\n";
+                      << http.getLastStatusCode() << " - leaving ChatRoom empty\n";
             return;
         }
 
@@ -1424,7 +1431,7 @@ void AppController::handleOpenChat(const EventPayload& payload) {
                   << blendIt->second << "'\n";
 
     } catch (const std::exception& e) {
-        std::cerr << "[AppController] handleOpenChat: HTTP failed — "
+        std::cerr << "[AppController] handleOpenChat: HTTP failed - "
                   << e.what() << "\n";
     }
 }

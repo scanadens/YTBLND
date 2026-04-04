@@ -1,4 +1,8 @@
-
+/**
+ * \file CsvSource.cpp
+ * \brief Implementation for CsvSource.
+ * \author Shamar Pennant
+ */
 
 #include "CsvSource.hpp"
 

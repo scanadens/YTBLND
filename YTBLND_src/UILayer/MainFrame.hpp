@@ -38,7 +38,13 @@ class BlendCreationPanel;
 class BlendChatPanel;
 class ActiveBlendsPanel;
 
-/// Root application window containing the full-window page switcher.
+/**
+ * \brief Root application window containing the full-window page switcher.
+ */
+/**
+ * \class MainFrame
+ * \brief MainFrame class declaration.
+ */
 class MainFrame : public wxFrame {
 public:
     /**
@@ -101,7 +107,7 @@ private:
      */
     void RecolorAll(const Palette& oldPalette);
 
-    /// Helper: recursively recolor a widget and its children.
+    /** Helper: recursively recolor a widget and its children. */
     void RecolorWidget(wxWindow* w, const Palette& oldPalette);
 
     bool LoadImage(int key, const wxString& path);

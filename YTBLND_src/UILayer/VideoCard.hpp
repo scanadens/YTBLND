@@ -1,10 +1,10 @@
 /**
  * \file VideoCard.hpp
  * \brief Custom wxPanel widget that displays a single YouTube video preview.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
  *
- * Layout (top → bottom):
- * - 16:9 thumbnail — fetched asynchronously via libcurl from thumbnailURL,
+ * Layout (top -> bottom):
+ * - 16:9 thumbnail - fetched asynchronously via libcurl from thumbnailURL,
  *   falling back to img.youtube.com/vi/\<id\>/hqdefault.jpg if the URL is empty.
  * - Video title (up to 2 wrapped lines).
  * - Channel row: 24 px round channel logo + channel name.
@@ -30,6 +30,10 @@
  * logo (EVT_CHANNEL_LOGO_LOADED).  The generation field must match the
  * card's current counter or the event is treated as stale and discarded.
  */
+/**
+ * \class ThumbnailEvent
+ * \brief ThumbnailEvent class declaration.
+ */
 class ThumbnailEvent : public wxEvent {
 public:
     wxImage image;      ///< Decoded image (valid only when success is true).
@@ -45,7 +49,13 @@ public:
 wxDECLARE_EVENT(EVT_THUMBNAIL_LOADED,    ThumbnailEvent);  ///< Fired when the video thumbnail is ready.
 wxDECLARE_EVENT(EVT_CHANNEL_LOGO_LOADED, ThumbnailEvent);  ///< Fired when the channel logo is ready.
 
-/// Custom wxPanel widget that displays a single YouTube video preview.
+/**
+ * \brief Custom wxPanel widget that displays a single YouTube video preview.
+ */
+/**
+ * \class VideoCard
+ * \brief VideoCard class declaration.
+ */
 class VideoCard : public wxPanel {
 public:
     /**
@@ -61,7 +71,7 @@ public:
      */
     void SetVideo(const Video& video);
 
-    /// Resets the card to its empty placeholder state.
+    /** Resets the card to its empty placeholder state. */
     void Clear();
 
     wxSize DoGetBestSize() const override { return wxSize(260, 250); }
@@ -88,9 +98,9 @@ private:
 
     bool m_hovered = false;
 
-    /// Spawns a background thread to fetch and decode the video thumbnail.
+    /** Spawns a background thread to fetch and decode the video thumbnail. */
     void FetchThumbnailAsync();
-    /// Spawns a background thread to fetch and decode the channel logo.
+    /** Spawns a background thread to fetch and decode the channel logo. */
     void FetchChannelLogoAsync();
 
     void OnThumbnailLoaded  (ThumbnailEvent& evt);

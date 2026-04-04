@@ -1,7 +1,8 @@
 /**
  * \file UIColors.hpp
  * \brief Shared dark-theme colour palette used throughout the UI.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
+ * \author Xavier Wah-Huen Lusetti
  *
  * All wxColour constants live here so the visual style is consistent and easy
  * to retheme.  Include this header instead of hard-coding colours in individual
@@ -13,7 +14,7 @@
  * | Background    | \#0D0D0D  | Window / page background           |
  * | Surface       | \#191919  | Card / panel backgrounds           |
  * | SurfaceRaised | \#262626  | Inputs, raised elements            |
- * | Accent        | \#8A00FF  | Brand purple — buttons, hover      |
+ * | Accent        | \#8A00FF  | Brand purple - buttons, hover      |
  * | AccentHover   | \#A028FF  | Lighter purple for hover feedback  |
  * | TextPrimary   | \#FFFFFF  | Body text                          |
  * | TextSecondary | \#A0A0A0  | Secondary / caption text           |
@@ -31,6 +32,10 @@ enum class ThemeType {
     Neon = 2
 };
 
+/**
+ * \struct Palette
+ * \brief Palette class declaration.
+ */
 struct Palette {
     wxColour Background;
     wxColour Surface;
@@ -47,7 +52,9 @@ struct Palette {
     wxColour Danger;
 };
 
-/// Shared dark-theme colour constants for the YTBLND UI.
+/**
+ * \brief Shared dark-theme colour constants for the YTBLND UI.
+ */
 namespace UIColors {
     extern Palette DarkMode;
     extern Palette LightMode;

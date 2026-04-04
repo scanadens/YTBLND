@@ -14,7 +14,11 @@
  * Subclasses implement format-specific file writing operations
  * (e.g., CSV files, HTML files, etc.).
  */
-/// Abstract interface for writing data to files.
+/** Abstract interface for writing data to files. */
+/**
+ * \class FileBin
+ * \brief FileBin class declaration.
+ */
 class FileBin {
 	public:
 		/** Virtual destructor for proper cleanup in derived classes. */

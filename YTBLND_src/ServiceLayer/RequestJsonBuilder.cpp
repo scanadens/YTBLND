@@ -1,3 +1,9 @@
+/**
+ * \file RequestJsonBuilder.cpp
+ * \brief Implementation for RequestJsonBuilder.
+ * \author Shamar Pennant
+ */
+
 #include "RequestJsonBuilder.hpp"
 
 #include "../ModelLayer/JsonUtils.hpp"

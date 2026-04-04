@@ -4,7 +4,7 @@
 /**
  * \file Blend.hpp
  * \brief Model representing a generated video feed shared by a group of users.
- *  \author Jasmine Kumar
+ * \author Jasmine Kumar
  *
  * A Blend is produced by an IBlendAlgorithm from the Watch Later lists of two
  * or more participants.  It is identified by a UUID-style blendID and stores
@@ -17,14 +17,17 @@
 #include "User.hpp"
 #include "Video.hpp"
 
-/// A generated video feed shared by a group of blend participants.
+/**
+ * \class Blend
+ * \brief Blend class declaration.
+ */
 class Blend {
     private:
-        std::string blendID;
-        std::string title;
-        std::string algorithmUsed;
-        std::list<User> participants;
-        std::list<Video> videoList;
+        std::string blendID;          // indentifying blend method
+        std::string title;            // title of the blend
+        std::string algorithmUsed;    // algorithm to be used for parsing through the blend
+        std::list<User> participants; // users included in the blend
+        std::list<Video> videoList;   // the video list included within the blend
 
     public:
         /**
@@ -41,15 +44,15 @@ class Blend {
               const std::list<User>& participants,
               const std::list<Video>& videoList);
 
-        /// \return Unique blend identifier.
+        /** \return Unique blend identifier. */
         std::string      getBlendID()       const;
-        /// \return User-facing title of this blend.
+        /** \return User-facing title of this blend. */
         std::string      getTitle()         const;
-        /// \return Name of the algorithm used to generate this blend.
+        /** \return Name of the algorithm used to generate this blend. */
         std::string      getAlgorithmUsed() const;
-        /// \return List of users who participated in this blend.
+        /** \return List of users who participated in this blend. */
         std::list<User>  getParticipants()  const;
-        /// \return Ordered list of videos in this blend.
+        /** \return Ordered list of videos in this blend. */
         std::list<Video> getVideoList()     const;
 
         /**
@@ -65,7 +68,7 @@ class Blend {
          */
         Video getVideo(int index) const;
 
-        /// \return Number of videos in the blend.
+        /** \return Number of videos in the blend. */
         int size() const;
 
         /**
@@ -74,7 +77,7 @@ class Blend {
          */
         void setBlendID(const std::string& blendID);
 
-        /// \return JSON string representation of this blend.
+        /** \return JSON string representation of this blend. */
         std::string toString() const;
 };
 

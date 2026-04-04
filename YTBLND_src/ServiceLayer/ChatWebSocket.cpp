@@ -1,3 +1,9 @@
+/**
+ * \file ChatWebSocket.cpp
+ * \brief Implementation for ChatWebSocket.
+ * \author Shamar Pennant
+ */
+
 #include "ChatWebSocket.hpp"
 #include "../ModelLayer/JsonUtils.hpp"
 

@@ -1,3 +1,9 @@
+/**
+ * \file YouTubeData.cpp
+ * \brief Implementation for YouTubeData.
+ * \author Jasmine Kumar
+ */
+
 #include "YouTubeData.hpp"
 #include <map>
 #include <vector>

@@ -5,10 +5,10 @@
 // from the YouTube Data API v3:
 //
 //   videos.list?part=snippet&id=<ids>&key=<apiKey>
-//     → title, channelId, channelTitle, thumbnailUrl
+//     -> title, channelId, channelTitle, thumbnailUrl
 //
 //   channels.list?part=snippet&id=<channelIds>&key=<apiKey>
-//     → channel logo URL (snippet.thumbnails.default.url)
+//     -> channel logo URL (snippet.thumbnails.default.url)
 //
 // IDs are batched at most 50 per request (YouTube API limit).
 // Videos not returned by the API (private, deleted) are kept unchanged.
@@ -27,6 +27,26 @@
 
 #include "../ModelLayer/Video.hpp"
 
+/**
+ * \file YouTubeMetadataFetcher.hpp
+ * \author Jasmine Kumar
+ * \brief Enriches a list of Video objects (video-ID only) with full snippet metadata from the YouTube Data API v3
+ * 
+ * videos.list?part=snippet&id=<ids>&key=<apiKey>
+ *      -> title, channelId, channelTitle, thumbnailUrl
+ * channels.list?part=snippet&id=<channelIds>&key=<apiKey>
+ *      -> channel logo URL (snippet.thumbnails.default.url)
+ * 
+ * IDs are batched at most 50 per request (YouTube API limit).
+ * Videos not returned by the API (private, deleted) are kept unchanged.
+ * Any network or parse error is logged to stderr; the remaining videos are
+ * still returned with whatever data was successfully retrieved.
+ */
+
+/**
+ * \class YouTubeMetadataFetcher
+ * \brief YouTubeMetadataFetcher class declaration.
+ */
 class YouTubeMetadataFetcher {
 public:
     explicit YouTubeMetadataFetcher(std::string apiKey);
@@ -43,6 +63,10 @@ private:
 
     static constexpr int kBatchSize = 50;
 
+/**
+ * \struct VideoMeta
+ * \brief VideoMeta class declaration.
+ */
     struct VideoMeta {
         std::string title;
         std::string channelId;
@@ -51,12 +75,12 @@ private:
     };
 
     // Fetches snippet data for up to kBatchSize video IDs.
-    // Returns a map of videoId → VideoMeta.
+    // Returns a map of videoId -> VideoMeta.
     std::unordered_map<std::string, VideoMeta>
     fetchVideoBatch(const std::vector<std::string>& ids);
 
     // Fetches the default thumbnail URL for each channel ID.
-    // Returns a map of channelId → logoUrl.
+    // Returns a map of channelId -> logoUrl.
     std::unordered_map<std::string, std::string>
     fetchChannelLogos(const std::vector<std::string>& channelIds);
 

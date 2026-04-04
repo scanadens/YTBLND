@@ -12,7 +12,7 @@
  * events through EventRouter; AppController handles them by updating AppState
  * and calling the appropriate backend services.
  *
- * No panel or backend class should call another directly — everything routes
+ * No panel or backend class should call another directly - everything routes
  * through AppController.
  */
 
@@ -31,7 +31,11 @@
 
 class YouTubeDataParser;  ///< Stub for future use.
 
-/// Central application coordinator.
+/** Central application coordinator. */
+/**
+ * \class AppController
+ * \brief AppController class declaration.
+ */
 class AppController {
 public:
         /**
@@ -51,13 +55,13 @@ public:
          */
         ~AppController();
 
-        /// \return Reference to the EventRouter so panels can call dispatch().
+        /** \return Reference to the EventRouter so panels can call dispatch().*/
         EventRouter& getEventRouter();
 
-        /// Registers a UI progress sink used for long-running controller operations.
+        /** Registers a UI progress sink used for long-running controller operations. */
         void setProgressReporter(std::function<void(double, const std::string&)> reporter);
 
-        /// Clears the active UI progress sink.
+        /** Clears the active UI progress sink. */
         void clearProgressReporter();
 
         /**
@@ -80,7 +84,7 @@ public:
 
         /**
          * Deletes the current account after password re-authentication.
-         * \\param payload { "userID": "...", "password": "..." }
+         * \param payload { "userID": "...", "password": "..." }
          */
         void handleDeleteAccount(const EventPayload& payload);
 
@@ -141,25 +145,29 @@ public:
 
         /**
          * Retrieves the current user from the AppSate
-         * \return \c User \c shared pointer. \c nullptr \c if \c User \c DNE
+         * \return \c User shared pointer. \c nullptr if \c User DNE
          */
         const User* get_current_user();
 
         /**
          * Rretrieves the current users username
-         * \return \c string \c copy of username. \c "" \c if \c User \c DNE
+         * \return \c string copy of username. \c "" if \c User DNE
          */
         std::string get_current_username();
 
         /**
          * Retrievesthe current users email (if an email was used on signup)
-         * \return \c string \c copy of users email. \c "" \c if \c User \c DNE or they provided no email on signup
+         * \return \c string copy of users email. \c "" if \c User DNE or they provided no email on signup
          */
         std::string get_current_email();
 
         /**
          * Holds summary info about a blend for display in the active blends list.
          */
+/**
+ * \struct BlendSummary
+ * \brief BlendSummary class declaration.
+ */
         struct BlendSummary {
             std::string blendID;
             std::string title;
@@ -187,7 +195,7 @@ public:
 
         /**
          * Parses the JSON response from GET /chat-history into a list of Messages.
-         * Expected format: {"messages":[{"sender_id":"...","content":"...","sent_at":"..."},...]}
+         * Expected format: \code {"messages":[{"sender_id":"...","content":"...","sent_at":"..."},...]} \endcode
          * Exposed as public static so it can be unit-tested without a live server.
          * \param response Raw JSON string from the server.
          * \return Ordered list of Messages with original server timestamps.
@@ -200,6 +208,11 @@ public:
          *
          * This utility is shared by production blend-loading paths and unit tests
          * to keep metadata workflow behavior consistent.
+         * 
+         * \param videos list of videos to go through
+         * \param maxVideosToEnrich upper bound on the number of videos the algorithm should process
+         * \param workerThreads number of threads to be working on video enrichment
+         * \param enrichChunkFn function each thread will use to enrich their assigned sub-set of videos
          */
         static std::list<Video> enrichMissingMetadataSubsetMultithreaded(
             const std::list<Video>& videos,
@@ -215,7 +228,7 @@ public:
         bool isConnected;                   // tracks whether AppState has a connection to the server
         std::function<void(double, const std::string&)> progressReporter; // optional UI progress sink
 
-        /// Owns the most recently generated Blend so AppState can hold a raw pointer.
+        /** Owns the most recently generated Blend so AppState can hold a raw pointer. */
         std::unique_ptr<Blend> currentBlend;
 
         /**
@@ -309,7 +322,7 @@ public:
             std::size_t workerThreads
         );
 
-        /// Sends a coarse-grained progress update to the active UI reporter.
+        /** Sends a coarse-grained progress update to the active UI reporter. */
         void reportProgress(double progress, const std::string& message);
 
         /**

@@ -1,4 +1,10 @@
 /**
+ * \file HttpClient.cpp
+ * \brief Implementation for HttpClient.
+ * \author Shamar Pennant
+ */
+
+/**
  * test implementation of http client wrapper for centralized use.
  * should act as a singleton within each app instace to avoid 
  * deadlocks or livelocks

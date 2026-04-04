@@ -1,40 +1,42 @@
-// ============================================================================
-// BlendCreationPanel.hpp — New-blend setup screen
-//
-// Lets the logged-in user assemble a group of up to 8 participants (by
-// username) and then create a blend from their combined YouTube data.
-//
-// LAYOUT
-// ──────
-//   TopBar  ("New Blend", back → HOME)
-//   Action row: "BLEND" label | Add button | Create Blend button
-//   Scrollable user list (wxScrolledWindow)
-//   "X / 8 users" count label
-//
-// USER-ADD FLOW
-// ─────────────
-//   1. User clicks Add → wxTextEntryDialog prompts for a username.
-//   2. Duplicate check against m_addedUsers.
-//   3. "lookupUser" event dispatched to AppController (optimistic — user is
-//      added to the list regardless of whether the backend finds them).
-//      TODO: Wire up AppController::handleLookupUser to validate that the
-//            username exists in the database before adding.
-//   4. "Create Blend" button is enabled once ≥ 2 users are present.
-//
-// BLEND CREATION
-// ──────────────
-//   OnCreate builds a payload {"userID_0": ..., "userID_1": ..., ...} and
-//   dispatches "createBlend".  On return it navigates to BLEND_CHAT.
-//   TODO: If createBlend fails (e.g. one of the users has no data), display
-//         an error instead of navigating away.
-//
-// RELOAD
-// ──────
-//   Reload() is called by MainFrame::NavigateTo(BLEND_CREATION).  It clears
-//   m_addedUsers so the panel starts fresh each time it is shown.
-//   TODO: Pre-populate the current user's own username so they don't have to
-//         add themselves manually.
-// ============================================================================
+/**
+ * \file BlendCreationPanel.hpp
+ * \brief New-blend setup screen.
+ * \author Jasmine Kumar
+ *
+ * Lets the logged-in user assemble a group of up to 8 participants (by
+ * username) and then create a blend from their combined YouTube data.
+ *
+ * LAYOUT
+ * ------
+ *   TopBar  ("New Blend", back -> HOME)
+ *   Action row: "BLEND" label | Add button | Create Blend button
+ *   Scrollable user list (wxScrolledWindow)
+ *   "X / 8 users" count label
+ *
+ * USER-ADD FLOW
+ * -------------
+ *   1. User clicks Add -> wxTextEntryDialog prompts for a username.
+ *   2. Duplicate check against m_addedUsers.
+ *   3. "lookupUser" event dispatched to AppController (optimistic - user is
+ *      added to the list regardless of whether the backend finds them).
+ *      TODO: Wire up AppController::handleLookupUser to validate that the
+ *            username exists in the database before adding.
+ *   4. "Create Blend" button is enabled once >= 2 users are present.
+ *
+ * BLEND CREATION
+ * --------------
+ *   OnCreate builds a payload {"userID_0": ..., "userID_1": ..., ...} and
+ *   dispatches "createBlend". On return it navigates to BLEND_CHAT.
+ *   TODO: If createBlend fails (e.g. one of the users has no data), display
+ *         an error instead of navigating away.
+ *
+ * RELOAD
+ * ------
+ *   Reload() is called by MainFrame::NavigateTo(BLEND_CREATION). It clears
+ *   m_addedUsers so the panel starts fresh each time it is shown.
+ *   TODO: Pre-populate the current user's own username so they do not have to
+ *         add themselves manually.
+ */
 
 #pragma once
 
@@ -50,6 +52,10 @@ class wxScrolledWindow;
 class wxStaticText;
 class wxButton;
 
+/**
+ * \class BlendCreationPanel
+ * \brief BlendCreationPanel class declaration.
+ */
 class BlendCreationPanel : public wxPanel, public IRefreshablePanel {
 public:
     BlendCreationPanel(wxWindow* parent, AppController& controller, NavigateFn nav);
@@ -101,7 +107,7 @@ private:
     // Blend name input
     wxTextCtrl*       m_blendNameCtrl;
 
-    // "Create Blend" button — enabled when >= 2 users added
+    // "Create Blend" button - enabled when >= 2 users added
     wxButton*         m_createBtn;
 
     // Currently added usernames

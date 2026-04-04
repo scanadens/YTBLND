@@ -1,11 +1,7 @@
 /**
  * \file ButtonsConfig.hpp
+ * \author Shamar Pennant
  * \brief Centralized button size presets for UI layer widgets.
- */
-
-/**
- * \defgroup UIButtonSizing Button Sizing Presets
- * \brief Centralized dimensions used by UI buttons.
  *
  * Presets are organized by usage area:
  * - Navigation: TopBarBack, Nav

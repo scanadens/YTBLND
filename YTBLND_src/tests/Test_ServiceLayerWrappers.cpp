@@ -1,3 +1,16 @@
+/**
+ * \file Test_ServiceLayerWrappers.cpp
+ * \brief Unit tests for service-layer wrappers, including HTTP and WebSocket components.
+ * \author Shamar Pennant
+ *
+ * \details
+ * Tests wrapper-layer behavior for:
+ * - HttpClient request method behavior against a local in-process HTTP server.
+ * - Status-code handling and success/failure interpretation logic.
+ * - RequestJsonBuilder payload shape used by auth/blend endpoints.
+ * - ChatWebSocket wrapper lifecycle and callback plumbing.
+ */
+
 #include "gtest/gtest.h"
 
 #include "../ServiceLayer/ChatWebSocket.hpp"

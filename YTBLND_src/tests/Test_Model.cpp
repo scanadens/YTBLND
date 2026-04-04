@@ -1,3 +1,17 @@
+/**
+ * \file Test_Model.cpp
+ * \brief Unit tests for model-layer entities and behavior.
+ * \author Shamar Pennant
+ * \author Jasmine Kumar
+ *
+ * \details
+ * Verifies model-layer contracts for:
+ * - Constructor/getter/setter behavior across User, Friend, Video, and related types.
+ * - Collection mutation semantics (add/remove friend, list updates, replacement behavior).
+ * - Blend and ChatRoom invariants, indexing rules, and message handling.
+ * - YouTubeData aggregation and helper behavior used by higher layers.
+ */
+
 #include <gtest/gtest.h>
 #include "../ModelLayer/User.hpp"
 #include "../ModelLayer/Friend.hpp"
@@ -9,7 +23,7 @@
 #include "../ModelLayer/ChatRoom.hpp"
 #include "../ModelLayer/Message.hpp"
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Helpers
 
 // Build a minimal Video with sensible defaults so tests stay readable.
 static Video makeVideo(const std::string& id = "v1",
@@ -28,7 +42,7 @@ static User makeUser(const std::string& id       = "u1",
     return User(id, username, email, password);
 }
 
-// ── User ─────────────────────────────────────────────────────────────────────
+// User
 
 TEST(UserTest, Constructor_StoresAllFields) {
     // Verify that the four constructor arguments are retrievable via getters.
@@ -92,7 +106,7 @@ TEST(UserTest, RemoveFriend_NonexistentID_NoOp) {
     EXPECT_TRUE(alice.getFriends().empty());
 }
 
-// ── Friend ────────────────────────────────────────────────────────────────────
+// Friend
 
 TEST(FriendTest, Constructor_StoresAllFields) {
     // Verify that Friend stores and returns the three constructor fields.
@@ -111,7 +125,7 @@ TEST(FriendTest, Setters_UpdateFields) {
     EXPECT_EQ("robert@example.com", f.getEmail());
 }
 
-// ── Video ─────────────────────────────────────────────────────────────────────
+// Video
 
 TEST(VideoTest, Constructor_StoresAllFields) {
     // All six Video fields should be returned correctly by their getters.
@@ -125,7 +139,7 @@ TEST(VideoTest, Constructor_StoresAllFields) {
     EXPECT_EQ(2u,                          v.getTags().size());
 }
 
-// ── VideoEntry ────────────────────────────────────────────────────────────────
+// VideoEntry
 
 TEST(VideoEntryTest, Constructor_StoresAllFields) {
     // VideoEntry should store the wrapped Video plus watch metadata.
@@ -146,7 +160,7 @@ TEST(VideoEntryTest, Setters_UpdateWatchData) {
     EXPECT_EQ(200, entry.getLastWatched());
 }
 
-// ── Channel ───────────────────────────────────────────────────────────────────
+// Channel
 
 TEST(ChannelTest, Constructor_StoresAllFields) {
     // Channel should store its ID, display name, and category list.
@@ -156,7 +170,7 @@ TEST(ChannelTest, Constructor_StoresAllFields) {
     EXPECT_EQ(2u,            ch.getCategories().size());
 }
 
-// ── YouTubeData ───────────────────────────────────────────────────────────────
+// YouTubeData
 
 TEST(YouTubeDataTest, DefaultConstruct_AllListsEmpty) {
     // A freshly constructed YouTubeData should have no entries in any list.
@@ -244,7 +258,7 @@ TEST(YouTubeDataTest, GetTopChannels_NLargerThanSubscriptions_ReturnsAll) {
     EXPECT_EQ(1u, yt.getTopChannels(99).size());
 }
 
-// ── Blend ─────────────────────────────────────────────────────────────────────
+// Blend
 
 TEST(BlendTest, Constructor_StoresAllFields) {
     // All Blend fields should be stored and retrievable immediately after
@@ -289,7 +303,7 @@ TEST(BlendTest, SetVideoList_ReplacesExistingList) {
     EXPECT_EQ("new1", b.getVideo(0).getVideoID());
 }
 
-// ── ChatRoom ──────────────────────────────────────────────────────────────────
+// ChatRoom
 
 TEST(ChatRoomTest, Constructor_StoresBlendIDAndParticipants) {
     // The blend ID and participant list passed to the constructor should be

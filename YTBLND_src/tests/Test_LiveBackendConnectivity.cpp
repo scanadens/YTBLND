@@ -1,3 +1,16 @@
+/**
+ * \file Test_LiveBackendConnectivity.cpp
+ * \brief Integration tests for live backend HTTP and WebSocket connectivity.
+ * \author Shamar Pennant
+ *
+ * \details
+ * Exercises live-backend connectivity expectations for:
+ * - Basic HTTP reachability and response semantics (for example /ping).
+ * - Auth/register flows required to provision test users.
+ * - WebSocket connect/open behavior and URI/path correctness.
+ * - End-to-end message send/receive paths under real backend conditions.
+ */
+
 #include "gtest/gtest.h"
 
 #include "../ServerConfig.hpp"

@@ -1,6 +1,9 @@
-// ============================================================================
-// SettingsPanel.hpp — Theme selection and logout screen
-// ============================================================================
+/**
+ * \file SettingsPanel.hpp
+ * \brief Theme selection and logout panel.
+ * \author Jasmine Kumar
+ * \author Xavier Wah-Huen Lusetti
+ */
 
 #pragma once
 
@@ -11,6 +14,10 @@
 class AppController;
 class wxChoice;
 
+/**
+ * \class SettingsPanel
+ * \brief SettingsPanel class declaration.
+ */
 class SettingsPanel : public wxPanel {
 public:
 	SettingsPanel(wxWindow* parent, AppController& controller, NavigateFn nav);

@@ -1,27 +1,22 @@
-// ============================================================================
-// BlendFeedPanel.hpp — 3×2 video grid for the Home page
-//
-// Displays 6 VideoCards in a fixed 3-column × 2-row grid.  Each card shows
-// one video from the active blend (AppState::getActiveBlend()).
-//
-// PAGING
-// ──────
-// m_offset tracks which 6-video slice of the blend is currently shown.
-// NextPage() advances the offset by 6 (wrapping around), then calls
-// LoadFromBlend() to refresh the cards.  The Refresh button on the home
-// page calls MainFrame::TriggerFeedRefresh() → NextPage().
-//
-// LOADING
-// ───────
-// LoadFromBlend() reads AppState directly (no parameter) so it always gets
-// the latest blend.  Call it after a blend is created/loaded to show the
-// first page, or from NextPage() to advance.
-//
-// TODO: Subscribe to an AppState "blendChanged" event so the feed auto-
-//       refreshes when a new blend becomes active, without requiring a
-//       manual Refresh button press.
-// TODO: Add animation / transition when paging between sets of videos.
-// ============================================================================
+/**
+ * \file BlendFeedPanel.hpp
+ * \brief Home-page video feed panel that displays paged blend results.
+ * \author Jasmine Kumar
+ *
+ * Displays six VideoCard widgets in a fixed 3x2 grid sourced from the active
+ * blend in AppState.
+ *
+ * PAGING
+ * ------
+ * m_offset tracks which six-video slice of the blend is visible.
+ * NextPage() advances by six entries (wrapping as needed), then refreshes via
+ * LoadFromBlend().
+ *
+ * LOADING
+ * -------
+ * LoadFromBlend() reads AppState directly so it always reflects the current
+ * active blend.
+ */
 
 #pragma once
 
@@ -31,21 +26,38 @@
 #include "IRefreshablePanel.hpp"
 #include "../AppLayer/AppController.hpp"
 
+/**
+ * \class BlendFeedPanel
+ * \brief Panel that renders paged blend videos in a fixed 3x2 card layout.
+ */
 class BlendFeedPanel : public wxPanel, public IRefreshablePanel {
 public:
+    /**
+     * \brief Construct a BlendFeedPanel.
+     * \param parent Parent wxWidgets window.
+     * \param controller Application controller used for refresh dispatches.
+     */
     BlendFeedPanel(wxWindow* parent, AppController& controller);
 
+    /**
+     * \brief Refresh panel state from current application data.
+     */
     void Refresh() override;
 
-    // Advance to the next 6 videos, wrapping around the blend.
+    /**
+     * \brief Advance to the next six videos, wrapping around the blend.
+     */
     void NextPage();
 
-    // (Re)load the current page from the active blend.
-    // Clears all cards if there is no active blend.
+    /**
+     * \brief Reload the current page from the active blend.
+     *
+     * Clears all cards if there is no active blend.
+     */
     void LoadFromBlend();
 
 private:
-    static constexpr int kPageSize = 6;   // 3 cols × 2 rows
+    static constexpr int kPageSize = 6;   // 3 cols x 2 rows
 
     AppController& m_controller;
     VideoCard*     m_cards[kPageSize];

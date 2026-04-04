@@ -20,7 +20,11 @@
  * list of dictionaries format (list<Dict<string,string>>). Each dictionary
  * represents a row/entry with column headers as keys.
  */
-/// Abstract interface for parsing file data into structured format.
+
+/**
+ * \class Parser
+ * \brief Parser class declaration.
+ */
 class Parser {
 	public:
 		virtual ~Parser() = default;

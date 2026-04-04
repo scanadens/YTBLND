@@ -1,3 +1,10 @@
+/**
+ * \file SettingsPanel.cpp
+ * \brief Implementation for SettingsPanel.
+ * \author Jasmine Kumar
+ * \author Xavier Wah-Huen Lusetti
+ */
+
 // ============================================================================
 // SettingsPanel.cpp
 // ============================================================================
@@ -17,7 +24,7 @@
 #include "../AppLayer/EventRouter.hpp"
 #include "../ModelLayer/User.hpp"
 
-// ── Construction ──────────────────────────────────────────────────────────────
+// -- Construction --------------------------------------------------------------
 
 SettingsPanel::SettingsPanel(wxWindow* parent, AppController& controller, NavigateFn nav)
     : wxPanel(parent, wxID_ANY)
@@ -28,11 +35,11 @@ SettingsPanel::SettingsPanel(wxWindow* parent, AppController& controller, Naviga
 
     auto* root = new wxBoxSizer(wxVERTICAL);
 
-    // ── TopBar ────────────────────────────────────────────────────────────────
+    // -- TopBar ----------------------------------------------------------------
     auto* topBar = new TopBar(this, "Settings", m_nav, Page::HOME);
     root->Add(topBar, 0, wxEXPAND);
 
-    // ── Theme Selection ─────────────────────────────────────────────────────
+    // -- Theme Selection -----------------------------------------------------
     auto* themePanel = new wxPanel(this, wxID_ANY);
     themePanel->SetBackgroundColour(UIColors::Current->Surface);
     auto* themeSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -58,15 +65,15 @@ SettingsPanel::SettingsPanel(wxWindow* parent, AppController& controller, Naviga
     // Add it to the root sizer with padding
     root->Add(themePanel, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 16);  
 
-    // ── Divider ───────────────────────────────────────────────────────────────
+    // -- Divider ---------------------------------------------------------------
     auto* divider = new wxStaticLine(this, wxID_ANY);
     divider->SetBackgroundColour(UIColors::Current->Separator);
     root->Add(divider, 0, wxEXPAND);
 
-    // ── Spacer pushes logout to bottom ────────────────────────────────────────
+    // -- Spacer pushes logout to bottom ----------------------------------------
     root->AddStretchSpacer(1);
 
-    // ── Logout ────────────────────────────────────────────────────────────────
+    // -- Logout ----------------------------------------------------------------
     auto* logoutBtn = new wxButton(this, wxID_ANY, "Log Out");
     UIButtons::ApplySizeBounds(logoutBtn, ButtonType::FullWidthDanger);
     logoutBtn->SetBackgroundColour(UIColors::Current->Danger);
@@ -80,14 +87,14 @@ SettingsPanel::SettingsPanel(wxWindow* parent, AppController& controller, Naviga
 
 }
 
-// ── Private helpers ───────────────────────────────────────────────────────────
+// -- Private helpers -----------------------------------------------------------
 
 void SettingsPanel::RefreshUserInfo()
 {
     User* user = AppState::getInstance().getCurrentUser();
 }
 
-// ── Event handlers ────────────────────────────────────────────────────────────
+// -- Event handlers ------------------------------------------------------------
 
 void SettingsPanel::OnShow(wxShowEvent& evt)
 {

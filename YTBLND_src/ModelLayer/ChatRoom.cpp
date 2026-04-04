@@ -1,3 +1,9 @@
+/**
+ * \file ChatRoom.cpp
+ * \brief Implementation for ChatRoom.
+ * \author Jasmine Kumar
+ */
+
 #include "ChatRoom.hpp"
 #include "JsonUtils.hpp"
 
@@ -8,7 +14,7 @@ ChatRoom::ChatRoom(const std::string& blendID,
                    const std::vector<std::string>& participantIDs)
     : blendID(blendID), participantIDs(participantIDs) {}
 
-// ── Getters ───────────────────────────────────────────────────────────────────
+// -- Getters -------------------------------------------------------------------
 
 std::string ChatRoom::getBlendID() const {
     return blendID;
@@ -22,7 +28,7 @@ std::list<Message> ChatRoom::getMessages() const {
     return messages;
 }
 
-// ── Messaging ─────────────────────────────────────────────────────────────────
+// -- Messaging -----------------------------------------------------------------
 
 void ChatRoom::addMessage(const std::string& userID, const std::string& text) {
     messages.emplace_back(userID, text);

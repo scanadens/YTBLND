@@ -1,3 +1,9 @@
+/**
+ * \file CsvParser.cpp
+ * \brief Implementation for CsvParser.
+ * \author Shamar Pennant
+ */
+
 
 
 #include "CsvParser.hpp"

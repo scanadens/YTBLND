@@ -1,3 +1,9 @@
+/**
+ * \file YouTubeDataImporter.cpp
+ * \brief Implementation for YouTubeDataImporter.
+ * \author Shamar Pennant
+ */
+
 #include "YouTubeDataImporter.hpp"
 
 #include "WatchHistoryParser.hpp"

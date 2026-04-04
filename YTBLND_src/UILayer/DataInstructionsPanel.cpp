@@ -1,5 +1,11 @@
+/**
+ * \file DataInstructionsPanel.cpp
+ * \brief Implementation for DataInstructionsPanel.
+ * \author Jasmine Kumar
+ */
+
 // ============================================================================
-// DataInstructionsPanel.cpp — Google Takeout data setup screen implementation
+// DataInstructionsPanel.cpp - Google Takeout data setup screen implementation
 // ============================================================================
 
 #include "DataInstructionsPanel.hpp"
@@ -25,7 +31,7 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
 
     auto* outer = new wxBoxSizer(wxVERTICAL);
 
-    // ── Heading ───────────────────────────────────────────────────────────────
+    // -- Heading ---------------------------------------------------------------
     auto* heading = new wxStaticText(this, wxID_ANY,
                                      "Set Up Your YouTube Data",
                                      wxDefaultPosition, wxDefaultSize,
@@ -46,7 +52,7 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
     outer->Add(heading, 0, wxALIGN_CENTER | wxBOTTOM, 8);
     outer->Add(sub,     0, wxALIGN_CENTER | wxBOTTOM, 32);
 
-    // ── Steps card ────────────────────────────────────────────────────────────
+    // -- Steps card ------------------------------------------------------------
     auto* card = new wxPanel(this, wxID_ANY);
     card->SetBackgroundColour(UIColors::Surface);
     card->SetMinSize(wxSize(520, -1));
@@ -57,8 +63,8 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
         "2.  Click \"Deselect all\", then tick  YouTube and YouTube Music\n"
         "3.  Export and download the archive\n"
         "4.  Inside the zip, choose one of these files:\n"
-        "       • playlists / <any playlist>.csv  (e.g. Watch later videos.csv)\n"
-        "       • history / watch-history.html\n"
+        "       - playlists / <any playlist>.csv  (e.g. Watch later videos.csv)\n"
+        "       - history / watch-history.html\n"
         "5.  Click \"Browse for Data File...\" below and select that file";
 
     auto* stepsLabel = new wxStaticText(card, wxID_ANY, steps);

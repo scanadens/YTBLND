@@ -17,6 +17,10 @@
  * Reads a Google Takeout watch-history HTML file and extracts YouTube video IDs
  * from watched-video links. Supports both single-threaded and multi-threaded parsing.
  */
+/**
+ * \class WatchHistoryParser
+ * \brief WatchHistoryParser class declaration.
+ */
 class WatchHistoryParser {
 public:
     explicit WatchHistoryParser(const std::string& filePath);
@@ -41,6 +45,11 @@ private:
     std::string filePath;
     int parser_id;
 
+    /**
+     * Pulls the YouTube video idea from href tags
+     * \param href tag to extract the id from
+     * \return \code string \endcode of YouTube video id
+     */
     static std::optional<std::string> extractVideoIdFromHref(const std::string& href);
     
     /**
