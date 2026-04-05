@@ -1,5 +1,7 @@
 # ── Source globs ─────────────────────────────────────────────────────────────
 
+include(${CMAKE_SOURCE_DIR}/cmake/GenerateLinuxDesktopLauncher.cmake)
+
 option(YTBLND_BUILD_TESTS "Build unit tests" ON)
 option(YTBLND_BUILD_UI_TESTS "Build wxWidgets/UI tests" OFF)
 option(YTBLND_REQUIRE_WX "Fail configure if wxWidgets is missing" OFF)
@@ -120,6 +122,41 @@ if(YTBLND_HAS_WX)
     else()
         target_link_libraries(ytblnd PRIVATE wx::core wx::base wx::net)
     endif()
+
+    ytblnd_generate_linux_desktop_launcher(
+        TARGET ytblnd
+        TEMPLATE ${CMAKE_SOURCE_DIR}/resources/linux/ytblnd.desktop.in
+        OUTPUT ${CMAKE_BINARY_DIR}/linux/ytblnd.desktop
+        ICON_PATH ${CMAKE_SOURCE_DIR}/YTBLND_src/resources/ytblnd-framev2.png
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        APP_NAME YTBLND
+        COMMENT "Blend YouTube Watch Later data into a shared feed"
+        WM_CLASS ytblnd
+        CUSTOM_TARGET_NAME ytblnd_linux_desktop_entry
+    )
+
+    ytblnd_generate_linux_desktop_launcher(
+        TARGET ytblnd
+        TEMPLATE ${CMAKE_SOURCE_DIR}/resources/linux/ytblnd.desktop.in
+        OUTPUT ${CMAKE_BINARY_DIR}/linux/ytblnd-install.desktop
+        EXEC_PATH ${CMAKE_INSTALL_PREFIX}/bin/ytblnd
+        ICON_PATH ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/256x256/apps/ytblnd.png
+        WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}
+        APP_NAME YTBLND
+        COMMENT "Blend YouTube Watch Later data into a shared feed"
+        WM_CLASS ytblnd
+        CUSTOM_TARGET_NAME ytblnd_linux_install_desktop_entry
+    )
+
+    install(TARGETS ytblnd RUNTIME DESTINATION bin)
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/YTBLND_src/resources/
+        DESTINATION share/ytblnd/resources)
+    install(FILES ${CMAKE_SOURCE_DIR}/YTBLND_src/resources/ytblnd-framev2.png
+        DESTINATION share/icons/hicolor/256x256/apps
+        RENAME ytblnd.png)
+    install(FILES ${CMAKE_BINARY_DIR}/linux/ytblnd-install.desktop
+        DESTINATION share/applications
+        RENAME ytblnd.desktop)
 endif()
 
 # ── Tests ─────────────────────────────────────────────────────────────────────

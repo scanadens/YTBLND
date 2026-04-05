@@ -1527,6 +1527,24 @@ std::string AppController::get_current_email() {
     return appState.getCurrentUser()->getEmail();
 }
 
+std::string AppController::get_current_blend_id() {
+    if (currentBlend == nullptr) {
+        std::cout << "[AppController] current blend unique pointer has not been initialized with a Blend obj" << std::endl;
+        return "";
+    } else {
+        return currentBlend->getBlendID();
+    }
+}
+
+std::string AppController::get_current_blend_title() {
+    if (currentBlend == nullptr) {
+        std::cout << "[AppController] current blend unique pointer has not been initialized with a Blend obj" << std::endl;
+        return "";
+    } else {
+        return currentBlend->getTitle();
+    }
+}
+
 std::vector<AppController::BlendSummary> AppController::fetchUserBlends() {
     std::vector<BlendSummary> blends;
     User* user = appState.getCurrentUser();

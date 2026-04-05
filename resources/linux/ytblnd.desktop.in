@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=@YTBLND_APP_NAME@
+Comment=@YTBLND_COMMENT@
+Categories=Utility;
+Terminal=false
+StartupNotify=true
+StartupWMClass=@YTBLND_WM_CLASS@
+Exec=@YTBLND_EXEC@
+Icon=@YTBLND_ICON_PATH@
+Path=@YTBLND_WORKING_DIRECTORY@

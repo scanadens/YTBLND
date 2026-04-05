@@ -17,13 +17,12 @@
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
+#include "ResourcePathUtils.hpp"
 #include "OperationProgressDialog.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
 #include "../ModelLayer/User.hpp"
-
-// -- Helpers -------------------------------------------------------------------
 
 static wxTextCtrl* MakeField(wxWindow* parent,
                               const wxString& hint,
@@ -372,19 +371,15 @@ void LoginPanel::LoadThemedBackground() {
     else
         imageFile = "dark_purple_stripes.jpg";
 
-    // Try to find the file
-    for (const auto& candidate : wxArrayString{
-             "YTBLND_src/resources/" + imageFile,
-             "resources/" + imageFile,
-             "../resources/" + imageFile}) {
-        if (wxFileExists(candidate)) {
-            wxImage img(candidate, wxBITMAP_TYPE_JPEG);
-            if (img.IsOk()) {
-                m_bgImage = img;
-                return;
-            }
+    const wxString imagePath = UIResourcePaths::FindResourcePath(imageFile);
+    if (!imagePath.empty()) {
+        wxImage img(imagePath, wxBITMAP_TYPE_JPEG);
+        if (img.IsOk()) {
+            m_bgImage = img;
+            return;
         }
     }
+
     // If not found, clear so OnPaint falls back to solid color
     m_bgImage = wxNullImage;
 }
