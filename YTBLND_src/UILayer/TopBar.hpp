@@ -2,6 +2,7 @@
  * \file TopBar.hpp
  * \brief Reusable interior-page header bar.
  * \author Jasmine Kumar
+ * \author Xavier Lusetti
  *
  * Displays a left-aligned back button and a centred title label for interior
  * pages. The back button triggers the provided NavigateFn callback with the
@@ -11,12 +12,13 @@
 #pragma once
 #include <wx/wx.h>
 #include "UIPages.hpp"
+#include "UIColors.hpp"
 
 /**
  * \class TopBar
  * \brief Reusable horizontal top bar for interior pages.
  */
-class TopBar : public wxPanel {
+class TopBar : public wxPanel, public IThemedElement {
 public:
     /**
      * \brief Construct a TopBar.
@@ -27,16 +29,10 @@ public:
      */
     TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page backDest);
 
-    /** Reloads the back icon from the current theme's icon folder. */
-    void ReloadBackIcon();
+    // Theme update override required because TopBar uses .svg icons
+    void OnThemeUpdate() override;
 
 private:
-    /**
-     * \brief Load the themed back icon bitmap for the top bar.
-     * \param size Target icon size in pixels.
-     * \return Loaded back icon bitmap, or wxNullBitmap on failure.
-     */
-    static wxBitmap LoadBackIcon(int size = 24);
 
     /**
      * \brief Handle clicks on the back button.

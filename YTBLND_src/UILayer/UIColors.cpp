@@ -5,10 +5,15 @@
  */
 
 #include "UIColors.hpp"
-#include "TopBar.hpp"
+#include "ResourcePathUtils.hpp"
+
 #include <fstream>
 #include <string>
 #include <algorithm>
+
+#include <wx/bmpbndl.h>
+#include <wx/mstream.h>
+#include <wx/ffile.h>
 
 // Initialize;
 // unordered map of palettes
@@ -119,6 +124,67 @@ void UIColors::SetTheme(const wxString& themeName) {
     }
 }
 
+wxButton* UIColors::MakeIconButton(wxWindow* parent, const wxString& iconName, 
+                                   ColorRole bgRole, int iconSize) 
+{
+    // Create the button with a size slightly larger than the icon for padding
+    wxButton* btn = new wxButton(parent, wxID_ANY, wxEmptyString, 
+                                 wxDefaultPosition, wxSize(iconSize + 12, iconSize + 12), 
+                                 wxBORDER_NONE);
+
+    // Tag the button with the icon name so OnThemeUpdate knows which SVG to reload
+    btn->SetName(iconName);
+
+    // Apply initial theme colors
+    wxColour bg;
+    switch(bgRole) {
+        case ColorRole::Surface: bg = Surface(); break;
+        default:                 bg = Background(); break;
+    }
+    btn->SetBackgroundColour(bg);
+
+    // Load and set the initial SVG
+    wxBitmapBundle icon = GetIcon(iconName + ".svg", ColorRole::TextPrimary, iconSize);
+    if (icon.IsOk()) {
+        btn->SetBitmap(icon);
+    }
+
+    return btn;
+}
+
+wxBitmapBundle UIColors::GetIcon(const wxString& iconName, ColorRole role, int size) {
+    wxString folder = UIResourcePaths::GetIconFolder();
+    wxString path = UIResourcePaths::FindResourcePath("icons/" + folder + "/" + iconName);
+    
+    if (path.empty() || !Current) return wxBitmapBundle();
+
+    wxFFile file(path, "r");
+    if (!file.IsOpened()) return wxBitmapBundle();
+
+    wxString svgContent;
+    file.ReadAll(&svgContent);
+
+    // Map the role to the current palette's color
+    wxColour targetColor;
+    switch(role) {
+        case ColorRole::Background:    targetColor = Current->Background;       break;
+        case ColorRole::Surface:       targetColor = Current->Surface;          break;
+        case ColorRole::SurfaceRaised: targetColor = Current->SurfaceRaised;    break;
+        case ColorRole::Accent:        targetColor = Current->Accent;           break;
+        case ColorRole::AccentHover:   targetColor = Current->AccentHover;      break;
+        case ColorRole::TextPrimary:   targetColor = Current->TextPrimary;      break;
+        case ColorRole::TextSecondary: targetColor = Current->TextPrimary;      break;
+        case ColorRole::TextMuted:     targetColor = Current->TextPrimary;      break;
+        case ColorRole::Separator:     targetColor = Current->Separator;        break;
+        case ColorRole::Danger:        targetColor = Current->Danger;           break;
+        default:                       targetColor = Current->TextPrimary;
+    }
+
+    svgContent.Replace("CURRENT_COLOR", targetColor.GetAsString(wxC2S_HTML_SYNTAX));
+
+    return wxBitmapBundle::FromSVG(svgContent, wxSize(size, size));
+}
+
 ColorRole UIColors::GetRoleFromColour(const wxColour& col) {
     // Detect roles for current background and foreground by searching through the theme map
     for (auto const& [name, p] : ThemeMap) {
@@ -167,9 +233,9 @@ void UIColors::UpdateUI(wxWindow* win) {
     win->Refresh();
     win->Update();
 
-    // If this window is a TopBar, reload its back icon for the new theme
-    if (auto* topBar = dynamic_cast<TopBar*>(win)) {
-        topBar->ReloadBackIcon();
+    // Generic check for themed elements (.svg elements)
+    if (auto* themed = dynamic_cast<IThemedElement*>(win)) {
+        themed->OnThemeUpdate();
     }
 
     // Recurse through children

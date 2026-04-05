@@ -44,6 +44,15 @@ enum class ColorRole {
     None
 };
 
+/** * \class IThemedElement
+ * \brief Interface for any UI component that needs custom refresh logic (like icons).
+ */
+class IThemedElement {
+public:
+    virtual ~IThemedElement() = default;
+    virtual void OnThemeUpdate() = 0; // Every class implements its own refresh logic
+};
+
 /**
  * \struct Palette
  * \brief Palette class declaration.
@@ -102,6 +111,25 @@ public:
      */
     static void SetTheme(const wxString& themeName);
 
+
+    /**
+     * \brief Centralized factory for icon buttons.
+     * \param parent The parent window.
+     * \param iconName The filename (e.g., "refresh").
+     * \param bgRole The color role for the button background.
+     * \param iconSize Pixel size for the icon.
+     */
+    static wxButton* MakeIconButton(wxWindow* parent, const wxString& iconName, 
+                                    ColorRole bgRole, int iconSize);
+
+
+    /**
+     * \brief Loads an SVG and replaces "CURRENT_COLOR" with a palette color.
+     * \param iconName The filename (e.g., "back.svg")
+     * \param role The color role to apply (e.g., ColorRole::TextPrimary)
+     * \param size Pixel size for the bundle
+     */
+    static wxBitmapBundle GetIcon(const wxString& iconName, ColorRole role, int size);
 
     /**
      * \brief Updates the displaying UI with the active palette.

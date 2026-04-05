@@ -2,6 +2,7 @@
  * \file TopBar.cpp
  * \brief Implementation for TopBar.
  * \author Jasmine Kumar
+ * \author Xavier Lusetti
  */
 
 // ============================================================================
@@ -15,19 +16,6 @@
 #include <wx/font.h>
 #include <wx/image.h>
 
-wxBitmap TopBar::LoadBackIcon(int size) {
-    wxString folder = UIResourcePaths::GetIconFolder();
-    wxString path = UIResourcePaths::FindResourcePath("icons/" + folder + "/back.png");
-    if (!path.empty()) {
-        wxImage img(path, wxBITMAP_TYPE_PNG);
-        if (img.IsOk()) {
-            img.Rescale(size, size, wxIMAGE_QUALITY_BILINEAR);
-            return wxBitmap(img);
-        }
-    }
-    return wxNullBitmap;
-}
-
 TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page backDest)
     : wxPanel(parent, wxID_ANY)
     , m_nav(std::move(nav))
@@ -37,22 +25,22 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
 
     // -- Back icon button (standalone on Background) --------------------------
     m_backBtn = new wxButton(this, wxID_ANY, wxEmptyString,
-                              wxDefaultPosition, wxSize(36, 32),
+                              wxDefaultPosition, wxSize(32, 32),
                               wxBORDER_NONE);
-    m_backBtn->SetBackgroundColour(UIColors::Background());
-    wxBitmap backBmp = LoadBackIcon(24);
-    if (backBmp.IsOk()) m_backBtn->SetBitmap(backBmp);
-    else m_backBtn->SetLabel("< Back");
-    auto* backBtn = m_backBtn;
+    OnThemeUpdate();
 
-    backBtn->Bind(wxEVT_BUTTON, &TopBar::OnBack, this);
-    backBtn->Bind(wxEVT_ENTER_WINDOW, [backBtn](wxMouseEvent& e) {
-        backBtn->SetBackgroundColour(UIColors::SurfaceRaised());
-        backBtn->Refresh(); e.Skip();
+    // Back button event bindings
+    m_backBtn->Bind(wxEVT_BUTTON, &TopBar::OnBack, this);
+        // Hover effects
+    m_backBtn->Bind(wxEVT_ENTER_WINDOW, [this](wxMouseEvent& e) {
+        m_backBtn->SetBackgroundColour(UIColors::SurfaceRaised());
+        m_backBtn->Refresh(); 
+        e.Skip();
     });
-    backBtn->Bind(wxEVT_LEAVE_WINDOW, [backBtn](wxMouseEvent& e) {
-        backBtn->SetBackgroundColour(UIColors::Background());
-        backBtn->Refresh(); e.Skip();
+    m_backBtn->Bind(wxEVT_LEAVE_WINDOW, [this](wxMouseEvent& e) {
+        m_backBtn->SetBackgroundColour(UIColors::Background());
+        m_backBtn->Refresh(); 
+        e.Skip();
     });
 
     // -- Title label ----------------------------------------------------------
@@ -70,7 +58,7 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     // Three-column sizer: [back btn | title (stretch) | right spacer]
     // The right spacer mirrors the back button width so the title stays centred.
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-    sizer->Add(backBtn,    0, wxALIGN_CENTER_VERTICAL | wxLEFT, 8);
+    sizer->Add(m_backBtn,    0, wxALIGN_CENTER_VERTICAL | wxLEFT, 8);
     sizer->AddStretchSpacer(1);
     sizer->Add(titleLabel, 0, wxALIGN_CENTER_VERTICAL);
     sizer->AddStretchSpacer(1);
@@ -83,11 +71,20 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     SetMinSize(wxSize(-1, 40));
 }
 
-void TopBar::ReloadBackIcon()
-{
+void TopBar::OnThemeUpdate() {
     if (!m_backBtn) return;
-    wxBitmap bmp = LoadBackIcon(24);
-    if (bmp.IsOk()) m_backBtn->SetBitmap(bmp);
+
+    // Update the button background to match the new theme
+    m_backBtn->SetBackgroundColour(UIColors::Background());
+
+    // Fetch the updated SVG icon
+    wxBitmapBundle icon = UIColors::GetIcon("back.svg", ColorRole::TextPrimary, 32);
+    
+    if (icon.IsOk()) {
+        m_backBtn->SetBitmap(icon);
+    }
+
+    // Repaint
     m_backBtn->Refresh();
 }
 
