@@ -328,6 +328,27 @@ wxButton* MainFrame::MakeIconButton(wxWindow* parent, const wxString& iconName,
 
     // Shared tooltip popup pointer (one per button, created on first hover)
     auto* tipPtr = new wxPopupWindow*{nullptr};
+    auto hideTip = [tipPtr]() {
+        if (*tipPtr) {
+            (*tipPtr)->Hide();
+            (*tipPtr)->Destroy();
+            *tipPtr = nullptr;
+        }
+    };
+
+    btn->Bind(wxEVT_LEFT_DOWN, [hideTip](wxMouseEvent& e) {
+        hideTip();
+        e.Skip();
+    });
+    btn->Bind(wxEVT_KILL_FOCUS, [hideTip](wxFocusEvent& e) {
+        hideTip();
+        e.Skip();
+    });
+    btn->Bind(wxEVT_DESTROY, [tipPtr, hideTip](wxWindowDestroyEvent& e) {
+        hideTip();
+        delete tipPtr;
+        e.Skip();
+    });
 
     btn->Bind(wxEVT_ENTER_WINDOW, [btn, tipText, tipPtr](wxMouseEvent& e) {
         btn->SetBackgroundColour(UIColors::SurfaceRaised());
@@ -339,7 +360,7 @@ wxButton* MainFrame::MakeIconButton(wxWindow* parent, const wxString& iconName,
             auto* tipPanel = new wxPanel(tip, wxID_ANY);
             tipPanel->SetBackgroundColour(UIColors::SurfaceRaised());
             auto* lbl = new wxStaticText(tipPanel, wxID_ANY, tipText);
-            lbl->SetForegroundColour(UIColors::TextMuted());
+            lbl->SetForegroundColour(UIColors::AccentHover());
             lbl->SetBackgroundColour(UIColors::SurfaceRaised());
             auto* sz = new wxBoxSizer(wxHORIZONTAL);
             sz->Add(lbl, 0, wxALL, 6);
@@ -386,8 +407,20 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     auto* settingsBtn = settingsIconBtn;
     auto* userBtn     = userIconBtn;
 
-    settingsBtn->Bind(wxEVT_BUTTON, [this, settingsBtn](wxCommandEvent&){ ShowSettingsDropdown(settingsBtn); });
-    userBtn    ->Bind(wxEVT_BUTTON, [this, userBtn](wxCommandEvent&){ ShowUserDropdown(userBtn); });
+    settingsBtn->Bind(wxEVT_BUTTON, [this, settingsBtn](wxCommandEvent&){
+        CallAfter([this, settingsBtn]() {
+            if (settingsBtn->IsShownOnScreen()) {
+                ShowSettingsDropdown(settingsBtn);
+            }
+        });
+    });
+    userBtn    ->Bind(wxEVT_BUTTON, [this, userBtn](wxCommandEvent&){
+        CallAfter([this, userBtn]() {
+            if (userBtn->IsShownOnScreen()) {
+                ShowUserDropdown(userBtn);
+            }
+        });
+    });
 
     ribbonSizer->Add(settingsBtn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 8);
     ribbonSizer->Add(userBtn,     0, wxALIGN_CENTER_VERTICAL | wxLEFT, 4);
@@ -474,7 +507,7 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     vbox->Add(bi_panel, 0, wxEXPAND | wxCENTER);
     vbox->Add(feedPanel, 1, wxEXPAND | wxALL, 16);
     vbox->Add(refreshPanel, 0, wxEXPAND);
-    vbox->AddSpacer(16);
+    vbox->AddSpacer(24);
     page->SetSizer(vbox);
 
     return page;
@@ -497,7 +530,7 @@ void MainFrame::ReloadThemedIcons() {
 // -- Helper: create a hoverable row for dropdown menus -------------------------
 namespace {
 wxPanel* MakeDropdownRow(wxWindow* parent, const wxString& label,
-                          const wxColour& textColor = UIColors::TextMuted()) {
+                          const wxColour& textColor = UIColors::TextPrimary()) {
     auto* row = new wxPanel(parent, wxID_ANY);
     row->SetBackgroundColour(UIColors::Surface());
     row->SetMinSize(wxSize(220, 40));
@@ -527,7 +560,7 @@ wxPanel* MakeDropdownRow(wxWindow* parent, const wxString& label,
 // -- Settings dropdown ---------------------------------------------------------
 
 void MainFrame::ShowSettingsDropdown(wxWindow* anchor) {
-    auto* popup = new wxPopupTransientWindow(this);
+    auto* popup = new wxPopupTransientWindow(this, wxBORDER_SIMPLE | wxPU_CONTAINS_CONTROLS);
     auto* panel = new wxPanel(popup, wxID_ANY);
     panel->SetBackgroundColour(UIColors::Surface());
     auto* sizer = new wxBoxSizer(wxVERTICAL);
@@ -547,7 +580,7 @@ void MainFrame::ShowSettingsDropdown(wxWindow* anchor) {
         row->SetMinSize(wxSize(220, 36));
         auto* rowSz = new wxBoxSizer(wxHORIZONTAL);
         auto* lbl = new wxStaticText(row, wxID_ANY, "   " + name);
-        lbl->SetForegroundColour(UIColors::TextMuted());
+        lbl->SetForegroundColour(UIColors::TextPrimary());
         lbl->SetBackgroundColour(UIColors::Surface());
         rowSz->Add(lbl, 0, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 16);
         row->SetSizer(rowSz);
@@ -602,15 +635,14 @@ void MainFrame::ShowSettingsDropdown(wxWindow* anchor) {
     popup->SetClientSize(panel->GetBestSize());
     popup->Layout();
 
-    wxPoint pos = anchor->ClientToScreen(wxPoint(0, anchor->GetSize().GetHeight()));
-    popup->SetPosition(pos);
+    popup->Position(anchor->ClientToScreen(wxPoint(0, 0)), wxSize(0, anchor->GetSize().GetHeight()));
     popup->Popup();
 }
 
 // -- User dropdown -------------------------------------------------------------
 
 void MainFrame::ShowUserDropdown(wxWindow* anchor) {
-    auto* popup = new wxPopupTransientWindow(this);
+    auto* popup = new wxPopupTransientWindow(this, wxBORDER_SIMPLE | wxPU_CONTAINS_CONTROLS);
     auto* panel = new wxPanel(popup, wxID_ANY);
     panel->SetBackgroundColour(UIColors::Surface());
     auto* sizer = new wxBoxSizer(wxVERTICAL);
@@ -698,8 +730,7 @@ void MainFrame::ShowUserDropdown(wxWindow* anchor) {
     popup->SetClientSize(panel->GetBestSize());
     popup->Layout();
 
-    wxPoint pos = anchor->ClientToScreen(wxPoint(0, anchor->GetSize().GetHeight()));
-    popup->SetPosition(pos);
+    popup->Position(anchor->ClientToScreen(wxPoint(0, 0)), wxSize(0, anchor->GetSize().GetHeight()));
     popup->Popup();
 }
 
