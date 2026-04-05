@@ -47,6 +47,16 @@ ActiveBlendsPanel::ActiveBlendsPanel(wxWindow* parent,
 
     root->Add(m_listScroll, 1, wxEXPAND | wxALL, 8);
 
+    // Create New Blend button at the bottom
+    auto* newBlendBtn = new wxButton(this, wxID_ANY, "Create New Blend");
+    UIButtons::ApplySizeBounds(newBlendBtn, ButtonType::FullWidthPrimary);
+    newBlendBtn->SetBackgroundColour(UIColors::Accent());
+    newBlendBtn->SetForegroundColour(UIColors::TextPrimary());
+    newBlendBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
+        m_nav(Page::BLEND_CREATION);
+    });
+    root->Add(newBlendBtn, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 16);
+
     // Empty state label
     m_emptyLabel = new wxStaticText(m_listInner, wxID_ANY,
                                     "No active blends.",

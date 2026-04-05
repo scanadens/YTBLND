@@ -239,8 +239,6 @@ void BlendChatPanel::Reload()
         placeholder->SetForegroundColour(UIColors::TextMuted());
         m_msgSizer->Add(placeholder, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP, 20);
     } else {
-        static const wxColour kHoverBg(50, 50, 50);
-
         for (const Message& msg : msgs) {
             // Message row container
             auto* rowPanel = new wxPanel(m_msgInner, wxID_ANY);
@@ -282,7 +280,7 @@ void BlendChatPanel::Reload()
 
             // -- Hover highlight ---------------------------------------------------
             auto applyHover = [=](bool hover) {
-                wxColour bg = hover ? kHoverBg : UIColors::Surface();
+                wxColour bg = hover ? UIColors::SurfaceRaised() : UIColors::Surface();
                 rowPanel ->SetBackgroundColour(bg);
                 userLabel->SetBackgroundColour(bg);
                 tsLabel  ->SetBackgroundColour(bg);

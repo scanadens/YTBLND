@@ -455,12 +455,14 @@ void AppController::handleRegister(const EventPayload& payload) {
 
             if (!http.wasLastRequestSuccessful(http.P)) {
                 if (http.getLastStatusCode() == http.DUPLICATE) {
-                    std::cerr << "[AppController] handleRegister: userID '"
-                              << newUser.getUserID() << "' already exists\n";
-                } else {
-                    std::cerr << "[AppController] handleRegister: registration failed, HTTP "
-                              << http.getLastStatusCode() << " response=" << registerResponse << "\n";
+                    // Account already exists -- try logging in instead
+                    std::cout << "[AppController] handleRegister: account already exists for '"
+                              << newUser.getUserID() << "', attempting login\n";
+                    handleLogin({{"userID", idIt->second}, {"password", pwIt->second}});
+                    return;
                 }
+                std::cerr << "[AppController] handleRegister: registration failed, HTTP "
+                          << http.getLastStatusCode() << " response=" << registerResponse << "\n";
                 return;
             }
 
@@ -718,40 +720,49 @@ void AppController::handleUploadData(const EventPayload& payload) {
     const std::string& filePath = fileIt->second;
     const std::string& userID   = userIt->second;
 
-    // If there's a pending registration for this user, create the server account first.
+    // If there's a pending registration for this user, create the server account first
+    // (only if it wasn't already created during handleRegister).
     if (pendingRegistration_.has_value() && pendingRegistration_->getUserID() == userID) {
-        if (!isConnected) {
+        if (pendingAccountCreated_) {
+            // Account was already created on the server during handleRegister -- skip re-registration
+            std::cout << "[AppController] handleUploadData: account for '" << userID
+                      << "' already created during registration, skipping\n";
+            pendingRegistration_.reset();
+            pendingAccountCreated_ = false;
+        } else if (!isConnected) {
             appState.setPendingUploadError("Cannot create account while offline. Please connect and try again.");
             return;
-        }
-        std::string registerResponse;
-        try {
-            registerResponse = http.post(
-                http.REG_USER,
-                RequestJsonBuilder::buildRegisterJson(
-                    pendingRegistration_->getUserID(),
-                    pendingRegistration_->getUsername(),
-                    pendingRegistration_->getEmail(),
-                    pendingRegistration_->getPassword()
-                )
-            );
-            if (!http.wasLastRequestSuccessful(http.P)) {
-                if (http.getLastStatusCode() == http.DUPLICATE) {
-                    appState.setPendingUploadError("Registration failed: username already taken. Choose a different username.");
-                } else {
-                    appState.setPendingUploadError("Registration failed: server returned an error. Please try again.");
+        } else {
+            std::string registerResponse;
+            try {
+                registerResponse = http.post(
+                    http.REG_USER,
+                    RequestJsonBuilder::buildRegisterJson(
+                        pendingRegistration_->getUserID(),
+                        pendingRegistration_->getUsername(),
+                        pendingRegistration_->getEmail(),
+                        pendingRegistration_->getPassword()
+                    )
+                );
+                if (!http.wasLastRequestSuccessful(http.P)) {
+                    if (http.getLastStatusCode() == http.DUPLICATE) {
+                        // Account exists -- not an error, just continue with the upload
+                        std::cout << "[AppController] handleUploadData: account already exists for '"
+                                  << userID << "', continuing with upload\n";
+                    } else {
+                        appState.setPendingUploadError("Registration failed: server returned an error. Please try again.");
+                        pendingRegistration_.reset();
+                        return;
+                    }
                 }
-                // clear pending to allow retry or new username flow
                 pendingRegistration_.reset();
+                pendingAccountCreated_ = false;
+            } catch (const std::exception& ex) {
+                appState.setPendingUploadError("Registration failed: network error. Please try again.");
+                std::cerr << "[AppController] handleUploadData: failed to create account for '"
+                          << userID << "' - " << ex.what() << "\n";
                 return;
             }
-            // success - clear pendingRegistration_
-            pendingRegistration_.reset();
-            std::cout << "[AppController] Account created on server for '" << userID << "'\n";
-        } catch (const std::exception& ex) {
-            appState.setPendingUploadError("Registration failed: network error while creating account. Please try again.");
-            std::cerr << "[AppController] handleUploadData: failed to create account for '" << userID << "' - " << ex.what() << "\n";
-            return;
         }
     }
 
@@ -1024,12 +1035,19 @@ void AppController::handleCreateBlend(const EventPayload& payload) {
         return;
     }
 
-    // Attempt to fill in missing metadata for the newly created blend's videos.
-    // If participants have large HTML-imported watch lists, their contribution videos
-    // may lack enriched metadata until now.
-    reportProgress(0.8, "Enriching video metadata...");
-    enrichActiveBlendFeedIfMissingMetadata();
+    // Set active blend first so enrichment can access it if needed
     appState.setActiveBlend(currentBlend.get());
+
+    // Attempt to fill in missing metadata for the newly created blend's videos.
+    reportProgress(0.8, "Enriching video metadata...");
+    try {
+        enrichActiveBlendFeedIfMissingMetadata();
+    } catch (const std::exception& e) {
+        std::cerr << "[AppController] handleCreateBlend: metadata enrichment failed (non-fatal): "
+                  << e.what() << "\n";
+    } catch (...) {
+        std::cerr << "[AppController] handleCreateBlend: metadata enrichment failed (non-fatal)\n";
+    }
     appState.createChatRoom(*currentBlend);
     appState.setIsBlendGenerating(false);
     reportProgress(1.0, "Blend created!");
@@ -1605,11 +1623,18 @@ void AppController::handleLeaveBlend(const EventPayload& payload) {
         }
     }
 
-    // Clear local state if this was the active blend
+    // Clear local state if this was the active blend, then try to load another
     Blend* active = appState.getActiveBlend();
     if (active && active->getBlendID() == blendID) {
         currentBlend.reset();
         appState.setActiveBlend(nullptr);
+
+        // Try to fall back to the next most recent blend
+        auto remaining = fetchUserBlends();
+        if (!remaining.empty()) {
+            handleSelectBlend({{"blendID", remaining[0].blendID},
+                               {"blendTitle", remaining[0].title}});
+        }
     }
 
     std::cout << "[AppController] Left blend '" << blendTitle << "'\n";

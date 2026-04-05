@@ -301,7 +301,7 @@ void LoginPanel::OnRegister(wxCommandEvent& /*evt*/)
          {"password", password}});
 
     if (AppState::getInstance().getCurrentUser() == nullptr) {
-        m_regError->SetLabel("Username already taken. Choose another.");
+        m_regError->SetLabel("Account already exists. Try signing in instead.");
         m_regError->Show(); Layout(); return;
     }
 

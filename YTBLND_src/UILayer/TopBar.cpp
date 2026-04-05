@@ -37,13 +37,14 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
     SetBackgroundColour(UIColors::Background());
 
     // -- Back icon button (standalone on Background) --------------------------
-    auto* backBtn = new wxButton(this, wxID_ANY, wxEmptyString,
-                                  wxDefaultPosition, wxSize(36, 32),
-                                  wxBORDER_NONE);
-    backBtn->SetBackgroundColour(UIColors::Background());
+    m_backBtn = new wxButton(this, wxID_ANY, wxEmptyString,
+                              wxDefaultPosition, wxSize(36, 32),
+                              wxBORDER_NONE);
+    m_backBtn->SetBackgroundColour(UIColors::Background());
     wxBitmap backBmp = LoadBackIcon(24);
-    if (backBmp.IsOk()) backBtn->SetBitmap(backBmp);
-    else backBtn->SetLabel("< Back");
+    if (backBmp.IsOk()) m_backBtn->SetBitmap(backBmp);
+    else m_backBtn->SetLabel("< Back");
+    auto* backBtn = m_backBtn;
 
     backBtn->Bind(wxEVT_BUTTON, &TopBar::OnBack, this);
     backBtn->Bind(wxEVT_ENTER_WINDOW, [backBtn](wxMouseEvent& e) {
@@ -81,6 +82,14 @@ TopBar::TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page bac
 
     SetSizer(outerSizer);
     SetMinSize(wxSize(-1, 40));
+}
+
+void TopBar::ReloadBackIcon()
+{
+    if (!m_backBtn) return;
+    wxBitmap bmp = LoadBackIcon(24);
+    if (bmp.IsOk()) m_backBtn->SetBitmap(bmp);
+    m_backBtn->Refresh();
 }
 
 void TopBar::OnBack(wxCommandEvent& /*evt*/)

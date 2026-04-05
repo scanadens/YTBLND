@@ -27,6 +27,9 @@ public:
      */
     TopBar(wxWindow* parent, const wxString& title, NavigateFn nav, Page backDest);
 
+    /** Reloads the back icon from the current theme's icon folder. */
+    void ReloadBackIcon();
+
 private:
     /**
      * \brief Load the themed back icon bitmap for the top bar.
@@ -45,4 +48,6 @@ private:
     NavigateFn m_nav;
     /** Destination page used when the back button is activated. */
     Page       m_backDest;
+    /** Stored reference to the back button for icon reloading. */
+    wxButton*  m_backBtn = nullptr;
 };

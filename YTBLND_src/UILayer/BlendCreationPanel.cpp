@@ -257,10 +257,35 @@ void BlendCreationPanel::RebuildUserList()
                                                wxString::FromUTF8(username));
             nameLabel->SetForegroundColour(UIColors::TextPrimary());
 
-            auto* removeBtn = new wxButton(row, wxID_ANY, wxT("\xc3\x97"));
-            UIButtons::ApplySizeBounds(removeBtn, ButtonType::Icon);
+            auto* removeBtn = new wxButton(row, wxID_ANY, wxEmptyString,
+                                           wxDefaultPosition, wxSize(30, 30),
+                                           wxBORDER_NONE);
             removeBtn->SetBackgroundColour(UIColors::SurfaceRaised());
-            removeBtn->SetForegroundColour(UIColors::Danger());
+            {
+                wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
+                wxString folder = themeName.BeforeFirst(' ').Lower();
+                for (const auto& c : wxArrayString{
+                         "YTBLND_src/resources/icons/" + folder + "/remove.png",
+                         "resources/icons/" + folder + "/remove.png",
+                         "../resources/icons/" + folder + "/remove.png"}) {
+                    if (wxFileExists(c)) {
+                        wxImage img(c, wxBITMAP_TYPE_PNG);
+                        if (img.IsOk()) {
+                            img.Rescale(18, 18, wxIMAGE_QUALITY_BILINEAR);
+                            removeBtn->SetBitmap(wxBitmap(img));
+                        }
+                        break;
+                    }
+                }
+            }
+            removeBtn->Bind(wxEVT_ENTER_WINDOW, [removeBtn](wxMouseEvent& e) {
+                removeBtn->SetBackgroundColour(UIColors::Surface());
+                removeBtn->Refresh(); e.Skip();
+            });
+            removeBtn->Bind(wxEVT_LEAVE_WINDOW, [removeBtn](wxMouseEvent& e) {
+                removeBtn->SetBackgroundColour(UIColors::SurfaceRaised());
+                removeBtn->Refresh(); e.Skip();
+            });
 
             // Capture username by value for the lambda
             std::string cap = username;

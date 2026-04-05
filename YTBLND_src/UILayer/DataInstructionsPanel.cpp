@@ -15,6 +15,7 @@
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
+#include "TopBar.hpp"
 #include "../AppLayer/AppController.hpp"
 #include "../AppLayer/AppState.hpp"
 #include "../AppLayer/EventRouter.hpp"
@@ -30,6 +31,10 @@ DataInstructionsPanel::DataInstructionsPanel(wxWindow*      parent,
     SetBackgroundColour(UIColors::Background());
 
     auto* outer = new wxBoxSizer(wxVERTICAL);
+
+    // -- TopBar with back to LOGIN ------------------------------------------------
+    auto* topBar = new TopBar(this, "Upload Data", m_nav, Page::LOGIN);
+    outer->Add(topBar, 0, wxEXPAND);
 
     // -- Heading ---------------------------------------------------------------
     auto* heading = new wxStaticText(this, wxID_ANY,
