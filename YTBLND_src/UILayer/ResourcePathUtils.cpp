@@ -4,6 +4,7 @@
  */
 
 #include "ResourcePathUtils.hpp"
+#include "UIColors.hpp"
 
 #include <wx/filefn.h>
 #include <wx/filename.h>
@@ -41,6 +42,23 @@ wxString FindResourcePath(const wxString& fileName)
     }
 
     return wxEmptyString;
+}
+
+wxString GetIconFolder()
+{
+    wxString themeName = "Dark Mode";
+    if (UIColors::Current) {
+        themeName = UIColors::Current->Name;
+    }
+
+    if (themeName == "Dark Mode")     return "dark";
+    if (themeName == "Light Mode")    return "light";
+    if (themeName == "Neon Mode")     return "neon";
+    if (themeName == "Cyber Amber")   return "amber";
+    if (themeName == "Forest Floor")  return "amber";
+    if (themeName == "Nordic Frost")  return "light";
+    // All remaining dark-background themes use dark icons
+    return "dark";
 }
 
 }

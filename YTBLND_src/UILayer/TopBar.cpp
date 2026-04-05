@@ -16,8 +16,7 @@
 #include <wx/image.h>
 
 wxBitmap TopBar::LoadBackIcon(int size) {
-    wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
-    wxString folder = themeName.BeforeFirst(' ').Lower();
+    wxString folder = UIResourcePaths::GetIconFolder();
     wxString path = UIResourcePaths::FindResourcePath("icons/" + folder + "/back.png");
     if (!path.empty()) {
         wxImage img(path, wxBITMAP_TYPE_PNG);
