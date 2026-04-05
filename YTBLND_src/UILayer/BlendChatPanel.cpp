@@ -28,15 +28,53 @@
 #include "../ModelLayer/Blend.hpp"
 #include "../ModelLayer/User.hpp"
 
-// -- Helper: format a Unix timestamp as HH:MM ---------------------------------
+// -- Helper: format a Unix timestamp with relative local-time labels ---
 
-static wxString FormatTimestamp(std::time_t ts)
+static bool GetLocalTime(std::time_t ts, std::tm& outLocal)
 {
-    std::tm* tm = std::localtime(&ts);
-    if (!tm) return "??:??";
-    char buf[9]; // "12:34 PM\0"
-    std::strftime(buf, sizeof(buf), "%I:%M %p", tm);
-    return wxString::FromAscii(buf);
+    // Keep conversion thread-safe across platforms.
+#if defined(_WIN32)
+    return localtime_s(&outLocal, &ts) == 0;
+#else
+    return localtime_r(&ts, &outLocal) != nullptr;
+#endif
+}
+
+static bool IsSameLocalDay(const std::tm& a, const std::tm& b)
+{
+    return a.tm_year == b.tm_year && a.tm_yday == b.tm_yday;
+}
+
+wxString BlendChatPanel::FormatTimestamp(std::time_t ts, std::time_t now)
+{
+    std::tm msgLocal{};
+    std::tm nowLocal{};
+    if (!GetLocalTime(ts, msgLocal) || !GetLocalTime(now, nowLocal)) {
+        return "unknown-time";
+    }
+
+    char timeBuf[12]; // "HH:MM\0"
+    std::strftime(timeBuf, sizeof(timeBuf), "%H:%M", &msgLocal);
+
+    if (IsSameLocalDay(msgLocal, nowLocal)) {
+        return wxString::Format("Today at %s", wxString::FromAscii(timeBuf));
+    }
+
+    std::tm yesterdayLocal{};
+    if (GetLocalTime(now - 24 * 60 * 60, yesterdayLocal) && IsSameLocalDay(msgLocal, yesterdayLocal)) {
+        return wxString::Format("Yesterday at %s", wxString::FromAscii(timeBuf));
+    }
+
+    const int monthDiff = (nowLocal.tm_year - msgLocal.tm_year) * 12 + (nowLocal.tm_mon - msgLocal.tm_mon);
+    if (monthDiff >= 12) {
+        char fullBuf[40]; // "Mon DD, YYYY at HH:MM\0"
+        std::strftime(fullBuf, sizeof(fullBuf), "%b %d, %Y at %H:%M", &msgLocal);
+        return wxString::FromAscii(fullBuf);
+    }
+
+    char recentBuf[32]; // "Mon DD at HH:MM\0"
+    std::strftime(recentBuf, sizeof(recentBuf), "%b %d at %H:%M", &msgLocal);
+    return wxString::FromAscii(recentBuf);
 }
 
 // -- Construction --------------------------------------------------------------
@@ -231,6 +269,8 @@ void BlendChatPanel::Reload()
 
     const std::list<Message>& msgs = room->getMessages();
 
+    const std::time_t renderNow = std::time(nullptr);
+
     if (msgs.empty()) {
         auto* placeholder = new wxStaticText(m_msgInner, wxID_ANY,
                                              "No messages yet.",
@@ -246,7 +286,7 @@ void BlendChatPanel::Reload()
 
             auto* rowSizer = new wxBoxSizer(wxVERTICAL);
 
-            // -- Header line: [username bold]  [spacer]  [HH:MM AM/PM small grey] --
+            // -- Header line: [username bold]  [spacer]  [UTC timestamp small grey] --
             auto* headerLine = new wxBoxSizer(wxHORIZONTAL);
 
             auto* userLabel = new wxStaticText(rowPanel, wxID_ANY,
@@ -257,7 +297,7 @@ void BlendChatPanel::Reload()
             userLabel->SetFont(uf);
 
             auto* tsLabel = new wxStaticText(rowPanel, wxID_ANY,
-                                             FormatTimestamp(msg.timestamp));
+                                             FormatTimestamp(msg.timestamp, renderNow));
             tsLabel->SetForegroundColour(UIColors::TextMuted());
             wxFont tf = tsLabel->GetFont();
             tf.SetPointSize(tf.GetPointSize() - 1);

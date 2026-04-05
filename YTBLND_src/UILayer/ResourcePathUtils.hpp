@@ -1,5 +1,6 @@
 /**
  * \file ResourcePathUtils.hpp
+ * \author Xavier Lusetti
  * \author Shamar Pennant
  * \brief Shared resource path resolution helpers for UI components.
  */

@@ -17,7 +17,7 @@
  * Reload() reads AppState::getActiveChatRoom()->getMessages() and rebuilds
  * all message rows from scratch. Each row shows:
  *   "[userID]: message text"  (secondary + primary colour)
- *   HH:MM timestamp           (muted, smaller font)
+*   Relative local timestamp (Today/Yesterday, then month/day, then year after 12 months)
  * Messages are separated by thin wxStaticLine rules. The list auto-scrolls
  * to the bottom after each rebuild.
  *
@@ -44,6 +44,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <ctime>
 #include <utility>
 #include <vector>
 
@@ -125,4 +126,19 @@ private:
     void OnInputEnter(wxCommandEvent& evt);
     void OnPollTimer(wxTimerEvent& evt);
     void OnParticipantsToggle(wxCommandEvent& evt);
+
+     /**
+      * \brief Formats one chat message timestamp into a user-facing local-time label.
+     *
+     * Formatting rules are relative to \p now:
+      * - Same local day: "Today at HH:MM"
+      * - Previous local day: "Yesterday at HH:MM"
+      * - Older than yesterday but less than 12 months: "Mon DD at HH:MM"
+      * - 12+ months old: "Mon DD, YYYY at HH:MM"
+     *
+     * \param ts  Message timestamp (Unix seconds).
+     * \param now Reference timestamp used for relative display (Unix seconds).
+      * \return Formatted local timestamp string for display in the chat UI.
+     */
+    static wxString FormatTimestamp(std::time_t ts, std::time_t now);
 };
