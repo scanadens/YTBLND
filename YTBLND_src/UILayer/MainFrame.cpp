@@ -14,6 +14,11 @@
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
 #include "ResourcePathUtils.hpp"
+#include "ConfirmationDialog.hpp"
+
+#include <wx/popupwin.h>
+#include <wx/filedlg.h>
+#include <wx/statline.h>
 #include "LoginPanel.hpp"
 #include "DataInstructionsPanel.hpp"
 #include "BlendFeedPanel.hpp"
@@ -294,8 +299,7 @@ void MainFrame::UpdateBlendIndicatorLabel() {
 // -- Icon helpers -------------------------------------------------------------
 
 wxBitmap MainFrame::LoadThemedIcon(const wxString& name, int size) {
-    wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
-    wxString folder = themeName.BeforeFirst(' ').Lower();
+    wxString folder = UIResourcePaths::GetIconFolder();
     wxString path = UIResourcePaths::FindResourcePath("icons/" + folder + "/" + name + ".png");
     if (!path.empty()) {
         wxImage img(path, wxBITMAP_TYPE_PNG);
@@ -317,16 +321,51 @@ wxButton* MainFrame::MakeIconButton(wxWindow* parent, const wxString& iconName,
     wxBitmap bmp = LoadThemedIcon(iconName, iconSize);
     if (bmp.IsOk()) btn->SetBitmap(bmp);
 
-    // Look up the CURRENT palette color on each hover/leave so it stays
-    // correct after theme switches
-    btn->Bind(wxEVT_ENTER_WINDOW, [btn](wxMouseEvent& e) {
+    // Capitalize first letter for display
+    wxString tipText = iconName;
+    if (!tipText.empty())
+        tipText[0] = wxToupper(tipText[0]);
+
+    // Shared tooltip popup pointer (one per button, created on first hover)
+    auto* tipPtr = new wxPopupWindow*{nullptr};
+
+    btn->Bind(wxEVT_ENTER_WINDOW, [btn, tipText, tipPtr](wxMouseEvent& e) {
         btn->SetBackgroundColour(UIColors::SurfaceRaised());
-        btn->Refresh(); e.Skip();
+        btn->Refresh();
+
+        // Create themed tooltip near the cursor
+        if (!*tipPtr) {
+            auto* tip = new wxPopupWindow(btn->GetParent());
+            auto* tipPanel = new wxPanel(tip, wxID_ANY);
+            tipPanel->SetBackgroundColour(UIColors::SurfaceRaised());
+            auto* lbl = new wxStaticText(tipPanel, wxID_ANY, tipText);
+            lbl->SetForegroundColour(UIColors::TextMuted());
+            lbl->SetBackgroundColour(UIColors::SurfaceRaised());
+            auto* sz = new wxBoxSizer(wxHORIZONTAL);
+            sz->Add(lbl, 0, wxALL, 6);
+            tipPanel->SetSizer(sz);
+            tipPanel->Fit();
+            tip->SetClientSize(tipPanel->GetBestSize());
+            *tipPtr = tip;
+        }
+        // Position centered below the button
+        wxPoint btnScreen = btn->ClientToScreen(wxPoint(0, btn->GetSize().GetHeight()));
+        int tipW = (*tipPtr)->GetSize().GetWidth();
+        int btnW = btn->GetSize().GetWidth();
+        (*tipPtr)->SetPosition(wxPoint(btnScreen.x + (btnW - tipW) / 2, btnScreen.y + 4));
+        (*tipPtr)->Show();
+        e.Skip();
     });
-    btn->Bind(wxEVT_LEAVE_WINDOW, [btn, base](wxMouseEvent& e) {
+    btn->Bind(wxEVT_LEAVE_WINDOW, [btn, base, tipPtr](wxMouseEvent& e) {
         btn->SetBackgroundColour(
             (base == IconBase::Surface) ? UIColors::Surface() : UIColors::Background());
-        btn->Refresh(); e.Skip();
+        btn->Refresh();
+        if (*tipPtr) {
+            (*tipPtr)->Hide();
+            (*tipPtr)->Destroy();
+            *tipPtr = nullptr;
+        }
+        e.Skip();
     });
     return btn;
 }
@@ -347,8 +386,8 @@ wxPanel* MainFrame::BuildHomePage(wxWindow* parent) {
     auto* settingsBtn = settingsIconBtn;
     auto* userBtn     = userIconBtn;
 
-    settingsBtn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::SETTINGS); });
-    userBtn    ->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ NavigateTo(Page::USER); });
+    settingsBtn->Bind(wxEVT_BUTTON, [this, settingsBtn](wxCommandEvent&){ ShowSettingsDropdown(settingsBtn); });
+    userBtn    ->Bind(wxEVT_BUTTON, [this, userBtn](wxCommandEvent&){ ShowUserDropdown(userBtn); });
 
     ribbonSizer->Add(settingsBtn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 8);
     ribbonSizer->Add(userBtn,     0, wxALIGN_CENTER_VERTICAL | wxLEFT, 4);
@@ -453,6 +492,215 @@ void MainFrame::ReloadThemedIcons() {
     reload(blendsIconBtn,   "blends",   32);
     reload(chatIconBtn,     "chat",     32);
     reload(refreshBtn,      "refresh",  40);
+}
+
+// -- Helper: create a hoverable row for dropdown menus -------------------------
+namespace {
+wxPanel* MakeDropdownRow(wxWindow* parent, const wxString& label,
+                          const wxColour& textColor = UIColors::TextMuted()) {
+    auto* row = new wxPanel(parent, wxID_ANY);
+    row->SetBackgroundColour(UIColors::Surface());
+    row->SetMinSize(wxSize(220, 40));
+    auto* sizer = new wxBoxSizer(wxHORIZONTAL);
+    auto* lbl = new wxStaticText(row, wxID_ANY, label);
+    lbl->SetForegroundColour(textColor);
+    lbl->SetBackgroundColour(UIColors::Surface());
+    sizer->Add(lbl, 0, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 16);
+    row->SetSizer(sizer);
+
+    for (wxWindow* w : {static_cast<wxWindow*>(row), static_cast<wxWindow*>(lbl)}) {
+        w->Bind(wxEVT_ENTER_WINDOW, [row, lbl](wxMouseEvent& e) {
+            row->SetBackgroundColour(UIColors::SurfaceRaised());
+            lbl->SetBackgroundColour(UIColors::SurfaceRaised());
+            row->Refresh(); e.Skip();
+        });
+        w->Bind(wxEVT_LEAVE_WINDOW, [row, lbl](wxMouseEvent& e) {
+            row->SetBackgroundColour(UIColors::Surface());
+            lbl->SetBackgroundColour(UIColors::Surface());
+            row->Refresh(); e.Skip();
+        });
+    }
+    return row;
+}
+}
+
+// -- Settings dropdown ---------------------------------------------------------
+
+void MainFrame::ShowSettingsDropdown(wxWindow* anchor) {
+    auto* popup = new wxPopupTransientWindow(this);
+    auto* panel = new wxPanel(popup, wxID_ANY);
+    panel->SetBackgroundColour(UIColors::Surface());
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
+
+    // "Theme >" row — toggles the theme list below
+    auto* themeRow = MakeDropdownRow(panel, "Theme  >");
+    sizer->Add(themeRow, 0, wxEXPAND);
+
+    // Theme sub-items (initially hidden)
+    auto* themeSub = new wxPanel(panel, wxID_ANY);
+    themeSub->SetBackgroundColour(UIColors::Surface());
+    auto* themeSubSizer = new wxBoxSizer(wxVERTICAL);
+
+    for (const wxString& name : UIColors::ThemeOrder) {
+        auto* row = new wxPanel(themeSub, wxID_ANY);
+        row->SetBackgroundColour(UIColors::Surface());
+        row->SetMinSize(wxSize(220, 36));
+        auto* rowSz = new wxBoxSizer(wxHORIZONTAL);
+        auto* lbl = new wxStaticText(row, wxID_ANY, "   " + name);
+        lbl->SetForegroundColour(UIColors::TextMuted());
+        lbl->SetBackgroundColour(UIColors::Surface());
+        rowSz->Add(lbl, 0, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 16);
+        row->SetSizer(rowSz);
+
+        // Hover
+        for (wxWindow* w : {static_cast<wxWindow*>(row), static_cast<wxWindow*>(lbl)}) {
+            w->Bind(wxEVT_ENTER_WINDOW, [row, lbl](wxMouseEvent& e) {
+                row->SetBackgroundColour(UIColors::SurfaceRaised());
+                lbl->SetBackgroundColour(UIColors::SurfaceRaised());
+                row->Refresh(); e.Skip();
+            });
+            w->Bind(wxEVT_LEAVE_WINDOW, [row, lbl](wxMouseEvent& e) {
+                row->SetBackgroundColour(UIColors::Surface());
+                lbl->SetBackgroundColour(UIColors::Surface());
+                row->Refresh(); e.Skip();
+            });
+        }
+
+        // Click — apply theme
+        wxString capName = name;
+        auto themeAction = [this, popup, capName](wxMouseEvent&) {
+            UIColors::SetTheme(capName);
+            wxWindow* top = wxGetTopLevelParent(this);
+            UIColors::UpdateUI(top);
+            controller.getEventRouter().dispatch("theme_updated", {});
+            popup->Dismiss();
+        };
+        row->Bind(wxEVT_LEFT_UP, themeAction);
+        lbl->Bind(wxEVT_LEFT_UP, themeAction);
+
+        themeSubSizer->Add(row, 0, wxEXPAND);
+    }
+    themeSub->SetSizer(themeSubSizer);
+    themeSub->Hide();
+    sizer->Add(themeSub, 0, wxEXPAND);
+
+    // Toggle theme sub-list on click of "Theme >" row
+    auto toggleThemes = [themeSub, panel, popup](wxMouseEvent&) {
+        themeSub->Show(!themeSub->IsShown());
+        panel->Layout();
+        panel->Fit();
+        popup->SetClientSize(panel->GetBestSize());
+        popup->Layout();
+    };
+    themeRow->Bind(wxEVT_LEFT_UP, toggleThemes);
+    for (wxWindow* w : themeRow->GetChildren())
+        w->Bind(wxEVT_LEFT_UP, toggleThemes);
+
+    panel->SetSizer(sizer);
+    panel->Layout();
+    panel->Fit();
+    popup->SetClientSize(panel->GetBestSize());
+    popup->Layout();
+
+    wxPoint pos = anchor->ClientToScreen(wxPoint(0, anchor->GetSize().GetHeight()));
+    popup->SetPosition(pos);
+    popup->Popup();
+}
+
+// -- User dropdown -------------------------------------------------------------
+
+void MainFrame::ShowUserDropdown(wxWindow* anchor) {
+    auto* popup = new wxPopupTransientWindow(this);
+    auto* panel = new wxPanel(popup, wxID_ANY);
+    panel->SetBackgroundColour(UIColors::Surface());
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
+
+    // Username display (centered, non-clickable)
+    User* user = AppState::getInstance().getCurrentUser();
+    wxString username = user ? wxString::FromUTF8(user->getUsername()) : "Not logged in";
+    auto* nameLabel = new wxStaticText(panel, wxID_ANY, username,
+                                        wxDefaultPosition, wxDefaultSize,
+                                        wxALIGN_CENTRE_HORIZONTAL);
+    nameLabel->SetForegroundColour(UIColors::TextPrimary());
+    nameLabel->SetBackgroundColour(UIColors::Surface());
+    nameLabel->SetMinSize(wxSize(220, -1));
+    wxFont nf = nameLabel->GetFont();
+    nf.SetWeight(wxFONTWEIGHT_BOLD);
+    nameLabel->SetFont(nf);
+    sizer->Add(nameLabel, 0, wxEXPAND | wxALL, 10);
+
+    // "Re-upload Data" row
+    auto* reuploadRow = MakeDropdownRow(panel, "Re-upload Data");
+    sizer->Add(reuploadRow, 0, wxEXPAND);
+
+    auto reuploadAction = [this, popup](wxMouseEvent&) {
+        popup->Dismiss();
+        User* u = AppState::getInstance().getCurrentUser();
+        if (!u) return;
+        wxFileDialog dlg(this, "Select Watch Later CSV", "", "",
+                         "Supported files (*.csv;*.html;*.htm)|*.csv;*.html;*.htm|All files (*.*)|*.*",
+                         wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+        if (dlg.ShowModal() != wxID_OK) return;
+        controller.getEventRouter().dispatch("uploadData",
+            {{"filePath", dlg.GetPath().ToStdString()}, {"userID", u->getUserID()}});
+        wxMessageBox("Your data has been re-uploaded.", "Data Updated", wxOK | wxICON_INFORMATION, this);
+    };
+    reuploadRow->Bind(wxEVT_LEFT_UP, reuploadAction);
+    for (wxWindow* w : reuploadRow->GetChildren())
+        w->Bind(wxEVT_LEFT_UP, reuploadAction);
+
+    // "Delete Account" row (same muted color as others, no red)
+    auto* deleteRow = MakeDropdownRow(panel, "Delete Account");
+    sizer->Add(deleteRow, 0, wxEXPAND);
+
+    auto deleteAction = [this, popup](wxMouseEvent&) {
+        popup->Dismiss();
+        User* u = AppState::getInstance().getCurrentUser();
+        if (!u) return;
+        bool confirmed = ConfirmationDialog::Confirm(this, "Delete Account",
+            "Are you sure you want to delete your account? This cannot be undone.");
+        if (!confirmed) return;
+        wxTextEntryDialog pwDlg(this, "Re-enter your password:", "Confirm Delete");
+        if (pwDlg.ShowModal() != wxID_OK) return;
+        std::string password = pwDlg.GetValue().ToStdString();
+        if (password.empty()) return;
+        controller.getEventRouter().dispatch("deleteAccount",
+            {{"userID", u->getUserID()}, {"password", password}});
+        if (AppState::getInstance().getCurrentUser() == nullptr) {
+            wxMessageBox("Account deleted.", "Done", wxOK | wxICON_INFORMATION, this);
+            NavigateTo(Page::LOGIN);
+        } else {
+            wxMessageBox("Delete failed. Check password.", "Error", wxOK | wxICON_ERROR, this);
+        }
+    };
+    deleteRow->Bind(wxEVT_LEFT_UP, deleteAction);
+    for (wxWindow* w : deleteRow->GetChildren())
+        w->Bind(wxEVT_LEFT_UP, deleteAction);
+
+    // "Log Out" row
+    auto* logoutRow = MakeDropdownRow(panel, "Log Out");
+    sizer->Add(logoutRow, 0, wxEXPAND);
+
+    auto logoutAction = [this, popup](wxMouseEvent&) {
+        popup->Dismiss();
+        bool confirmed = ConfirmationDialog::Confirm(this, "Log Out", "Log out?");
+        if (!confirmed) return;
+        controller.getEventRouter().dispatch("logout", {});
+        NavigateTo(Page::LOGIN);
+    };
+    logoutRow->Bind(wxEVT_LEFT_UP, logoutAction);
+    for (wxWindow* w : logoutRow->GetChildren())
+        w->Bind(wxEVT_LEFT_UP, logoutAction);
+
+    panel->SetSizer(sizer);
+    panel->Layout();
+    panel->Fit();
+    popup->SetClientSize(panel->GetBestSize());
+    popup->Layout();
+
+    wxPoint pos = anchor->ClientToScreen(wxPoint(0, anchor->GetSize().GetHeight()));
+    popup->SetPosition(pos);
+    popup->Popup();
 }
 
 bool MainFrame::LoadImage(int key, const wxString& path)

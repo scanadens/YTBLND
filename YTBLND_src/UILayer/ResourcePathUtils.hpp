@@ -17,4 +17,12 @@ namespace UIResourcePaths {
  */
 wxString FindResourcePath(const wxString& fileName);
 
+/**
+ * \brief Returns the icon folder name for the current theme.
+ *
+ * Maps theme names to icon folder names. Themes without their own icon set
+ * fall back to the closest visual match (dark or light).
+ */
+wxString GetIconFolder();
+
 }

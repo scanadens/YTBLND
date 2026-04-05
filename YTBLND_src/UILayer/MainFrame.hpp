@@ -143,4 +143,9 @@ private:
     void OnRefresh (wxCommandEvent&);  ///< Advances the feed by one page.
 
     bool LoadImage(int key, const wxString& path);
+
+    /** Shows the settings dropdown (theme picker + logout) anchored below the given button. */
+    void ShowSettingsDropdown(wxWindow* anchor);
+    /** Shows the user dropdown (account actions) anchored below the given button. */
+    void ShowUserDropdown(wxWindow* anchor);
 };

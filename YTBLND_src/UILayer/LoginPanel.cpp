@@ -12,8 +12,10 @@
 #include "LoginPanel.hpp"
 
 #include <wx/dcbuffer.h>
+#include <wx/graphics.h>
 #include <wx/simplebook.h>
 #include <wx/statline.h>
+#include <unordered_map>
 
 #include "UIColors.hpp"
 #include "ButtonsConfig.hpp"
@@ -62,7 +64,7 @@ LoginPanel::LoginPanel(wxWindow* parent, AppController& controller, NavigateFn n
     // -- Outer centering sizer -------------------------------------------------
     auto* outer = new wxBoxSizer(wxVERTICAL);
 
-    // -- YTBLND title ----------------------------------------------------------
+    // -- YTBLND title -------------------------------------------------------------
     auto* titleLabel = new wxStaticText(this, wxID_ANY, "YTBLND",
                                         wxDefaultPosition, wxDefaultSize,
                                         wxALIGN_CENTRE_HORIZONTAL);
@@ -360,16 +362,20 @@ void LoginPanel::Reset()
 // -- Themed background --------------------------------------------------------
 
 void LoginPanel::LoadThemedBackground() {
-    // Map theme name to background image filename
     wxString themeName = UIColors::Current ? UIColors::Current->Name : wxString("Dark Mode");
-    wxString imageFile;
 
-    if (themeName == "Light Mode")
-        imageFile = "checkered_wave_background.jpg";
-    else if (themeName == "Neon Mode")
-        imageFile = "purple_neon_synth.jpg";
-    else
-        imageFile = "dark_purple_stripes.jpg";
+    static const std::unordered_map<wxString, wxString> bgMap = {
+        {"Dark Mode",     "dark_purple_stripes.jpg"},
+        {"Light Mode",    "checkered_wave_background.jpg"},
+        {"Neon Mode",     "purple_neon_synth.jpg"},
+        {"Cyber Amber",   "cyber_amber.jpg"},
+        {"Nordic Frost",  "nordic_frost.jpg"},
+        {"Forest Floor",  "forest_floor.jpg"},
+        {"Synthwave 84",  "synthwave_84.jpg"},
+    };
+
+    auto it = bgMap.find(themeName);
+    wxString imageFile = (it != bgMap.end()) ? it->second : "dark_purple_stripes.jpg";
 
     const wxString imagePath = UIResourcePaths::FindResourcePath(imageFile);
     if (!imagePath.empty()) {
@@ -379,8 +385,6 @@ void LoginPanel::LoadThemedBackground() {
             return;
         }
     }
-
-    // If not found, clear so OnPaint falls back to solid color
     m_bgImage = wxNullImage;
 }
 
