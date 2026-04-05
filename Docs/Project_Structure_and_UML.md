@@ -76,4 +76,4 @@ YTBLEND/
 
 # UML Class Diagram
 
-![YT-BLND-UML.drawio.svg](Docs/Resources/YT-BLND-uml-diag.drawio.svg)
+![YT-BLND-uml-diag-Page-1.jpg](Docs/Resources/YT-BLND-uml-diag-Page-1.jpg) 
