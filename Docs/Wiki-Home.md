@@ -54,3 +54,5 @@ Links to our documentation is listed as a glossary below.
 [README](README)
 
 [Client Requirements](Front_End_Requirements_for_Server_Communication)
+
+[Justification For Non-C++ Server Implementation](Reasons_for_steering_away_from_a_complete_C++_proj)
