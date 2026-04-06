@@ -263,12 +263,28 @@ Visit [Google Takeout](https://takeout.google.com/) to download your YouTube dat
 
 ## Known Bugs & Issues
 
-- Theme selection is limited to the current build session (is not backed by the server and refreshes on building src)
-- Certain account logins redirect to other accounts being logged in instead
+### Minor
+
+- Full legitimate (or at least streamlined) installation is limited to Linux
 - Blend does not filter out ads from `watch-history.html`
-- App installation is currently limited to Linux
-- There is no means of the user being able to save a copy of their YouTube data through the app
+- Theme selection is limited to the current build session (is not backed by the server and refreshes on building src)
+- Add new members to an already existing blend without recreating it
+- Make theme selection persist per-user across sessions instead of per-session
+- Toggle YouTube Shorts on or off in the blend feed
+- Filter out ads from uploaded watch history data
+- General UI cleanup and polish
+- The UI is not consistent across different OS. (most polished on Linux builds)
+
+### Major
+
+- There are no super privileges within chatrooms (can’t kick people out)
+- No meta data tags or categorization for the blend feed (as a result can’t block videos through tag selection)
 - Unable to add other users within the app as a standalone friend without creating a blend with them
-- No meta data tags or categorization for the blend feed (as a result can't block videos through tag selection)
-- There are no super privileges within chatrooms (can't kick people out) 
-- Full legitimate (or at least streamlined) installation is limited to Linux 
+- There is no means of the user being able to save a copy of their YouTube data through the app
+- App installation is currently limited to Linux
+- **Blend hierarchy*** — distinguish creator from members with role-based privileges; creator can moderate chat and manage blend membership
+- **Friends feature** — maintain a friends list and add friends directly to blends
+- **OAuth integration** — connect with Google OAuth for seamless data import without manual CSV/HTML export
+- **Blend algorithm selection**— offer different algorithms with filters by user, genre, recency, etc.
+- **Settings control** centralize user preferences (theme, algorithm, filters) in a dedicated settings panel
+- Certain account logins redirect to other accounts being logged in instead
