@@ -7,8 +7,8 @@
 // ============================================================================
 // main.cpp - Application entry point
 //
-// Creates the single AppController (which owns AppState, EventRouter, and
-// SqliteDataManager), initialises wxWidgets image handlers for thumbnail
+// Creates the single AppController (which owns AppState and EventRouter),
+// initialises wxWidgets image handlers for thumbnail
 // loading, then shows the MainFrame starting at the LOGIN page.
 //
 // Design note: AppController is a member of YTBLNDApp so its lifetime covers
@@ -29,7 +29,7 @@ public:
     int  OnExit() override;
 
 private:
-    // AppController owns AppState (singleton), EventRouter, and SqliteDataManager.
+    // AppController owns AppState (singleton) and EventRouter.
     // Declared here so its lifetime matches the application.
     AppController controller;
 };

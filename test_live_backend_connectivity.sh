@@ -1,15 +1,24 @@
 #!/bin/bash
-# Runs only live backend gtests with a quick health preflight.
+# Runs only the live backend connectivity gtests from the dev/test build.
 
 set -euo pipefail
 
-HTTP_BASE_URL="${YTBLND_LIVE_BACKEND_HTTP_BASE_URL:-http://localhost:8080}"
+if command -v pkg-config >/dev/null 2>&1 && pkg-config --exists gumbo; then
+	echo "Gumbo detected: HTML parsing support is enabled in this build."
+else
+	echo "Gumbo not detected: HTML parsing support is disabled in this build."
+fi
 
-if ! curl -sS -f "${HTTP_BASE_URL}/ping" >/dev/null; then
-	echo "Live backend is unreachable at ${HTTP_BASE_URL}."
-	echo "Start the backend first or set YTBLND_LIVE_BACKEND_HTTP_BASE_URL to the correct host."
+echo "Doxygen is not required for live backend connectivity tests."
+
+test_binary="./build-dev/YTBLND_src/ytblnd_tests"
+
+if [[ ! -x "$test_binary" ]]; then
+	echo "Dev test binary not found at $test_binary"
+	echo "Run ./build_dev_src.sh first. This test build expects SQLite and GoogleTest to be installed."
 	exit 1
 fi
 
+# allow single gtest flags to be passed on the gtest binary for further testing
 YTBLND_RUN_LIVE_BACKEND_TESTS=1 \
-./build/YTBLND_src/ytblnd_tests --gtest_filter='LiveBackendConnectivityTest.*'
+"$test_binary" --gtest_filter='LiveBackendConnectivityTest.*' "$@"

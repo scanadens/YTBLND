@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/slipnut44/git_repo/group45/build-dev/_deps/ixwebsocket-subbuild/CMakeFiles/ixwebsocket-populate"
+		},
+		{
+			"file" : "/home/slipnut44/git_repo/group45/build-dev/_deps/ixwebsocket-subbuild/CMakeFiles/ixwebsocket-populate.rule"
+		},
+		{
+			"file" : "/home/slipnut44/git_repo/group45/build-dev/_deps/ixwebsocket-subbuild/CMakeFiles/ixwebsocket-populate-complete.rule"
+		},
+		{
+			"file" : "/home/slipnut44/git_repo/group45/build-dev/_deps/ixwebsocket-subbuild/ixwebsocket-populate-prefix/src/ixwebsocket-populate-stamp/ixwebsocket-populate-build.rule"
+		},
+		{
+			"file" : "/home/slipnut44/git_repo/group45/build-dev/_deps/ixwebsocket-subbuild/ixwebsocket-populate-prefix/src/ixwebsocket-populate-stamp/ixwebsocket-populate-configure.rule"
+		},
+		{
+			"file" : "/home/slipnut44/git_repo/group45/build-dev/_deps/ixwebsocket-subbuild/ixwebsocket-populate-prefix/src/ixwebsocket-populate-stamp/ixwebsocket-populate-download.rule"
+		},
+		{
+			"file" : "/home/slipnut44/git_repo/group45/build-dev/_deps/ixwebsocket-subbuild/ixwebsocket-populate-prefix/src/ixwebsocket-populate-stamp/ixwebsocket-populate-install.rule"
+		},
+		{
+			"file" : "/home/slipnut44/git_repo/group45/build-dev/_deps/ixwebsocket-subbuild/ixwebsocket-populate-prefix/src/ixwebsocket-populate-stamp/ixwebsocket-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/slipnut44/git_repo/group45/build-dev/_deps/ixwebsocket-subbuild/ixwebsocket-populate-prefix/src/ixwebsocket-populate-stamp/ixwebsocket-populate-patch_disconnected.rule"
+		},
+		{
+			"file" : "/home/slipnut44/git_repo/group45/build-dev/_deps/ixwebsocket-subbuild/ixwebsocket-populate-prefix/src/ixwebsocket-populate-stamp/ixwebsocket-populate-test.rule"
+		},
+		{
+			"file" : "/home/slipnut44/git_repo/group45/build-dev/_deps/ixwebsocket-subbuild/ixwebsocket-populate-prefix/src/ixwebsocket-populate-stamp/ixwebsocket-populate-update_disconnected.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"ixwebsocket-populate"
+		],
+		"name" : "ixwebsocket-populate"
+	}
+}
