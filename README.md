@@ -269,3 +269,4 @@ Visit [Google Takeout](https://takeout.google.com/) to download your YouTube dat
 - Unable to add other users within the app as a standalone friend without creating a blend with them
 - No meta data tags or categorization for the blend feed (as a result can't block videos through tag selection)
 - There are no super privileges within chatrooms (can't kick people out) 
+- Full legitimate (or at least streamlined) installation is limited to Linux 
