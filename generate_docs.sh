@@ -28,7 +28,7 @@ make -C build/doxygen_output/latex pdf
 
 if [ $? -eq 0 ]; then
     echo "PDF generated: build/doxygen_output/latex/refman.pdf"
-    cp build/doxygen_ouput/latex/refman.pdf Docs/
+    cp build/doxygen_output/latex/refman.pdf Docs/
 else
     echo "PDF generation failed. Check build/doxygen_output/latex/refman.log for details."
     exit 1
