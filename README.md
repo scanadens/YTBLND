@@ -85,8 +85,8 @@ For the dev/test build with SQLite and test targets enabled:
 ./build_dev_src.sh
 
 # Or manually
-cmake -S . -B build-dev -DYTBLND_BUILD_TESTS=ON -DYTBLND_ENABLE_SQLITE=ON
-cmake --build build-dev --parallel
+cmake -S . -B build -DYTBLND_BUILD_TESTS=ON -DYTBLND_ENABLE_SQLITE=ON
+cmake --build build --parallel
 ```
 
 `build_dev_src.sh` takes no positional arguments. If Doxygen is installed, the `doc` target is built automatically after the main build. To force docs generation and fail if Doxygen is missing, set `YTBLND_DEV_BUILD_DOCS=on` before running:
@@ -97,6 +97,8 @@ YTBLND_DEV_BUILD_DOCS=on ./build_dev_src.sh
 
 Valid values for `YTBLND_DEV_BUILD_DOCS`: `auto` (default — build docs if Doxygen is present), `on` / `true` / `1` (require docs), anything else skips docs.
 
+Both user and dev modes now share the same `build/` directory. Running either build script reconfigures `build/` for that mode.
+
 If you have a stale build directory (e.g. after adding new CMake dependencies), wipe it first:
 
 ```bash
@@ -106,7 +108,7 @@ rm -rf build && cmake -S . -B build && cmake --build build --parallel
 This produces:
 
 - `build/YTBLND_src/ytblnd` — main application
-- `build-dev/YTBLND_src/ytblnd_tests` — unit/integration tests from the dev build
+- `build/YTBLND_src/ytblnd_tests` — unit/integration tests when configured in dev mode
 
 ## Running
 
@@ -188,7 +190,7 @@ Unit tests are in `YTBLND_src/tests/`. After building, run them with:
 Or run the binary directly:
 
 ```bash
-./build-dev/YTBLND_src/ytblnd_tests
+./build/YTBLND_src/ytblnd_tests
 ```
 
 To run only the live backend connectivity tests (backend server as of April 5, 2026 is currently running on a [vultr](https://www.vultr.com) cloud instance in Chicago):

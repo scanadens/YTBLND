@@ -19,17 +19,17 @@ else
 fi
 
 # Dev/test build: enables SQLite-backed paths and test targets.
-cmake -S . -B build-dev -DYTBLND_BUILD_TESTS=ON -DYTBLND_ENABLE_SQLITE=ON
-cmake --build build-dev
+cmake -S . -B build -DYTBLND_BUILD_TESTS=ON -DYTBLND_ENABLE_SQLITE=ON
+cmake --build build
 
 if [[ "$docs_mode" == "1" || "$docs_mode" == "true" || "$docs_mode" == "on" ]]; then
 	if [[ "$has_doxygen" -eq 0 ]]; then
 		echo "YTBLND_DEV_BUILD_DOCS requested docs, but doxygen is not installed."
 		exit 1
 	fi
-	cmake --build build-dev --target doc
+	cmake --build build --target doc
 elif [[ "$docs_mode" == "auto" && "$has_doxygen" -eq 1 ]]; then
-	cmake --build build-dev --target doc
+	cmake --build build --target doc
 fi
 
-echo "dev binary can be found within build-dev/"
+echo "Dev build completed in build/"

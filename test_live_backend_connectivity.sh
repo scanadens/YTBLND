@@ -11,11 +11,11 @@ fi
 
 echo "Doxygen is not required for live backend connectivity tests."
 
-test_binary="./build-dev/YTBLND_src/ytblnd_tests"
+test_binary="./build/YTBLND_src/ytblnd_tests"
 
 if [[ ! -x "$test_binary" ]]; then
 	echo "Dev test binary not found at $test_binary"
-	echo "Run ./build_dev_src.sh first. This test build expects SQLite and GoogleTest to be installed."
+	echo "Run ./build_dev_src.sh first (single build dir mode). This test build expects SQLite and GoogleTest to be installed."
 	exit 1
 fi
 

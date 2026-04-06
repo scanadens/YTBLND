@@ -20,21 +20,21 @@ else
 fi
 
 # Dev install keeps SQLite-enabled code paths available for local testing.
-cmake -S . -B build-dev -DCMAKE_INSTALL_PREFIX="$prefix" -DYTBLND_BUILD_TESTS=ON -DYTBLND_ENABLE_SQLITE=ON
-cmake --build build-dev
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX="$prefix" -DYTBLND_BUILD_TESTS=ON -DYTBLND_ENABLE_SQLITE=ON
+cmake --build build
 
 if [[ "$docs_mode" == "1" || "$docs_mode" == "true" || "$docs_mode" == "on" ]]; then
 	if [[ "$has_doxygen" -eq 0 ]]; then
 		echo "YTBLND_DEV_BUILD_DOCS requested docs, but doxygen is not installed."
 		exit 1
 	fi
-	cmake --build build-dev --target doc
+	cmake --build build --target doc
 elif [[ "$docs_mode" == "auto" && "$has_doxygen" -eq 1 ]]; then
-	cmake --build build-dev --target doc
+	cmake --build build --target doc
 fi
 
-cmake --install build-dev
+cmake --install build
 update-desktop-database "$prefix/share/applications" 2>/dev/null || true
 gtk-update-icon-cache "$prefix/share/icons/hicolor" 2>/dev/null || true
 
-echo "Installed YTBLND dev build to $prefix"
+echo "Installed YTBLND dev build to $prefix (single build dir: build/)"
