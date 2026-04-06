@@ -1,7 +1,7 @@
 # Frontend Client Integration Guide (`ytblnd-backend`)
 
 ## 1. Base Configuration
-- Base URL: `http://localhost:8080`
+- Base URL: `http://137.220.58.22:8080`
 - API prefix: `/api/v1`
 - JSON header for REST requests: `Content-Type: application/json`
 - Current auth model: no JWT/session token required yet
