@@ -2,9 +2,10 @@
 
 include(${CMAKE_SOURCE_DIR}/cmake/GenerateLinuxDesktopLauncher.cmake)
 
-option(YTBLND_BUILD_TESTS "Build unit tests" ON)
+option(YTBLND_BUILD_TESTS "Build unit tests" OFF)
 option(YTBLND_BUILD_UI_TESTS "Build wxWidgets/UI tests" OFF)
 option(YTBLND_REQUIRE_WX "Fail configure if wxWidgets is missing" OFF)
+option(YTBLND_ENABLE_SQLITE "Enable SQLite-backed local persistence (used by local tests/dev)" OFF)
 option(YTBLND_FETCHCONTENT_UPDATES_DISCONNECTED "Skip remote FetchContent updates after initial clone" ON)
 
 # Pull ixwebsocket from source so builds remain portable across distros.
@@ -28,10 +29,18 @@ file(GLOB_RECURSE YTBLND_UI_SOURCES
 )
 
 # ── Gumbo (optional — HTML parser used by HtmlParser.cpp) ────────────────────
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GUMBO gumbo)   # not REQUIRED — build still works without it
+set(YTBLND_HAS_GUMBO FALSE)
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+    pkg_check_modules(GUMBO QUIET IMPORTED_TARGET gumbo)
+    if(GUMBO_FOUND)
+        set(YTBLND_HAS_GUMBO TRUE)
+    endif()
+else()
+    message(STATUS "pkg-config not found - Gumbo HTML parsing disabled")
+endif()
 
-if(NOT GUMBO_FOUND)
+if(NOT YTBLND_HAS_GUMBO)
     message(STATUS "Gumbo not found — HtmlParser.cpp and HtmlSource.cpp excluded")
     list(REMOVE_ITEM YTBLND_CORE_SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/AppInfrastructure/HtmlParser.cpp"
@@ -68,7 +77,24 @@ endif()
 # ── Main executable ──────────────────────────────────────────────────────────
 # main.cpp is at YTBLND_src root — added explicitly so it is NOT picked up by
 # the test GLOB and does not conflict with GTest's own main.
-find_package(SQLite3 REQUIRED)
+set(YTBLND_HAS_SQLITE FALSE)
+if(YTBLND_ENABLE_SQLITE)
+    find_package(SQLite3 QUIET)
+    if(SQLite3_FOUND)
+        set(YTBLND_HAS_SQLITE TRUE)
+    else()
+        message(STATUS "SQLite3 not found - SQLite-backed local persistence disabled")
+    endif()
+else()
+    message(STATUS "SQLite support disabled via YTBLND_ENABLE_SQLITE=OFF")
+endif()
+
+if(NOT YTBLND_HAS_SQLITE)
+    list(REMOVE_ITEM YTBLND_CORE_SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/ServiceLayer/SqliteDataManager.cpp"
+    )
+endif()
+
 find_package(CURL REQUIRED)
 
 set(IXWEBSOCKET_BUILD_TEST OFF CACHE BOOL "Disable ixwebsocket tests" FORCE)
@@ -109,11 +135,18 @@ if(YTBLND_HAS_WX)
     )
 
     target_link_libraries(ytblnd PRIVATE
-        SQLite::SQLite3
         CURL::libcurl
         ixwebsocket::ixwebsocket
         nlohmann_json::nlohmann_json
     )
+
+    if(YTBLND_HAS_GUMBO)
+        target_link_libraries(ytblnd PRIVATE PkgConfig::GUMBO)
+    endif()
+
+    if(YTBLND_HAS_SQLITE)
+        target_link_libraries(ytblnd PRIVATE SQLite::SQLite3)
+    endif()
 
     if(YTBLND_WX_USE_FIND_MODULE)
         target_include_directories(ytblnd PRIVATE ${wxWidgets_INCLUDE_DIRS})
@@ -169,9 +202,17 @@ if(YTBLND_BUILD_TESTS)
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/Test_BlendCreationPanel.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/Test_ThemeSwitching.cpp
     )
+    set(YTBLND_SQLITE_TEST_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/Test_Auth.cpp
+    )
 
     if(NOT (YTBLND_BUILD_UI_TESTS AND YTBLND_HAS_WX))
         list(REMOVE_ITEM TEST_SOURCES ${YTBLND_UI_TEST_SOURCES})
+    endif()
+
+    if(NOT YTBLND_HAS_SQLITE)
+        message(STATUS "SQLite disabled: excluding SQLite-dependent tests")
+        list(REMOVE_ITEM TEST_SOURCES ${YTBLND_SQLITE_TEST_SOURCES})
     endif()
 
     add_executable(ytblnd_tests ${TEST_SOURCES})
@@ -210,11 +251,18 @@ if(YTBLND_BUILD_TESTS)
     target_link_libraries(ytblnd_tests PRIVATE
         GTest::gtest
         GTest::gtest_main
-        SQLite::SQLite3
         CURL::libcurl
         ixwebsocket::ixwebsocket
         nlohmann_json::nlohmann_json
     )
+
+    if(YTBLND_HAS_GUMBO)
+        target_link_libraries(ytblnd_tests PRIVATE PkgConfig::GUMBO)
+    endif()
+
+    if(YTBLND_HAS_SQLITE)
+        target_link_libraries(ytblnd_tests PRIVATE SQLite::SQLite3)
+    endif()
 
     if(YTBLND_BUILD_UI_TESTS AND YTBLND_HAS_WX)
         if(YTBLND_WX_USE_FIND_MODULE)

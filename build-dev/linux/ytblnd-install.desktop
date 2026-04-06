@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=YTBLND
+Comment=Blend YouTube Watch Later data into a shared feed
+Categories=Utility;
+Terminal=false
+StartupNotify=true
+StartupWMClass=ytblnd
+Exec=/usr/local/bin/ytblnd
+Icon=/usr/local/share/icons/hicolor/256x256/apps/ytblnd.png
+Path=/usr/local
