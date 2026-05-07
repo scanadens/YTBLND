@@ -3,7 +3,7 @@
 
 /**
  * \file IBlendAlgorithm.hpp
- * \author Jasmine Kumar
+ * \author Jasmine  Kumar
  * \brief Abstract interface for blend-generation algorithms.
  *
  * All blend algorithms must implement this interface so AppController
